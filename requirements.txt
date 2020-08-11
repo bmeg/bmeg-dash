@@ -1,0 +1,5 @@
+umap-learn
+jupyter
+gripql
+pandas
+plotly
