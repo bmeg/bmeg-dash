@@ -15,6 +15,7 @@ import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
+import dash_cytoscape as cyto
 from urllib.request import urlopen
 
 
@@ -49,34 +50,12 @@ styles = {
     'outline': {
         'borderLeft': 'thin #556B2F solid',
         'borderRight': 'thin #556B2F solid'},
-    'outline_middle': {
-        'marginTop':0,
-        'marginBottom':0,
-        'padding':5,
-        'borderLeft': 'thin #556B2F solid',
-        'borderRight': 'thin #556B2F solid'},
-    'outline_bottom': {
-        'padding':5,
-        'borderLeft': 'thin #556B2F solid',
-        'borderRight': 'thin #556B2F solid',
-        'borderBottom': 'thin #556B2F solid'},
-    'textbox_middle': {
-        'font_family':'sans-serif',
-        'padding': 10,
-        'textAlign': 'center',
-        'marginTop':0,
-        'marginBottom':0,
-        'borderLeft': 'thin #556B2F solid',
-        'borderRight': 'thin #556B2F solid'},
-    'textbox_bottom': {
-        'font_family':'sans-serif',
-        'padding': 10,
-        'textAlign': 'center',
-        'borderLeft': 'thin #556B2F solid',
-        'borderRight': 'thin #556B2F solid',
-        'borderBottom': 'thin #556B2F solid'},
     'font_source_middle': {'font_family': 'sans-serif', 'textAlign':'right','fontSize':10,'padding': 10,'borderLeft': 'thin #556B2F solid','borderRight': 'thin #556B2F solid','marginTop':0,'marginBottom':0},
-    'font_source_bottom': {'font_family': 'sans-serif', 'textAlign':'right','fontSize':10,'padding': 10, 'borderLeft': 'thin #556B2F solid','borderRight': 'thin #556B2F solid','borderBottom': 'thin #556B2F solid','marginTop':0,'marginBottom':0}
+    'font_source_bottom': {'font_family': 'sans-serif', 'textAlign':'right','fontSize':10,'padding': 10, 'borderLeft': 'thin #556B2F solid','borderRight': 'thin #556B2F solid','borderBottom': 'thin #556B2F solid','marginTop':0,'marginBottom':0},
+    'pre': {
+        'border': 'thin lightgrey solid',
+        'overflowX': 'scroll'
+    }
 }
 
 FORMAT_stripTABLE={
@@ -85,18 +64,38 @@ FORMAT_stripTABLE={
     'style_header':{'backgroundColor': 'rgb(230, 230, 230)','fontWeight': 'bold'},
 }
  
+default_stylesheet = [
+    {
+        'selector': 'node',
+        'style': {
+            'background-color': '#BFD7B5',
+            'label': 'data(label)'
+        }
+    }
+]
+
+
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 tab_layout = html.Div(children=[
-    html.H4(children='Database Contents',style=styles['section_spaced']),
     html.P(id='overview_table', children=''),
     dcc.Loading(id="overview_table",
             type="default",children=html.Div(id="overview_table_output")),
             
     html.P(id='lit_tab', children=''),
     dcc.Loading(id="lit_tab",
-            type="default",children=html.Div(id="lit_tab_output")),
+            type="default",children=html.Div(id="lit_tab_output")),    
 ])
+
+
+
+
+
+    
+    
+    
+    
+    
 
 @app.callback(Output("overview_table", "children"),
     [Input('url', 'pathname')])
@@ -108,7 +107,7 @@ def render_pip_rural(href):
                       'Compounds']
     res={}
     for node in nodes_interest:
-        traverse = G.query().V().hasLabel(node).limit(130000).as_('a')
+        traverse = G.query().V().hasLabel(node).limit(500).as_('a')
         q = traverse.render('$a._gid')
         for a in q:
             if node in res:
@@ -126,7 +125,7 @@ def render_pip_rural(href):
     nodes_interest = ['Sample','Aliquot']
     res={}
     for node in nodes_interest:
-        traverse = G.query().V().hasLabel(node).limit(130000).as_('a')
+        traverse = G.query().V().hasLabel(node).limit(500).as_('a')
         q = traverse.render('$a._gid')
         for a in q:
             if node in res:
@@ -152,7 +151,7 @@ def render_pip_rural(href):
     nodes_interest = ['Publication','G2PAssociation']
     res={}
     for node in nodes_interest:
-        traverse = G.query().V().hasLabel(node).limit(130000).as_('a')
+        traverse = G.query().V().hasLabel(node).limit(500).as_('a')
         q = traverse.render('$a._gid')
         for a in q:
             if node in res:

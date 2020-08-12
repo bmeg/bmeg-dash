@@ -8,7 +8,7 @@ import dash
 import dash_html_components as html
 import dash_core_components as dcc
 from dash.dependencies import Input, Output
-from bmeg_app.views import app_Home
+from bmeg_app.views import app_Home, app_Examples
 
 # # format logo
 # image_filename = 'bmeg_app/images/logo.png' 
@@ -42,6 +42,7 @@ app.layout = html.Div([
     # Tab at top of page
     dcc.Tabs(id='main-tab', value='tab-Home', children=[
         dcc.Tab(label='Home', value='tab-Home', style=tab_style, selected_style=tab_selected_style),
+        dcc.Tab(label='Examples', value='tab-Examples',style=tab_style, selected_style=tab_selected_style)
     ]),
     html.Div(id='main-tab-content')
 ])
@@ -52,7 +53,8 @@ app.layout = html.Div([
 def render_content(tab):
     if tab == 'tab-Home':
         return html.Div([app_Home.tab_layout])
-    
+    elif tab == 'tab-Examples':
+        return html.Div([app_Examples.tab_layout])    
 
 
 if __name__ == '__main__':
