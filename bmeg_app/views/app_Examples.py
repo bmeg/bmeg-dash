@@ -72,18 +72,18 @@ default_stylesheet = [
     }
 ]
 
-select_genes = ['ENSG00000198793','ENSG00000198400','ENSG00000143622']
+# Populate list of all genes for selection of 2.Drug response table 
+# TODO: cache select_genes list so can remove (below) .limit(1000)
+q= G.query().V().hasLabel('Gene').as_('gene').limit(1000).out('g2p_associations').as_('lit').out('compounds').as_('comp')
+q= q.render(['$gene._gid','$lit._data.response_type'])
+select_genes={}
+for a,b in q:
+    if b is not None and a not in select_genes:
+        select_genes[a]=1
 
-def get_options(list_genes):
-    dict_list = []
-    for i in list_genes:
-        dict_list.append({'label': i, 'value': i})
 
-    return dict_list
-
-      
+# Page      
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
 tab_layout = html.Div(children=[
     html.H4(children='Cohort Genomics',style=styles['section_spaced']),
     html.P(children='1. Conduct a query that starts on the TCGA BRCA cohort, goes though Cases -> Samples -> Aliquots -> SomaticCallsets -> Alleles. Once at the alleles, do an aggregation to count the number of times each chromsome occurs', style={'textAlign': 'center'}),
@@ -136,7 +136,7 @@ tab_layout = html.Div(children=[
 
     html.Div([dcc.Dropdown(id='dr_dropdown',
         options=[
-            {'label': g, 'value': g} for g in select_genes],
+            {'label': g, 'value': g} for g in select_genes.keys()],
         value=[],
         placeholder='Search or Select',
         multi=True,
