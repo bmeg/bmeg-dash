@@ -2,7 +2,7 @@
 
 from ..app import app
 from ..db import G
-from ..components import basic_plots as bp
+from ..components import dresp
 import pandas as pd
 import time
 import sys
@@ -22,6 +22,7 @@ import dash_core_components as dcc
 
 
 
+        
 ######################
 # Layout
 ######################
@@ -71,7 +72,16 @@ default_stylesheet = [
     }
 ]
 
+select_genes = ['ENSG00000198793','ENSG00000198400','ENSG00000143622']
 
+def get_options(list_genes):
+    dict_list = []
+    for i in list_genes:
+        dict_list.append({'label': i, 'value': i})
+
+    return dict_list
+
+      
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 tab_layout = html.Div(children=[
@@ -118,14 +128,34 @@ tab_layout = html.Div(children=[
         count.append(i["value"])
     plt.bar(name, count, width=0.35)
     ```
-    ''', style={'textAlign': 'left'})
+    ''', style={'textAlign': 'left'}),
 
+
+    html.H4(children='Drug Response',style=styles['section_spaced']),
+    html.P(children='2. Differential gene experssion analysis has lead to a list of top differentially expressed genes. You want a quick an easy method to find what drug(s) might be useful. Task: Given a list of differentially expressed genes, what is the predicted drug response that is supported by published literature?', style={'textAlign': 'center'}),
+
+    html.Div([dcc.Dropdown(id='dr_dropdown',
+        options=[
+            {'label': g, 'value': g} for g in select_genes],
+        value=[],
+        placeholder='Search or Select',
+        multi=True,
+        ),     
+        dcc.Loading(type="default",children=html.Div(id="dr_dropdown_table")),
+    ]),
 
 ])
 
-
-
-
+        
+@app.callback(Output("dr_dropdown_table", "children"),
+    [Input('dr_dropdown', 'value')])
+def render_callback(User_selected):
+    data = []
+    for gene in User_selected:
+        data.append(gene)
+    input_df= dresp.evidenceTable(data)
+    tab= dash_table.DataTable(id='dropdown_table',data = input_df.to_dict('records'),columns=[{"name": i, "id": i} for i in input_df.columns])
+    return tab
 
 
 
