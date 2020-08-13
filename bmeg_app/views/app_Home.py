@@ -63,18 +63,23 @@ style_table={
 
 # format logo
 image_filename = 'bmeg_app/images/graph_rc5_cropped.png' 
-encoded_image = base64.b64encode(open(image_filename, 'rb').read())
+encoded_image0 = base64.b64encode(open(image_filename, 'rb').read())
+image_filename = 'bmeg_app/images/example1.png' 
+encoded_image1 = base64.b64encode(open(image_filename, 'rb').read())
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 tab_layout = html.Div(children=[
+    html.P(id='node_text', children='BMEG database'),
+
     dcc.Loading(id="cards",
             type="default",children=html.Div(id="cards_output")),  
-            
+    dcc.Loading(id="node_cts_bar",
+            type="default",children=html.Div(id="node_cts_bar_output")),
+                        
     html.H4(children='Explore BMEG Graph Network',style=styles['section_spaced']),
-    html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode()),
+    html.Img(src='data:image/png;base64,{}'.format(encoded_image0.decode()),
         style={'height':'30%', 'width':'50%','marginTop': 10, 'marginBottom':0}),
-    dcc.Loading(id="node_cts_ALL_bar",
-            type="default",children=html.Div(id="node_cts_ALL_bar_output")),
+
     html.P(id='node_text', children='Node Properties'),
     dcc.Dropdown(
         id='node_dd',
@@ -83,12 +88,39 @@ tab_layout = html.Div(children=[
             {'label': 'Project', 'value': 'project'},
             {'label': 'TODO Add all other nodes', 'value': 'todo'}
         ],
-        value='user_selection1',
-        placeholder='Select a Node'
+        value='gene',
     ),
     dcc.Loading(id="node_prop_table",
         type="default",children=html.Div(id="node_dd-selection")),
-
+    html.H1(children=''),        
+    html.P(children='Example Usage'),
+    dcc.Markdown('''
+    ```py
+    import gripql
+    import pandas as pd
+    conn = gripql.Connection("https://bmeg.io/api", credential_file = 'bmeg_credentials.json')
+    G = conn.graph('rc5') # schema version 
+    # Query BMEG
+    q = G.query().V().hasLabel('Gene').as_('gene')
+    q= q.render(['$gene._gid', '$gene._label', '$gene._data.start', '$gene._data.end'])
+    ID=[]
+    TYPE=[]
+    START=[]
+    STOP=[]
+    for a,b,c,d in q:
+        ID.append(a)
+        TYPE.append(b)
+        START.append(c)
+        STOP.append(d)
+    # Store as Pandas DataFrame
+    df=pd.DataFrame(list(zip(ID,TYPE,START,STOP)),columns=['ID','Type','Start','Stop'])
+    # View DataFrame Head
+    df.iloc[:10,:]
+    ```
+    ''', style={'textAlign': 'left'}),
+    html.P(children='Outputs the following DataFrame'),
+    html.Img(src='data:image/png;base64,{}'.format(encoded_image1.decode()),
+        style={'height':'30%', 'width':'30%','marginTop': 10, 'marginBottom':0}),
 ])
 
 
@@ -113,7 +145,7 @@ def render_callback(href, node_selection):
             '_data.submitter_id',
             '_data.symbol']
         Description=['Ensembl gene ID', 'BMEG tagged label', 'Data dictionary',
-            '','','','','','','','','BMEG tagged submitter_id','']
+            '','','','','','','','','BMEG tagged submitter_id']
         Example= ['ENSG00000176022', 'Gene', '{\'chromosome\': \'1\', \'description\': \'UDP-Gal:betaGal beta 1,3-galactosyltransferase polypeptide 6\', ...}',
             1,'\'UDP-Gal:betaGal beta 1,3-galactosyltransferase polypeptide 6\'',1170421,'ENSG00000176022','GRCh37','Project:Reference',1167629,'+','None','B3GALT6']
         definitions_gene= pd.DataFrame(list(zip(NodeProperty, Description, Example)),columns=['Node Property', 'Description', 'Example'])
@@ -152,31 +184,34 @@ def render_callback(href, node_selection):
 def render_callback(href):
     if href is None: # if event is trigged before page/url fully loaded
         raise PreventUpdate
-    nodes_interest = ['Allele','Gene','Transcript','Protein','DrugResponse', 'Pathway','Compound', 'Project','Publication']
+    nodes_interest = ['Allele','Gene','Transcript','Exon','Protein','DrugResponse', 'Pathway','Compound', 'Interaction','Project','Publication', 'Aliquot']
     res = {}
     for l in nodes_interest:
         res[l] = G.query().V().hasLabel(l).count().execute()[0]['count']
-    fig= cards.counts(75, res,main_colors['lightgrey'],styles['font']['font_family'])
+    fig= cards.counts(100, res,main_colors['lightgrey'],styles['font']['font_family'])
     return dcc.Graph(id='cards_output', figure=fig),
         
     
     
-@app.callback(Output("node_cts_ALL_bar", "children"),
+@app.callback(Output("node_cts_bar", "children"),
     [Input('url', 'pathname')])
 def render_callback(href):
     if href is None: # if event is trigged before page/url fully loaded
         raise PreventUpdate
+    all_v =  G.listLabels()['vertex_labels']
+    to_rm = ['Aliquot','Allele', 'Gene', 'Protein', 'Transcript', 'Exon','Pathway', 'Compound', 'DrugResponse', 'Interaction','Project', 'Publication']
+    verts = [x for x in all_v if x not in to_rm]
     # count nodes of interest
     res = {}
-    for l in G.listLabels()['vertex_labels']:
+    for l in verts:
         res[l] = G.query().V().hasLabel(l).count().execute()[0]['count']
     keys=[]
     values=[]
     for k,v in res.items():
         keys.append(k)
         values.append(v)
-    fig = bp.bar_thresh('','Node', keys, values, 5000, main_colors['pale_yellow'], 300, '', 'All Available Data')
-    return dcc.Graph(id='node_cts_ALL_bar_output', figure=fig),
+    fig = bp.bar_thresh('','Node', keys, values, 5000, main_colors['pale_yellow'], 250, '', '')
+    return dcc.Graph(id='node_cts_bar_output', figure=fig),
 
     
         

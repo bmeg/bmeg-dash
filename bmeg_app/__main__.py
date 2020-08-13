@@ -21,12 +21,12 @@ from bmeg_app.views import app_Home, app_Examples
 tabs_styles = {
     'height': '50px'}
 tab_style = {
-    'borderBottom': '3px solid #88BDBC',
+    'borderBottom': '#88BDBC',
     'backgroundColor': '#88BDBC',
     'font_family':'sans-serif',
-    'fontSize': 15,
+    'fontSize': 10,
     'color': 'azure',
-    'padding': '10px'}
+    'padding': '5px'}
 tab_selected_style = {
     'border': '3px solid #026670',
     'backgroundColor': '#026670',
@@ -41,8 +41,8 @@ app.layout = html.Div([
     #     style={'height':'100%', 'width':'100%', 'textAlign': 'left', 'marginTop': 20, 'marginBottom':0}),
     # Tab at top of page
     dcc.Tabs(id='main-tab', value='tab-Home', children=[
-        dcc.Tab(label='Home', value='tab-Home', style=tab_style, selected_style=tab_selected_style),
-        dcc.Tab(label='Examples', value='tab-Examples',style=tab_style, selected_style=tab_selected_style)
+        dcc.Tab(label='Home', value='tab-Home', style=tab_style, selected_style=tab_style),
+        dcc.Tab(label='Examples', value='tab-Examples',style=tab_style, selected_style=tab_style)
     ]),
     html.Div(id='main-tab-content')
 ])
