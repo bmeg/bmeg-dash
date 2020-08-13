@@ -12,7 +12,7 @@ def evidenceTable(select_genes):
         for i in range(0, len(select_genes)):
             if i == 0:
                 gene=select_genes[i]
-                q= G.query().V().hasLabel('Gene').has(gripql.eq('$._gid', gene)).as_('gene').limit(1000).out('g2p_associations').as_('lit').out('compounds').as_('comp')
+                q= G.query().V().hasLabel('Gene').has(gripql.eq('$._gid', gene)).as_('gene').out('g2p_associations').as_('lit').out('compounds').as_('comp')
         #         q= G.query().V().hasLabel('G2PAssociation').as_('lit').out('genes').has(gripql.eq('$._gid', gene)).as_('gene')
                 q= q.render(['$gene._gid','$comp._gid', '$lit._data.response_type',  '$lit._data.source','$lit._data.evidence_label', '$lit._data.description'])
                 col_a=[]
