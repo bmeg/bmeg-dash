@@ -132,7 +132,7 @@ tab_layout = html.Div(children=[
     mk.codeblock_cohort_genom(),
 
     html.H4(children='Drug Response',style=styles['section_spaced']),
-    html.P(children='2. Differential gene experssion analysis has lead to a list of top differentially expressed genes. You want a quick an easy method to find what drug(s) might be useful. Task: Given a list of differentially expressed genes, what is the predicted drug response that is supported by published literature?', style={'textAlign': 'center'}),
+    html.P(children='2. Differential gene experssion analysis has lead to a list of top differentially expressed genes. You want a quick and easy method to find what drug(s) might be useful. Task: Given a list of differentially expressed genes, what is the predicted drug response that is supported by published literature?', style={'textAlign': 'center'}),
     cyto.Cytoscape(
         layout={'name': 'preset'},
         stylesheet=default_stylesheet,
