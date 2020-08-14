@@ -69,7 +69,7 @@ encoded_image1 = base64.b64encode(open(image_filename, 'rb').read())
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 tab_layout = html.Div(children=[
-    html.P(id='node_text', children='BMEG database'),
+    html.P(children='BMEG database'),
 
     dcc.Loading(id="cards",
             type="default",children=html.Div(id="cards_output")),  
@@ -80,7 +80,7 @@ tab_layout = html.Div(children=[
     html.Img(src='data:image/png;base64,{}'.format(encoded_image0.decode()),
         style={'height':'30%', 'width':'50%','marginTop': 10, 'marginBottom':0}),
 
-    html.P(id='node_text', children='Node Properties'),
+    html.P(children='Node Properties'),
     dcc.Dropdown(
         id='node_dd',
         options=[

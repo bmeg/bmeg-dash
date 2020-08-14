@@ -3,6 +3,7 @@
 from ..app import app
 from ..db import G
 from ..components import dresp
+from ..markdown import examples_tab as mk
 import pandas as pd
 import time
 import sys
@@ -81,24 +82,23 @@ for a,b in q:
     if b is not None and a not in select_genes:
         select_genes[a]=1
 
-
 # Page      
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 tab_layout = html.Div(children=[
     html.H4(children='Cohort Genomics',style=styles['section_spaced']),
     html.P(children='1. Conduct a query that starts on the TCGA BRCA cohort, goes though Cases -> Samples -> Aliquots -> SomaticCallsets -> Alleles. Once at the alleles, do an aggregation to count the number of times each chromsome occurs', style={'textAlign': 'center'}),
     cyto.Cytoscape(
-        id='click_node_data-callback',
         layout={'name': 'preset'},
         stylesheet=default_stylesheet,
+        autolock=True,
         style={'width': '90%', 'height': '200px'},
         elements=[
             #Node
             {'data': {'id': 'proj', 'label': 'Project'}, 'position': {'x': 0, 'y': 0}},
-            {'data': {'id': 'case', 'label': 'Case'}, 'position': {'x': 100, 'y': 100}},
-            {'data': {'id': 'samp', 'label': 'Sample'}, 'position': {'x': 200, 'y': 0}},
+            {'data': {'id': 'case', 'label': 'Case'}, 'position': {'x': 100, 'y': 70}},
+            {'data': {'id': 'samp', 'label': 'Sample'}, 'position': {'x': 200, 'y': 40}},
             {'data': {'id': 'aliq', 'label': 'Aliquot'}, 'position': {'x': 300, 'y': 100}},
-            {'data': {'id': 'allele', 'label': 'Allele'}, 'position': {'x': 400, 'y': 0}},
+            {'data': {'id': 'allele', 'label': 'Allele'}, 'position': {'x': 400, 'y': 20}},
             #Edge
             {'data': {'source': 'proj', 'target': 'case'}},
             {'data': {'source': 'case', 'target': 'samp'}},
@@ -107,33 +107,47 @@ tab_layout = html.Div(children=[
         ]
     ),
     # html.Pre(id='click_node_data', style=styles['pre']),  
-    dcc.Markdown('''
-    ```py
-    import matplotlib.pyplot as plt
-    import gripql
-    conn = gripql.Connection("https://bmeg.io/api", credential_file="bmeg_credentials.json")
-    G = conn.graph("rc5")
-
-    q = G.query().V("Project:TCGA-BRCA").out("cases").out("samples")
-    q = q.has(gripql.eq("gdc_attributes.sample_type", "Primary Tumor"))
-    q = q.out("aliquots").out("somatic_callsets").out("alleles")
-    q = q.has(gripql.eq("variant_type", "SNP"))
-    q = q.aggregate(gripql.term("chrom", "chromosome"))
-    res = q.execute()
-    
-    name = []
-    count = []
-    for i in res[0].chrom.buckets:
-        name.append(i["key"])
-        count.append(i["value"])
-    plt.bar(name, count, width=0.35)
-    ```
-    ''', style={'textAlign': 'left'}),
-
+    # dcc.Markdown('''
+    # ```py
+    # import matplotlib.pyplot as plt
+    # import gripql
+    # conn = gripql.Connection("https://bmeg.io/api", credential_file="bmeg_credentials.json")
+    # G = conn.graph("rc5")
+    # 
+    # q = G.query().V("Project:TCGA-BRCA").out("cases").out("samples")
+    # q = q.has(gripql.eq("gdc_attributes.sample_type", "Primary Tumor"))
+    # q = q.out("aliquots").out("somatic_callsets").out("alleles")
+    # q = q.has(gripql.eq("variant_type", "SNP"))
+    # q = q.aggregate(gripql.term("chrom", "chromosome"))
+    # res = q.execute()
+    # 
+    # name = []
+    # count = []
+    # for i in res[0].chrom.buckets:
+    #     name.append(i["key"])
+    #     count.append(i["value"])
+    # plt.bar(name, count, width=0.35)
+    # ```
+    # ''', style={'textAlign': 'left'}),
+    mk.codeblock_cohort_genom(),
 
     html.H4(children='Drug Response',style=styles['section_spaced']),
     html.P(children='2. Differential gene experssion analysis has lead to a list of top differentially expressed genes. You want a quick an easy method to find what drug(s) might be useful. Task: Given a list of differentially expressed genes, what is the predicted drug response that is supported by published literature?', style={'textAlign': 'center'}),
-
+    cyto.Cytoscape(
+        layout={'name': 'preset'},
+        stylesheet=default_stylesheet,
+        autolock=True,
+        style={'width': '90%', 'height': '200px'},
+        elements=[
+            #Node
+            {'data': {'id': 'Gene', 'label': 'Gene'}, 'position': {'x': 0, 'y': 100}},
+            {'data': {'id': 'G2PAssociation', 'label': 'G2PAssociation'}, 'position': {'x': 100, 'y': 20}},
+            {'data': {'id': 'Compound', 'label': 'Compound'}, 'position': {'x': 250, 'y': 70}},
+            #Edge
+            {'data': {'source': 'Gene', 'target': 'G2PAssociation'}},
+            {'data': {'source': 'G2PAssociation', 'target': 'Compound'}},
+        ]
+    ),
     html.Div([dcc.Dropdown(id='dr_dropdown',
         options=[
             {'label': g, 'value': g} for g in select_genes.keys()],
@@ -143,8 +157,10 @@ tab_layout = html.Div(children=[
         ),     
         dcc.Loading(type="default",children=html.Div(id="dr_dropdown_table")),
     ]),
+    mk.codeblock_drugresp(),
 
 ])
+
 
         
 @app.callback(Output("dr_dropdown_table", "children"),
