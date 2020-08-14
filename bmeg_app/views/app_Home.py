@@ -34,12 +34,13 @@ main_colors = {
     'tab_darkblue':'#026670'}
 styles = {
     'section_spaced': {
-        'border': 'thin #556B2F solid',
+        # 'border': 'thin #556B2F solid',
         'backgroundColor': main_colors['tab_lightblue'],
         'textAlign': 'center',
-        'color':main_colors['tab_darkblue'],
+        # 'color':main_colors['tab_darkblue'],
+        'color':'white',
         'fontSize': 15,
-        'marginTop':20,
+        'marginTop':0,
         'marginBottom':0,
         'padding':5},
     'outline': {
@@ -62,36 +63,37 @@ style_table={
 
 
 # format logo
-image_filename = 'bmeg_app/images/graph_rc5_cropped.png' 
+image_filename = 'bmeg_app/images/rc5_schema.png' 
 encoded_image0 = base64.b64encode(open(image_filename, 'rb').read())
 image_filename = 'bmeg_app/images/example1.png' 
 encoded_image1 = base64.b64encode(open(image_filename, 'rb').read())
-
+ 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 tab_layout = html.Div(children=[
-    html.P(children='BMEG database'),
-
+    html.H4(children='What is stored inside the database?',style=styles['section_spaced']),
     dcc.Loading(id="cards",
             type="default",children=html.Div(id="cards_output")),  
     dcc.Loading(id="node_cts_bar",
             type="default",children=html.Div(id="node_cts_bar_output")),
                         
-    html.H4(children='Explore BMEG Graph Network',style=styles['section_spaced']),
+    html.H4(children='Database architecture',style=styles['section_spaced']),
     html.Img(src='data:image/png;base64,{}'.format(encoded_image0.decode()),
         style={'height':'30%', 'width':'50%','marginTop': 10, 'marginBottom':0}),
 
-    html.P(children='Node Properties'),
-    dcc.Dropdown(
-        id='node_dd',
-        options=[
-            {'label': 'Gene', 'value': 'gene'},
-            {'label': 'Project', 'value': 'project'},
-            {'label': 'TODO Add all other nodes', 'value': 'todo'}
-        ],
-        value='gene',
-    ),
-    dcc.Loading(id="node_prop_table",
-        type="default",children=html.Div(id="node_dd-selection")),
+    html.P(children='Explore Node Properties'),
+    html.Div([
+        dcc.Dropdown(id='node_dd',
+            options=[
+                {'label': 'Gene', 'value': 'gene'},
+                {'label': 'Project', 'value': 'project'},
+                {'label': 'TODO Add all other nodes', 'value': 'todo'}
+            ],
+            value=[],
+            placeholder='Select Node'),
+        dcc.Loading(id="node_prop_table",
+            type="default",children=html.Div(id="node_dd-selection")),
+    ]),
+
     html.H1(children=''),        
     html.P(children='Example Usage'),
     dcc.Markdown('''
@@ -151,9 +153,9 @@ def render_callback(href, node_selection):
         definitions_gene= pd.DataFrame(list(zip(NodeProperty, Description, Example)),columns=['Node Property', 'Description', 'Example'])
         df= definitions_gene
         return dash_table.DataTable(id='table_output',data = df.to_dict('records'),columns=[{"name": i, "id": i} for i in df.columns],
-            style_cell_conditional=style_table['style_cell_conditional'],
-            style_data_conditional = style_table['style_data_conditional'],
-            style_header = style_table['style_header'],
+            # style_cell_conditional=style_table['style_cell_conditional'],
+            # style_data_conditional = style_table['style_data_conditional'],
+            # style_header = style_table['style_header'],
             )
         
     elif node_selection == 'project':
@@ -169,9 +171,9 @@ def render_callback(href, node_selection):
         definitions_gene= pd.DataFrame(list(zip(NodeProperty, Description, Example)),columns=['Node Property', 'Description', 'Example'])
         df= definitions_gene
         return dash_table.DataTable(id='table_output',data = df.to_dict('records'),columns=[{"name": i, "id": i} for i in df.columns],
-            style_cell_conditional=style_table['style_cell_conditional'],
-            style_data_conditional = style_table['style_data_conditional'],
-            style_header = style_table['style_header'],
+            # style_cell_conditional=style_table['style_cell_conditional'],
+            # style_data_conditional = style_table['style_data_conditional'],
+            # style_header = style_table['style_header'],
             )
     elif node_selection=='todo':
         return

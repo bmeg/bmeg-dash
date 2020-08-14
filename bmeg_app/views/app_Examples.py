@@ -18,7 +18,6 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 import dash_cytoscape as cyto
 from urllib.request import urlopen
-
 import dash_core_components as dcc
 
 
@@ -42,10 +41,11 @@ main_colors = {
 
 styles = {
     'section_spaced': {
-        'border': 'thin #556B2F solid',
-        'backgroundColor': main_colors['lightgreen_borderfill'],
+        # 'border': 'thin #556B2F solid',
+        'backgroundColor': main_colors['tab_lightblue'],
         'textAlign': 'center',
-        'color':main_colors['lightgrey'],
+        # 'color':main_colors['tab_darkblue'],
+        'color':'white',
         'fontSize': 15,
         'marginTop':20,
         'marginBottom':0,
@@ -58,11 +58,10 @@ styles = {
     'pre': {
         'border': 'thin lightgrey solid',
         'overflowX': 'scroll'
-    }
+    },
 }
 
 
- 
 default_stylesheet = [
     {
         'selector': 'node',
