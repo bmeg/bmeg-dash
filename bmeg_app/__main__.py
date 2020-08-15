@@ -67,7 +67,7 @@ app.layout = html.Div([
     # html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode()),
     #     style={'height':'100%', 'width':'100%', 'textAlign': 'left', 'marginTop': 20, 'marginBottom':0}),
     # Tab at top of page
-    dcc.Tabs(id='main-tab', value='tab-Examples', children=[
+    dcc.Tabs(id='main-tab', value='tab-Home', children=[
         dcc.Tab(label='Home', value='tab-Home', style=tab_style, selected_style=tab_style),
         dcc.Tab(label='Examples', value='tab-Examples',style=tab_style, selected_style=tab_style)
     ]),
