@@ -2,7 +2,7 @@
 
 from ..app import app
 from ..db import G
-from ..components import dresp
+from ..components import dresp, basic_plots as bp
 from ..markdown import examples_tab as mk
 import pandas as pd
 import time
@@ -80,6 +80,12 @@ select_genes={}
 for a,b in q:
     if b is not None and a not in select_genes:
         select_genes[a]=1
+# All drugs for Drug Response 2b example 
+temp = G.query().V().hasLabel('Compound').render(['$._data.synonym'])
+drugs=[]
+for a in temp:
+    if a[0] is not None:
+        drugs.append(a[0])
 
 # Page      
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -106,32 +112,10 @@ tab_layout = html.Div(children=[
         ]
     ),
     # html.Pre(id='click_node_data', style=styles['pre']),  
-    # dcc.Markdown('''
-    # ```py
-    # import matplotlib.pyplot as plt
-    # import gripql
-    # conn = gripql.Connection("https://bmeg.io/api", credential_file="bmeg_credentials.json")
-    # G = conn.graph("rc5")
-    # 
-    # q = G.query().V("Project:TCGA-BRCA").out("cases").out("samples")
-    # q = q.has(gripql.eq("gdc_attributes.sample_type", "Primary Tumor"))
-    # q = q.out("aliquots").out("somatic_callsets").out("alleles")
-    # q = q.has(gripql.eq("variant_type", "SNP"))
-    # q = q.aggregate(gripql.term("chrom", "chromosome"))
-    # res = q.execute()
-    # 
-    # name = []
-    # count = []
-    # for i in res[0].chrom.buckets:
-    #     name.append(i["key"])
-    #     count.append(i["value"])
-    # plt.bar(name, count, width=0.35)
-    # ```
-    # ''', style={'textAlign': 'left'}),
     mk.codeblock_cohort_genom(),
 
     html.H4(children='Drug Response',style=styles['section_spaced']),
-    html.P(children='2. Differential gene experssion analysis has lead to a list of top differentially expressed genes. You want a quick and easy method to find what drug(s) might be useful. Task: Given a list of differentially expressed genes, what is the predicted drug response that is supported by published literature?', style={'textAlign': 'center'}),
+    html.P(children='2a. Differential gene experssion analysis has lead to a list of top differentially expressed genes. You want a quick and easy method to find what drug(s) might be useful. Task: Given a list of differentially expressed genes, what is the predicted drug response that is supported by published literature?', style={'textAlign': 'center'}),
     cyto.Cytoscape(
         layout={'name': 'preset'},
         stylesheet=default_stylesheet,
@@ -157,7 +141,15 @@ tab_layout = html.Div(children=[
         dcc.Loading(type="default",children=html.Div(id="dr_dropdown_table")),
     ]),
     mk.codeblock_drugresp(),
-
+    html.P(children='2b. Currently only for AAC. TODO add second facet by drug response, add this to dictionary in dresp.py, add in total samples, add in total projects'),
+    html.Div([dcc.Dropdown(id='drTWO_dropdown',
+        options=[
+            {'label': g, 'value': g} for g in drugs],
+        value='Imatinib',
+        placeholder='Search or Select',
+        ),     
+        dcc.Loading(id='drTWO_dropdown_table',type="default",children=html.Div(id="drTWO_dropdown_table")),
+    ]),    
 ])
 
 
@@ -172,6 +164,17 @@ def render_callback(User_selected):
     tab= dash_table.DataTable(id='dropdown_table',data = input_df.to_dict('records'),columns=[{"name": i, "id": i} for i in input_df.columns])
     return tab
 
+
+@app.callback(Output("drTWO_dropdown_table", "children"),
+    [Input('drTWO_dropdown', 'value')])
+def render_callback(User_selected):
+    response_vals = list(dresp.response_table(User_selected,'AAC').values())
+    if len(response_vals)>1:
+        fig = bp.get_histogram_normal(response_vals, 'AAC', 'Frequency', main_colors['pale_yellow'], 300,200)
+        return dcc.Graph(id='drTWO_dropdown_table2', figure=fig),
+    else:
+        return html.P('No records of drug compound and drug response metric found')
+    
 
 
 

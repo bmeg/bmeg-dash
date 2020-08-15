@@ -2,7 +2,7 @@ from ..db import G
 import pandas as pd
 import gripql
 
-
+# Drug response 2a.
 def evidenceTable(select_genes):
     '''
     input list of genes that want to look for g2p response 
@@ -58,3 +58,21 @@ def evidenceTable(select_genes):
         return df
     else:
         return pd.DataFrame((),columns=['EnsemblID','Gene Symbol','Drug Compound','Response Type','Source','Source Evidence Level','Description'])
+
+# drug response 2b
+def response_table(selection, metric_selection):
+    '''
+    Input drug synonym and metric
+    return dictionary of all drug response values as v and k as indexing number
+    '''
+    res={}
+    index =0
+    conversion={'AAC':'$dr._data.aac'}
+    if selection != None:
+        q = G.query().V().hasLabel('Compound').has(gripql.eq('$._data.synonym', selection)).as_('comp').out('drug_responses').as_('dr')
+        q= q.render(['$dr._data.ec50'])
+        for a in q:
+            if a != [None]:
+                res[index]=a[0] #list of one
+            index+=1
+    return res
