@@ -16,7 +16,6 @@ import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-import dash_cytoscape as cyto
 from urllib.request import urlopen
 import dash_core_components as dcc
 
@@ -87,69 +86,27 @@ for a in temp:
     if a[0] is not None:
         drugs.append(a[0])
 
-# Page      
+# Drugs with G2P gene g2p_associations 
+temp = G.query().V().hasLabel('Gene').limit(1000).out('g2p_associations').out('compounds').as_('comp').render(['$comp._gid'])
+drugs_g2pgene = [i[0] for i in temp]
+
+
+########
+# Page  
+#######    
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 tab_layout = html.Div(children=[
-    html.H4(children='Cohort Genomics',style=styles['section_spaced']),
-    html.P(children='1. Conduct a query that starts on the TCGA BRCA cohort, goes though Cases -> Samples -> Aliquots -> SomaticCallsets -> Alleles. Once at the alleles, do an aggregation to count the number of times each chromsome occurs', style={'textAlign': 'center'}),
-    cyto.Cytoscape(
-        layout={'name': 'preset'},
-        stylesheet=default_stylesheet,
-        autolock=True,
-        style={'width': '90%', 'height': '200px'},
-        elements=[
-            #Node
-            {'data': {'id': 'proj', 'label': 'Project'}, 'position': {'x': 0, 'y': 0}},
-            {'data': {'id': 'case', 'label': 'Case'}, 'position': {'x': 100, 'y': 70}},
-            {'data': {'id': 'samp', 'label': 'Sample'}, 'position': {'x': 200, 'y': 40}},
-            {'data': {'id': 'aliq', 'label': 'Aliquot'}, 'position': {'x': 300, 'y': 100}},
-            {'data': {'id': 'allele', 'label': 'Allele'}, 'position': {'x': 400, 'y': 20}},
-            #Edge
-            {'data': {'source': 'proj', 'target': 'case'}},
-            {'data': {'source': 'case', 'target': 'samp'}},
-            {'data': {'source': 'samp', 'target': 'aliq'}},
-            {'data': {'source': 'aliq', 'target': 'allele'}},
-        ]
-    ),
-    # html.Pre(id='click_node_data', style=styles['pre']),  
-    mk.codeblock_cohort_genom(),
-
     html.H4(children='Drug Response',style=styles['section_spaced']),
     html.P(children='2a. Differential gene experssion analysis has lead to a list of top differentially expressed genes. You want a quick and easy method to find what drug(s) might be useful. Task: Given a list of differentially expressed genes, what is the predicted drug response that is supported by published literature?', style={'textAlign': 'center'}),
-    cyto.Cytoscape(
-        layout={'name': 'preset'},
-        stylesheet=default_stylesheet,
-        autolock=True,
-        style={'width': '90%', 'height': '200px'},
-        elements=[
-            #Node
-            {'data': {'id': 'Gene', 'label': 'Gene'}, 'position': {'x': 0, 'y': 100}},
-            {'data': {'id': 'G2PAssociation', 'label': 'G2PAssociation'}, 'position': {'x': 100, 'y': 20}},
-            {'data': {'id': 'Compound', 'label': 'Compound'}, 'position': {'x': 250, 'y': 70}},
-            #Edge
-            {'data': {'source': 'Gene', 'target': 'G2PAssociation'}},
-            {'data': {'source': 'G2PAssociation', 'target': 'Compound'}},
-        ]
-    ),
     html.Div([dcc.Dropdown(id='dr_dropdown',
         options=[
             {'label': g, 'value': g} for g in select_genes.keys()],
-        value=[],
-        placeholder='Search or Select',
+        value='ENSG00000159377',
         multi=True,
         ),     
         dcc.Loading(type="default",children=html.Div(id="dr_dropdown_table")),
-    ]),
-    mk.codeblock_drugresp(),
-    html.P(children='2b. Currently only for AAC. TODO add second facet by drug response, add this to dictionary in dresp.py, add in total samples, add in total projects'),
-    html.Div([dcc.Dropdown(id='drTWO_dropdown',
-        options=[
-            {'label': g, 'value': g} for g in drugs],
-        value='Imatinib',
-        placeholder='Search or Select',
-        ),     
-        dcc.Loading(id='drTWO_dropdown_table',type="default",children=html.Div(id="drTWO_dropdown_table")),
-    ]),    
+        
+    ]), 
 ])
 
 
@@ -160,31 +117,24 @@ def render_callback(User_selected):
     data = []
     for gene in User_selected:
         data.append(gene)
+        
+    ##########
+    drug_resp = 'AAC' # TODO change from hardcoded to selection
+    ##########
+    
+    ### High Level Gene-Drug ###
+    # Table
     input_df= dresp.evidenceTable(data)
     tab= dash_table.DataTable(id='dropdown_table',data = input_df.to_dict('records'),columns=[{"name": i, "id": i} for i in input_df.columns])
-    return tab
-
-
-@app.callback(Output("drTWO_dropdown_table", "children"),
-    [Input('drTWO_dropdown', 'value')])
-def render_callback(User_selected):
-    response_vals = list(dresp.response_table(User_selected,'AAC').values())
-    if len(response_vals)>1:
-        fig = bp.get_histogram_normal(response_vals, 'AAC', 'Frequency', main_colors['pale_yellow'], 300,200)
-        return dcc.Graph(id='drTWO_dropdown_table2', figure=fig),
-    else:
-        return html.P('No records of drug compound and drug response metric found')
-    
-
-
-
-##############
-
-
-    
-@app.callback(Output('click_node_data', 'children'),
-              [Input('click_node_data-callback', 'tapNodeData')])
-def displayTapNodeData(data):
-    if data is None: # if event is trigged before page/url fully loaded
-        return 'Select Data'
-    return json.dumps(data, indent=2)#.strip().split(',')[0].split(':')[1]
+    ### Detailed Gene-Drug ###
+    input_df= dresp.drug_response(data, drug_resp)
+    # Histograms
+    fig = bp.get_histogram_normal(input_df['Drug Compound'], 'Drug Compound', 'Frequency', main_colors['pale_orange'], 300, 200)
+    drug_plot= dcc.Graph(figure=fig)
+    fig = bp.get_histogram_normal(input_df['Cell Line'], 'Cell Line', 'Frequency',main_colors['pale_yellow'], 300, 10)
+    cellLine_plot= dcc.Graph(figure=fig)
+    fig = bp.get_histogram_normal(input_df[drug_resp], drug_resp, 'Frequency',main_colors['pale_orange'], 300, 10)
+    resp_plot= dcc.Graph(figure=fig)
+    # Table
+    tab2= dash_table.DataTable(data = input_df.to_dict('records'),columns=[{"name": i, "id": i} for i in input_df.columns])
+    return tab, html.H1(''), drug_plot,html.H1(''),cellLine_plot,html.H1(''),resp_plot,html.H1(''),tab2

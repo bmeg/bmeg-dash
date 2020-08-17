@@ -41,13 +41,15 @@ def get_histogram_normal(data, x_title, y_title, box_color, plot_height, y_ticks
     '''
     import pandas as pd
     import plotly.graph_objects as go
-    fig = go.Figure(data=[go.Histogram(x=data,marker=dict(color=box_color))]).update_yaxes(categoryorder="total ascending")
-    fig.update_layout(margin={'t':0, 'b':0},
+    fig = go.Figure(data=[go.Histogram(x=data,marker=dict(color=box_color))])#.update_yaxes(categoryorder="total ascending")
+    fig.update_layout(margin={'t':10, 'b':100},
         height=plot_height,
-        yaxis=dict(title=y_title,tickmode='linear', dtick=y_ticks),
+        yaxis=dict(title=y_title),
+        # yaxis=dict(title=y_title,tickmode='linear', dtick=y_ticks),
         xaxis=dict(title=x_title),
         plot_bgcolor='white',
-        paper_bgcolor='white')
+        paper_bgcolor='white',
+        hovermode='x unified')
     fig.update_xaxes(showline=True,linewidth=1,ticks='outside',linecolor='black')
     fig.update_yaxes(showline=True,linewidth=1,ticks='outside',linecolor='black')
     return fig
