@@ -15,7 +15,7 @@ def fullDF(response_metric,select_genes):
         for i in range(0, len(select_genes)):
             if i == 0:
                 gene=select_genes[i]
-                q= G.query().V().hasLabel('Gene').has(gripql.eq('$._gid', gene)).limit(500).as_('gene').out('g2p_associations').as_('lit').out('compounds').as_('comp').out('drug_responses').as_('dr')
+                q= G.query().V().hasLabel('Gene').has(gripql.eq('$._gid', gene)).limit(150).as_('gene').out('g2p_associations').as_('lit').out('compounds').as_('comp').out('drug_responses').as_('dr')
                 q = q.render(['$gene._gid','$gene._data.symbol', '$lit._data.source', '$lit._data.description','$dr._data.source_cell_name','$comp._data.synonym',conversion[response_metric],'$dr._data.project_id','$lit._data.response_type'])
                 gene_gid=[]
                 gene_sym=[]
@@ -39,7 +39,7 @@ def fullDF(response_metric,select_genes):
                 df=pd.DataFrame(list(zip(gene_gid,gene_sym,lit_src,lit_des,dr_cellline,comp_syn,dr_metric,dr_projid,lit_resptype)),columns=['Ensembl ID','Gene Symbol','Source','Description','Cell Line','Drug Compound','dr_metric','Dataset','Response Type'])
             else:
                 gene=select_genes[i]
-                q= G.query().V().hasLabel('Gene').has(gripql.eq('$._gid', gene)).limit(500).as_('gene').out('g2p_associations').as_('lit').out('compounds').as_('comp').out('drug_responses').as_('dr')
+                q= G.query().V().hasLabel('Gene').has(gripql.eq('$._gid', gene)).limit(150).as_('gene').out('g2p_associations').as_('lit').out('compounds').as_('comp').out('drug_responses').as_('dr')
                 q = q.render(['$gene._gid','$gene._data.symbol', '$lit._data.source', '$lit._data.description','$dr._data.source_cell_name','$comp._data.synonym',conversion[response_metric],'$dr._data.project_id','$lit._data.response_type'])
                 gene_gid=[]
                 gene_sym=[]
@@ -61,7 +61,8 @@ def fullDF(response_metric,select_genes):
                     dr_projid.append(i[7])
                     lit_resptype.append(i[8])
                 df2=pd.DataFrame(list(zip(gene_gid,gene_sym,lit_src,lit_des,dr_cellline,comp_syn,dr_metric,dr_projid,lit_resptype)),columns=['Ensembl ID','Gene Symbol','Source','Description','Cell Line','Drug Compound','dr_metric','Dataset','Response Type'])
-                df=pd.concat([df,df2],ignore_index=True).reset_index(drop=True)    
+                df=pd.concat([df,df2],ignore_index=True).reset_index(drop=True)  
+        df.insert(loc=1, column='i', value=list(range(0,df.shape[0])))
     elif len(select_genes)==0:    
-        df=pd.DataFrame((),columns=['Ensembl ID','Gene Symbol','Source','Description','Cell Line','Drug Compound','dr_metric','Dataset','Response Type'])
+        df=pd.DataFrame((),columns=['i','Ensembl ID','Gene Symbol','Source','Description','Cell Line','Drug Compound','dr_metric','Dataset','Response Type'])
     return df

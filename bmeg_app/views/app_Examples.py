@@ -74,7 +74,7 @@ default_stylesheet = [
 # Populate list of all genes for selection of 2.Drug response table 
 # TODO: cache select_genes list so can remove (below) .limit()
 print('querying initial data 1')
-q= G.query().V().hasLabel('Gene').limit(500).as_('gene').out('g2p_associations').as_('lit').out('compounds').as_('comp').out('drug_responses')
+q= G.query().V().hasLabel('Gene').limit(150).as_('gene').out('g2p_associations').as_('lit').out('compounds').as_('comp').out('drug_responses')
 q= q.render(['$gene._gid','$lit._data.response_type'])
 select_genes={}
 for a,b in q:
@@ -94,31 +94,26 @@ tab_layout = html.Div(children=[
         value=[],
         multi=True,
         ),     
-        dcc.Loading(type="default",children=html.Div(id="dr_dropdown_table")),
+    ],style={'width': '48%', 'display': 'inline-block'}), 
+    dcc.Loading(type="default",children=html.Div(id="dr_dropdown_table")),
         
-    ]), 
 ])
-
-
-        
+    
 @app.callback(Output("dr_dropdown_table", "children"),
     [Input('dr_dropdown', 'value')])
 def render_callback(User_selected):
     data = []
     for gene in User_selected:
         data.append(gene)
-    print('selection of data', data)
     ##########
     drug_resp = 'AAC' # TODO change from hardcoded to selection
     ##########
-
+    
     ### Query for base table ###
     baseDF = dresp.fullDF(drug_resp,data)
-    print('returned base df',baseDF)
     ### High Level Gene-Drug ###
     # Table
-    df1 = baseDF[['Ensembl ID','Gene Symbol','Drug Compound','Response Type', 'Source', 'Description']]
-    tab= dash_table.DataTable(id='dropdown_table',data = df1.to_dict('records'),columns=[{"name": i, "id": i} for i in df1.columns])
+    tab= dash_table.DataTable(id='dropdown_table',data = baseDF.to_dict('records'),columns=[{"name": i, "id": i} for i in baseDF.columns])
     
     ### Detailed Gene-Drug ###
     df2 = baseDF[['Drug Compound', 'Cell Line', 'dr_metric', 'Dataset']]
