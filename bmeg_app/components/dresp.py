@@ -15,7 +15,7 @@ def fullDF(response_metric,select_genes):
         for i in range(0, len(select_genes)):
             if i == 0:
                 gene=select_genes[i]
-                q= G.query().V().hasLabel('Gene').has(gripql.eq('$._gid', gene)).as_('gene').out('g2p_associations').as_('lit').out('compounds').as_('comp').out('drug_responses').as_('dr')
+                q= G.query().V().hasLabel('Gene').has(gripql.eq('$._gid', gene)).limit(500).as_('gene').out('g2p_associations').as_('lit').out('compounds').as_('comp').out('drug_responses').as_('dr')
                 q = q.render(['$gene._gid','$gene._data.symbol', '$lit._data.source', '$lit._data.description','$dr._data.source_cell_name','$comp._data.synonym',conversion[response_metric],'$dr._data.project_id','$lit._data.response_type'])
                 gene_gid=[]
                 gene_sym=[]
@@ -39,7 +39,7 @@ def fullDF(response_metric,select_genes):
                 df=pd.DataFrame(list(zip(gene_gid,gene_sym,lit_src,lit_des,dr_cellline,comp_syn,dr_metric,dr_projid,lit_resptype)),columns=['Ensembl ID','Gene Symbol','Source','Description','Cell Line','Drug Compound','dr_metric','Dataset','Response Type'])
             else:
                 gene=select_genes[i]
-                q= G.query().V().hasLabel('Gene').has(gripql.eq('$._gid', gene)).as_('gene').out('g2p_associations').as_('lit').out('compounds').as_('comp').out('drug_responses').as_('dr')
+                q= G.query().V().hasLabel('Gene').has(gripql.eq('$._gid', gene)).limit(500).as_('gene').out('g2p_associations').as_('lit').out('compounds').as_('comp').out('drug_responses').as_('dr')
                 q = q.render(['$gene._gid','$gene._data.symbol', '$lit._data.source', '$lit._data.description','$dr._data.source_cell_name','$comp._data.synonym',conversion[response_metric],'$dr._data.project_id','$lit._data.response_type'])
                 gene_gid=[]
                 gene_sym=[]

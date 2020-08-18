@@ -72,28 +72,18 @@ default_stylesheet = [
 ]
 
 # Populate list of all genes for selection of 2.Drug response table 
-# TODO: cache select_genes list so can remove (below) .limit(1000)
-q= G.query().V().hasLabel('Gene').as_('gene').limit(1000).out('g2p_associations').as_('lit').out('compounds').as_('comp')
+# TODO: cache select_genes list so can remove (below) .limit()
+print('querying initial data 1')
+q= G.query().V().hasLabel('Gene').limit(500).as_('gene').out('g2p_associations').as_('lit').out('compounds').as_('comp').out('drug_responses')
 q= q.render(['$gene._gid','$lit._data.response_type'])
 select_genes={}
 for a,b in q:
-    if b is not None and a not in select_genes:
-        select_genes[a]=1
-# All drugs for Drug Response 2b example 
-temp = G.query().V().hasLabel('Compound').render(['$._data.synonym'])
-drugs=[]
-for a in temp:
-    if a[0] is not None:
-        drugs.append(a[0])
-
-# Drugs with G2P gene g2p_associations 
-temp = G.query().V().hasLabel('Gene').limit(1000).out('g2p_associations').out('compounds').as_('comp').render(['$comp._gid'])
-drugs_g2pgene = [i[0] for i in temp]
-
+    select_genes[a]=1
 
 ########
 # Page  
-#######    
+####### 
+print('loading app layout')   
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 tab_layout = html.Div(children=[
     html.H4(children='Drug Response',style=styles['section_spaced']),
@@ -117,13 +107,14 @@ def render_callback(User_selected):
     data = []
     for gene in User_selected:
         data.append(gene)
+    print('selection of data', data)
     ##########
     drug_resp = 'AAC' # TODO change from hardcoded to selection
     ##########
 
     ### Query for base table ###
     baseDF = dresp.fullDF(drug_resp,data)
-
+    print('returned base df',baseDF)
     ### High Level Gene-Drug ###
     # Table
     df1 = baseDF[['Ensembl ID','Gene Symbol','Drug Compound','Response Type', 'Source', 'Description']]
