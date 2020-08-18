@@ -33,7 +33,7 @@ def bar_thresh_additional(fig_title, infotext, X_VALS, Y_VALS,INPUT_freq_thresho
     fig.update_xaxes(showline=True,title =x_axis_label,linewidth=1,linecolor='black')
     return fig
 
-def get_histogram_normal(data, x_title, y_title, box_color, plot_height, y_ticks):
+def get_histogram_normal(data, x_title, y_title, box_color, plot_height, y_ticks,suffix, update):
     '''
     input values to plot. can be pandas df['col']
     yticks == how far apart ticks
@@ -41,6 +41,8 @@ def get_histogram_normal(data, x_title, y_title, box_color, plot_height, y_ticks
     '''
     import pandas as pd
     import plotly.graph_objects as go
+    if update=='yes':
+        data =[str(a)+'_'+suffix for a in data]
     fig = go.Figure(data=[go.Histogram(x=data,marker=dict(color=box_color))])#.update_yaxes(categoryorder="total ascending")
     fig.update_layout(margin={'t':10, 'b':100},
         height=plot_height,

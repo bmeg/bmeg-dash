@@ -97,11 +97,11 @@ drugs_g2pgene = [i[0] for i in temp]
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 tab_layout = html.Div(children=[
     html.H4(children='Drug Response',style=styles['section_spaced']),
-    html.P(children='2a. Differential gene experssion analysis has lead to a list of top differentially expressed genes. You want a quick and easy method to find what drug(s) might be useful. Task: Given a list of differentially expressed genes, what is the predicted drug response that is supported by published literature?', style={'textAlign': 'center'}),
+    html.P(children='Differential gene experssion analysis has lead to a list of top differentially expressed genes. You want a quick and easy method to find what drug(s) might be useful. Task: Given a list of differentially expressed genes, what is the predicted drug response that is supported by published literature?', style={'textAlign': 'center'}),
     html.Div([dcc.Dropdown(id='dr_dropdown',
         options=[
             {'label': g, 'value': g} for g in select_genes.keys()],
-        value='ENSG00000159377',
+        value=[],
         multi=True,
         ),     
         dcc.Loading(type="default",children=html.Div(id="dr_dropdown_table")),
@@ -117,24 +117,25 @@ def render_callback(User_selected):
     data = []
     for gene in User_selected:
         data.append(gene)
-        
     ##########
     drug_resp = 'AAC' # TODO change from hardcoded to selection
     ##########
-    
+
+    ### Query for base table ###
+    baseDF = dresp.fullDF(drug_resp,data)
+
     ### High Level Gene-Drug ###
     # Table
-    input_df= dresp.evidenceTable(data)
-    tab= dash_table.DataTable(id='dropdown_table',data = input_df.to_dict('records'),columns=[{"name": i, "id": i} for i in input_df.columns])
+    df1 = baseDF[['Ensembl ID','Gene Symbol','Drug Compound','Response Type', 'Source', 'Description']]
+    tab= dash_table.DataTable(id='dropdown_table',data = df1.to_dict('records'),columns=[{"name": i, "id": i} for i in df1.columns])
+    
     ### Detailed Gene-Drug ###
-    input_df= dresp.drug_response(data, drug_resp)
+    df2 = baseDF[['Drug Compound', 'Cell Line', 'dr_metric', 'Dataset']]
+    df2= df2.rename(columns={'dr_metric':drug_resp})
     # Histograms
-    fig = bp.get_histogram_normal(input_df['Drug Compound'], 'Drug Compound', 'Frequency', main_colors['pale_orange'], 300, 200)
-    drug_plot= dcc.Graph(figure=fig)
-    fig = bp.get_histogram_normal(input_df['Cell Line'], 'Cell Line', 'Frequency',main_colors['pale_yellow'], 300, 10)
-    cellLine_plot= dcc.Graph(figure=fig)
-    fig = bp.get_histogram_normal(input_df[drug_resp], drug_resp, 'Frequency',main_colors['pale_orange'], 300, 10)
-    resp_plot= dcc.Graph(figure=fig)
+    drug_plot= dcc.Graph(figure=bp.get_histogram_normal(df2['Drug Compound'], 'Drug Compound', 'Frequency', main_colors['pale_orange'], 300, 200, 'drug','yes'))
+    cellLine_plot= dcc.Graph(figure=bp.get_histogram_normal(df2['Cell Line'], 'Cell Line', 'Frequency',main_colors['pale_yellow'], 300, 10, 'cellline','yes'))
+    resp_plot= dcc.Graph(figure=bp.get_histogram_normal(df2[drug_resp], drug_resp, 'Frequency',main_colors['pale_orange'], 300, 10,'drug','no'))
     # Table
-    tab2= dash_table.DataTable(data = input_df.to_dict('records'),columns=[{"name": i, "id": i} for i in input_df.columns])
-    return tab, html.H1(''), drug_plot,html.H1(''),cellLine_plot,html.H1(''),resp_plot,html.H1(''),tab2
+    tab2= dash_table.DataTable(data = df2.to_dict('records'),columns=[{"name": i, "id": i} for i in df2.columns])
+    return drug_plot,html.H1(''),cellLine_plot,html.H1(''),resp_plot,html.H1(''), tab, html.H1(''),tab2
