@@ -3,7 +3,7 @@ import pandas as pd
 import gripql
 
 
-def get_df(dropdown_selection):
+def get_df(dropdown_selection,property):
     lookup = {'CCLE': 'Project:CCLE',
      'CTRP': 'Project:CTRP',
      'TCGA-OV': 'Project:TCGA-OV',
@@ -73,14 +73,36 @@ def get_df(dropdown_selection):
      'GTEx_Thyroid': 'Project:GTEx_Thyroid'}
     data = {}
     label = lookup[dropdown_selection]
-    for row in G.query().V(label).out("cases").out("samples").out("aliquots").out("gene_expressions"):
-        data[row['gid']] = row['data']['values'].to_dict()
+    q=G.query().V(label).out("cases").as_('c').out("samples").as_('s').out("aliquots").out("gene_expressions").as_('gexp')
+    q=q.render([property, '$s._gid', '$gexp._gid','$gexp._data.values'])
+    data = {}
+    for row in q:
+        if row[0] !=[]:
+            stage = row[0][0].replace(' ',':').upper() 
+            sample = row[1]
+            key=stage+"__"+sample
+            gid = row[2]
+            vals=row[3]
+            data[key]= vals
     return pd.DataFrame(data).transpose()
 
-def get_umap(df):
+
+def get_umap(df, input_title):
     import plotly.express as px
     import umap.umap_ as umap
     locs = umap.UMAP().fit_transform(df)
     uDF = pd.concat( [pd.DataFrame(locs, index=df.index), df.index.to_series()], axis=1, ignore_index=True )
-    fig = px.scatter(uDF, x=0, y=1, hover_name=2)
+    uDF['group']= [a.split('__')[0] for a in uDF.index]
+    fig = px.scatter(uDF, x=0, y=1, hover_name=2,color='group')
+    fig.update_layout(title=input_title,height=400)
     return fig
+    
+# def get_umap_facet(df, input_title):
+#     import plotly.express as px
+#     import umap.umap_ as umap
+#     locs = umap.UMAP().fit_transform(df)
+#     uDF = pd.concat( [pd.DataFrame(locs, index=df.index), df.index.to_series()], axis=1, ignore_index=True )
+#     uDF['group']= [a.split('__')[0] for a in uDF.index]
+#     fig = px.scatter(uDF, x=0, y=1, hover_name=2,color='group')
+#     fig.update_layout(title=input_title,height=400)
+#     return fig

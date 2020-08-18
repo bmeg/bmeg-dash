@@ -18,6 +18,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 from urllib.request import urlopen
 import dash_core_components as dcc
+from plotly.subplots import make_subplots
 
 
 
@@ -123,19 +124,28 @@ def render_callback(User_selected_proj):
         return
     if User_selected_proj !=[]: # if event is trigged before page/url fully loaded
         print(User_selected_proj)
-        data = gC.get_df(User_selected_proj)
-        fig=gC.get_umap(data)
-        return dcc.Graph(figure=fig),    
-
+        data = gC.get_df(User_selected_proj,'$c._data.gdc_attributes.diagnoses.tumor_stage')
+        fig1=gC.get_umap(data, 'UMAP: Tumor Stage')
+        data = gC.get_df(User_selected_proj,'$c._data.gdc_attributes.diagnoses.tissue_or_organ_of_origin')
+        fig2=gC.get_umap(data, 'UMAP: Tissue/Organ of Origin')
+        data = gC.get_df(User_selected_proj,'$c._data.gdc_attributes.diagnoses.prior_malignancy')
+        fig3=gC.get_umap(data, 'UMAP: Prior Malignancy')
+        data = gC.get_df(User_selected_proj,'$c._data.gdc_attributes.diagnoses.prior_treatment')
+        fig4=gC.get_umap(data, 'UMAP: Prior Treatment')
+        return dcc.Graph(figure=fig1),dcc.Graph(figure=fig2),dcc.Graph(figure=fig3),dcc.Graph(figure=fig4),
         
-# @app.callback(Output("cluster", "children"),
-#     [Input('url', 'pathname')])
-# def render_pie_age_gender(href):
-#     if href is None: # if event is trigged before page/url fully loaded
-#         raise PreventUpdate
-#     data = gC.get_df()
-#     fig=gC.get_umap(data)
-#     return dcc.Graph(figure=fig),
+        # trace1 = fig1['data'][0]
+        # trace2 = fig2['data'][0]
+        # trace3 = fig3['data'][0]
+        # trace4 = fig4['data'][0]
+        # combined_fig = make_subplots(rows=2, cols=2, shared_xaxes=False)
+        # combined_fig.add_trace(trace1, row=1, col=1)
+        # combined_fig.add_trace(trace2, row=1, col=2)
+        # combined_fig.add_trace(trace3, row=2, col=1)
+        # combined_fig.add_trace(trace4, row=2, col=2)
+        # return dcc.Graph(figure=combined_fig),
+
+
 
 
     
