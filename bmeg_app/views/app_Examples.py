@@ -2,7 +2,7 @@
 
 from ..app import app
 from ..db import G
-from ..components import dresp, basic_plots as bp
+from ..components import dresp, basic_plots as bp, gene_cluster as gC
 from ..markdown import examples_tab as mk
 import pandas as pd
 import time
@@ -79,6 +79,9 @@ q= q.render(['$gene._gid','$lit._data.response_type'])
 select_genes={}
 for a,b in q:
     select_genes[a]=1
+# clustering options drop dropdown_table 
+projs = [row[0] for row in G.query().V().hasLabel('Project').as_('p').render(['$p._data.project_id']) if 'TCGA' in row[0]]
+
 
 ########
 # Page  
@@ -86,6 +89,18 @@ for a,b in q:
 print('loading app layout')   
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 tab_layout = html.Div(children=[
+    html.H4(children='Explore TCGA Data',style=styles['section_spaced']),
+    html.P(children='Gene expression', style={'textAlign': 'center'}),
+    html.Div([dcc.Dropdown(id='proj_dropdown',
+        options=[
+            {'label': g, 'value': g} for g in projs],
+        value=[],
+        multi=False,
+        ),     
+    ],style={'width': '48%', 'display': 'inline-block'}), 
+    dcc.Loading(type="default",children=html.Div(id="cluster")),
+    
+
     html.H4(children='Drug Response',style=styles['section_spaced']),
     html.P(children='Differential gene experssion analysis has lead to a list of top differentially expressed genes. You want a quick and easy method to find what drug(s) might be useful. Task: Given a list of differentially expressed genes, what is the predicted drug response that is supported by published literature?', style={'textAlign': 'center'}),
     html.Div([dcc.Dropdown(id='dr_dropdown',
@@ -98,6 +113,31 @@ tab_layout = html.Div(children=[
     dcc.Loading(type="default",children=html.Div(id="dr_dropdown_table")),
         
 ])
+
+
+
+@app.callback(Output("cluster", "children"),
+    [Input('proj_dropdown', 'value')])
+def render_callback(User_selected_proj):
+    if User_selected_proj is None: 
+        return
+    if User_selected_proj !=[]: # if event is trigged before page/url fully loaded
+        print(User_selected_proj)
+        data = gC.get_df(User_selected_proj)
+        fig=gC.get_umap(data)
+        return dcc.Graph(figure=fig),    
+
+        
+# @app.callback(Output("cluster", "children"),
+#     [Input('url', 'pathname')])
+# def render_pie_age_gender(href):
+#     if href is None: # if event is trigged before page/url fully loaded
+#         raise PreventUpdate
+#     data = gC.get_df()
+#     fig=gC.get_umap(data)
+#     return dcc.Graph(figure=fig),
+
+
     
 @app.callback(Output("dr_dropdown_table", "children"),
     [Input('dr_dropdown', 'value')])
