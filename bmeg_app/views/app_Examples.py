@@ -81,8 +81,7 @@ select_genes={}
 for a,b in q:
     select_genes[a]=1
 # clustering options drop dropdown_table 
-projs = [row[0] for row in G.query().V().hasLabel('Project').as_('p').render(['$p._data.project_id']) if 'TCGA' in row[0]]
-
+option_projects = gC.dropdown_options()
 
 ########
 # Page  
@@ -91,19 +90,21 @@ print('loading app layout')
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 tab_layout = html.Div(children=[
     html.H4(children='Explore TCGA Data',style=styles['section_spaced']),
-    html.P(children='Gene expression', style={'textAlign': 'center'}),
-    html.Div([dcc.Dropdown(id='proj_dropdown',
-        options=[
-            {'label': g, 'value': g} for g in projs],
-        value=[],
-        multi=False,
-        ),     
-    ],style={'width': '48%', 'display': 'inline-block'}), 
-    dcc.Loading(type="default",children=html.Div(id="cluster")),
-    
+    html.Label('Project'),
+    dcc.Dropdown(
+        id='project-dropdown',
+        options=[{'label': k, 'value': k} for k in option_projects.keys()],
+        value='TCGA-CHOL',
+        ),
+    html.Label('Property'),
+    dcc.Dropdown(id='property-dropdown'),
+    html.Hr(),
+    dcc.Loading(type="default",children=html.Div(id="umap_fig")),
+
 
     html.H4(children='Drug Response',style=styles['section_spaced']),
-    html.P(children='Differential gene experssion analysis has lead to a list of top differentially expressed genes. You want a quick and easy method to find what drug(s) might be useful. Task: Given a list of differentially expressed genes, what is the predicted drug response that is supported by published literature?', style={'textAlign': 'center'}),
+    # html.P(children='Differential gene experssion analysis has lead to a list of top differentially expressed genes. You want a quick and easy method to find what drug(s) might be useful. Task: Given a list of differentially expressed genes, what is the predicted drug response that is supported by published literature?', style={'textAlign': 'center'}),
+    html.Label('Gene(s)'),
     html.Div([dcc.Dropdown(id='dr_dropdown',
         options=[
             {'label': g, 'value': g} for g in select_genes.keys()],
@@ -111,44 +112,42 @@ tab_layout = html.Div(children=[
         multi=True,
         ),     
     ],style={'width': '48%', 'display': 'inline-block'}), 
+    html.Hr(),
     dcc.Loading(type="default",children=html.Div(id="dr_dropdown_table")),
-        
-])
-
-
-
-@app.callback(Output("cluster", "children"),
-    [Input('proj_dropdown', 'value')])
-def render_callback(User_selected_proj):
-    if User_selected_proj is None: 
-        return
-    if User_selected_proj !=[]: # if event is trigged before page/url fully loaded
-        print(User_selected_proj)
-        data = gC.get_df(User_selected_proj,'$c._data.gdc_attributes.diagnoses.tumor_stage')
-        fig1=gC.get_umap(data, 'UMAP: Tumor Stage')
-        data = gC.get_df(User_selected_proj,'$c._data.gdc_attributes.diagnoses.tissue_or_organ_of_origin')
-        fig2=gC.get_umap(data, 'UMAP: Tissue/Organ of Origin')
-        data = gC.get_df(User_selected_proj,'$c._data.gdc_attributes.diagnoses.prior_malignancy')
-        fig3=gC.get_umap(data, 'UMAP: Prior Malignancy')
-        data = gC.get_df(User_selected_proj,'$c._data.gdc_attributes.diagnoses.prior_treatment')
-        fig4=gC.get_umap(data, 'UMAP: Prior Treatment')
-        return dcc.Graph(figure=fig1),dcc.Graph(figure=fig2),dcc.Graph(figure=fig3),dcc.Graph(figure=fig4),
-        
-        # trace1 = fig1['data'][0]
-        # trace2 = fig2['data'][0]
-        # trace3 = fig3['data'][0]
-        # trace4 = fig4['data'][0]
-        # combined_fig = make_subplots(rows=2, cols=2, shared_xaxes=False)
-        # combined_fig.add_trace(trace1, row=1, col=1)
-        # combined_fig.add_trace(trace2, row=1, col=2)
-        # combined_fig.add_trace(trace3, row=2, col=1)
-        # combined_fig.add_trace(trace4, row=2, col=2)
-        # return dcc.Graph(figure=combined_fig),
-
-
-
-
     
+    
+  
+])
+########
+# Callbacks 
+########
+# TCGA 
+@app.callback(Output("umap_fig", "children"),
+    [Input('project-dropdown', 'value'),
+    Input('property-dropdown', 'value')])
+def render_callback(selected_project, selected_property):
+    if selected_project is None: 
+        return
+    if selected_project !=[]:
+        print(selected_project)
+        data = gC.get_df(selected_project,selected_property)
+        fig1=gC.get_umap(data, 'UMAP')
+        return dcc.Graph(figure=fig1),
+
+@app.callback(
+    dash.dependencies.Output('property-dropdown', 'options'),
+    [dash.dependencies.Input('project-dropdown', 'value')])
+def set_cities_options(selected_project):
+    return [{'label': k, 'value': v} for k,v in gC.mappings(selected_project).items()]
+    
+@app.callback(
+    dash.dependencies.Output('property-dropdown', 'value'),
+    [dash.dependencies.Input('property-dropdown', 'options')])
+def set_cities_value(available_options):
+    return available_options[0]['value']
+
+
+# Drug response    
 @app.callback(Output("dr_dropdown_table", "children"),
     [Input('dr_dropdown', 'value')])
 def render_callback(User_selected):

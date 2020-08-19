@@ -2,7 +2,6 @@ from ..db import G
 import pandas as pd
 import gripql
 
-
 def get_df(dropdown_selection,property):
     lookup = {'CCLE': 'Project:CCLE',
      'CTRP': 'Project:CTRP',
@@ -97,12 +96,22 @@ def get_umap(df, input_title):
     fig.update_layout(title=input_title,height=400)
     return fig
     
-# def get_umap_facet(df, input_title):
-#     import plotly.express as px
-#     import umap.umap_ as umap
-#     locs = umap.UMAP().fit_transform(df)
-#     uDF = pd.concat( [pd.DataFrame(locs, index=df.index), df.index.to_series()], axis=1, ignore_index=True )
-#     uDF['group']= [a.split('__')[0] for a in uDF.index]
-#     fig = px.scatter(uDF, x=0, y=1, hover_name=2,color='group')
-#     fig.update_layout(title=input_title,height=400)
-#     return fig
+
+def dropdown_options():
+    '''
+    All projects a
+    projects can be manually pulled with 
+        [row[0] for row in G.query().V().hasLabel('Project').as_('p').render(['$p._data.project_id']) if 'TCGA' in row[0]]
+    '''
+    options = {}
+    for row in G.query().V().hasLabel('Project').as_('p').render(['$p._data.project_id']):
+        if 'TCGA' in row[0]:
+            options[row[0]]=1
+    return options
+
+def mappings(selected_project):
+    if 'TCGA' in selected_project:
+        return {
+        'Tumor Stage':'$c._data.gdc_attributes.diagnoses.tumor_stage',"Tissue/Organ of Origin":'$c._data.gdc_attributes.diagnoses.tissue_or_organ_of_origin',"Prior Malignancy":'$c._data.gdc_attributes.diagnoses.prior_malignancy',"Prior Treatment":'$c._data.gdc_attributes.diagnoses.prior_treatment'
+        }
+    #elif other project...load project specific properties
