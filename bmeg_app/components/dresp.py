@@ -62,7 +62,7 @@ def fullDF(response_metric,select_genes):
                     lit_resptype.append(i[8])
                 df2=pd.DataFrame(list(zip(gene_gid,gene_sym,lit_src,lit_des,dr_cellline,comp_syn,dr_metric,dr_projid,lit_resptype)),columns=['Ensembl ID','Gene Symbol','Source','Description','Cell Line','Drug Compound','dr_metric','Dataset','Response Type'])
                 df=pd.concat([df,df2],ignore_index=True).reset_index(drop=True)  
-        df.insert(loc=1, column='i', value=list(range(0,df.shape[0])))
+        df.insert(loc=0, column='i', value=list(range(0,df.shape[0])))
     elif len(select_genes)==0:    
         df=pd.DataFrame((),columns=['i','Ensembl ID','Gene Symbol','Source','Description','Cell Line','Drug Compound','dr_metric','Dataset','Response Type'])
     return df
