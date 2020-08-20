@@ -75,3 +75,11 @@ def mappings(selected_project):
         'Nilotinib':'NILOTINIB'
          }
     #elif other project...load project specific properties
+def mappings_drugResp(selected_project):
+    if 'CCLE' == selected_project:
+        return {
+        'AAC':'$dr._data.aac',
+        'IC50':'$dr._data.ic50',
+        'EC50': '$dr._data.ec50'
+         }
+    #elif other project...load project specific properties

@@ -67,14 +67,17 @@ styles = {
 ####### 
 print('loading app layout')   
 tab_layout = html.Div(children=[
-    html.H4(children='Repurpose Drugs',style=styles['section_spaced']),
-    html.Label('Breast Cancer Drug Repurposing'),
+    html.H4(children='Repurposing Known Breat Cancer Drugs',style=styles['section_spaced']),
+    html.Label('Project'),
     html.Div([dcc.Dropdown(id='repurp_PROJECT_dropdown',
         options=[
             {'label': a, 'value': a} for a in ['CCLE']],
         value='CCLE',
         ),     
     ],style={'width': '48%', 'display': 'inline-block'}), 
+    html.Label('Drug Response Metric'),
+    dcc.Dropdown(id='repurp_RESPONSE_dropdown'),
+    html.Label('Drug to Compare Against Others'),
     dcc.Dropdown(id='repurp_DRUG_dropdown'),
 
     html.Hr(),
@@ -99,6 +102,21 @@ tab_layout = html.Div(children=[
 # Callbacks 
 ########
 @app.callback(
+    dash.dependencies.Output('repurp_RESPONSE_dropdown', 'options'),
+    [dash.dependencies.Input('repurp_PROJECT_dropdown', 'value')])
+def set_cities_options(selected_project):
+    return [{'label': k, 'value': v} for k,v in repurpose.mappings_drugResp(selected_project).items()]
+    
+@app.callback(
+    dash.dependencies.Output('repurp_RESPONSE_dropdown', 'value'),
+    [dash.dependencies.Input('repurp_RESPONSE_dropdown', 'options')])
+def set_cities_value(available_options):
+    return available_options[0]['value']
+    
+    
+    
+
+@app.callback(
     dash.dependencies.Output('repurp_DRUG_dropdown', 'options'),
     [dash.dependencies.Input('repurp_PROJECT_dropdown', 'value')])
 def set_cities_options(selected_project):
@@ -114,10 +132,11 @@ def set_cities_value(available_options):
 
 @app.callback(Output("figs_repurp", "children"),
     [Input('repurp_PROJECT_dropdown', 'value'),
+    Input('repurp_RESPONSE_dropdown', 'value'),
     Input('repurp_DRUG_dropdown', 'value')])
-def render_age_hist(selected_project, selected_drug):
+def render_age_hist(selected_project, selected_drugResp, selected_drug):
     # Query
-    drugDF, disease = repurpose.get_matrix(selected_project,'$dr._data.aac')
+    drugDF, disease = repurpose.get_matrix(selected_project,selected_drugResp)
     # drugDF, disease = repurpose.get_matrix('CCLE','$dr._data.aac')
     # Preprocess:Rename drugs to common name
     drugDF=drugDF[drugDF.columns.drop(list(drugDF.filter(regex='NO_ONTOLOGY')))] # TODO fix it so dont have to drop
@@ -129,7 +148,7 @@ def render_age_hist(selected_project, selected_drug):
             common.append(row[0])
     drugDF.columns=common
     # Final processing + figure 
-    fig = repurpose.compare_drugs(selected_drug, drugDF, disease,'Drug Response (AAC)')[1] #grab index0 if want to do more figs from table that generates this fig
+    fig = repurpose.compare_drugs(selected_drug, drugDF, disease,'Drug Response Metric' )[1] #grab index0 if want to do more figs from table that generates this fig
     return dcc.Graph(figure=fig),
 
 
