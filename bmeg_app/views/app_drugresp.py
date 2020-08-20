@@ -98,7 +98,7 @@ tab_layout = html.Div(children=[
         value=[],
         multi=True,
         ),     
-    ],style={'width': '48%', 'display': 'inline-block'}), 
+    ],style={'width': '100%', 'display': 'inline-block'}), 
     html.Hr(),
     dbc.Button('?', id='open_dr'),
     dbc.Modal(

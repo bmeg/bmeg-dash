@@ -74,7 +74,7 @@ tab_layout = html.Div(children=[
             {'label': a, 'value': a} for a in ['CCLE']],
         value='CCLE',
         ),     
-    ],style={'width': '48%', 'display': 'inline-block'}), 
+    ],style={'width': '100%', 'display': 'inline-block'}), 
     html.Label('Drug Response Metric'),
     dcc.Dropdown(id='repurp_RESPONSE_dropdown'),
     html.Label('Drug to Compare Against Others'),
@@ -96,6 +96,35 @@ tab_layout = html.Div(children=[
     ),
     # dcc.Loading(type="default",children=html.Div(id="dr_dropdown_table")),  
     dcc.Loading(id="figs_repurp",type="default",children=html.Div(id="figs_repurp_out")),
+    
+    html.Div([dbc.CardDeck(
+        [
+        dbc.Card(
+            dbc.CardBody(
+                [
+                    html.H4("PACLITAXEL (CID36314)", className="card-title"),
+                    html.P("Taxanes and derivatives"),
+                    html.P("This compound belongs to the class of organic compounds known as taxanes and derivatives. These are diterpenoids with a structure based either on the taxane skeleton, or a derivative thereof. In term of phytochemistry, several derivatives of the taxane skeleton exist: 2(3->20)-abeotaxane, 3,11-cyclotaxane, 11(15->1),11(10->9)-abeotaxane, 3,8-seco-taxane, and 11(15->1)-abeotaxane, among others. More complex skeletons have been found recently, which include the taxane-derived [3.3.3] propellane ring system") 
+                ]
+            ),
+            style={'font-size' : '12px'}, 
+            color="info", inverse=True,
+        ),
+        dbc.Card(
+            dbc.CardBody(
+                [
+                    html.H4("Title", className="card-title"),
+                    html.H6("Card subtitle", className="card-subtitle"),
+                    html.P(
+                        "Some quick example text to build on the card title and make "
+                        "up the bulk of the card's content.",
+                        className="card-text",
+                    ),
+                ]
+            ),
+            style={'font-size' : '12px'}, 
+            color="success", inverse=True,)]) ], style={'Align': 'center', 'width':'80%'} ),
+        
 ])
 
 ########
