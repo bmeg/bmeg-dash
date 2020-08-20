@@ -15,10 +15,11 @@ import dash
 import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 from urllib.request import urlopen
 import dash_core_components as dcc
 from plotly.subplots import make_subplots
+import dash_bootstrap_components as dbc
 
 
 
@@ -87,21 +88,7 @@ option_projects = gC.dropdown_options()
 # Page  
 ####### 
 print('loading app layout')   
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 tab_layout = html.Div(children=[
-    html.H4(children='Explore TCGA Data',style=styles['section_spaced']),
-    html.Label('Project'),
-    dcc.Dropdown(
-        id='project-dropdown',
-        options=[{'label': k, 'value': k} for k in option_projects.keys()],
-        value='TCGA-CHOL',
-        ),
-    html.Label('Property'),
-    dcc.Dropdown(id='property-dropdown'),
-    html.Hr(),
-    dcc.Loading(type="default",children=html.Div(id="umap_fig")),
-
-
     html.H4(children='Drug Response',style=styles['section_spaced']),
     # html.P(children='Differential gene experssion analysis has lead to a list of top differentially expressed genes. You want a quick and easy method to find what drug(s) might be useful. Task: Given a list of differentially expressed genes, what is the predicted drug response that is supported by published literature?', style={'textAlign': 'center'}),
     html.Label('Gene(s)'),
@@ -113,41 +100,37 @@ tab_layout = html.Div(children=[
         ),     
     ],style={'width': '48%', 'display': 'inline-block'}), 
     html.Hr(),
-    dcc.Loading(type="default",children=html.Div(id="dr_dropdown_table")),
-    
-    
-  
+    dbc.Button('?', id='open_dr'),
+    dbc.Modal(
+        [
+            dbc.ModalHeader('Explore Published Literature Gene-Drug Associations'),
+            dbc.ModalBody('Find cell line responses to drug treatments from literature curation and the dataset.'),
+            dbc.ModalFooter(
+                dbc.Button('Close',id='close_dr',className='ml-auto')
+            ),
+        ],
+        id='modal_dr',
+        size='sm',
+        centered=True,
+    ),
+    dcc.Loading(type="default",children=html.Div(id="dr_dropdown_table")),  
 ])
+
 ########
 # Callbacks 
 ########
-# TCGA 
-@app.callback(Output("umap_fig", "children"),
-    [Input('project-dropdown', 'value'),
-    Input('property-dropdown', 'value')])
-def render_callback(selected_project, selected_property):
-    if selected_project is None: 
-        return
-    if selected_project !=[]:
-        print(selected_project)
-        data = gC.get_df(selected_project,selected_property)
-        fig1=gC.get_umap(data, 'UMAP')
-        return dcc.Graph(figure=fig1),
-
+# help button 
 @app.callback(
-    dash.dependencies.Output('property-dropdown', 'options'),
-    [dash.dependencies.Input('project-dropdown', 'value')])
-def set_cities_options(selected_project):
-    return [{'label': k, 'value': v} for k,v in gC.mappings(selected_project).items()]
+    Output("modal_dr", "is_open"),
+    [Input("open_dr", "n_clicks"), Input("close_dr", "n_clicks")],
+    [State("modal_dr", "is_open")],
+)
+def toggle_modal(n1, n2, is_open):
+    if n1 or n2:
+        return not is_open
+    return is_open
     
-@app.callback(
-    dash.dependencies.Output('property-dropdown', 'value'),
-    [dash.dependencies.Input('property-dropdown', 'options')])
-def set_cities_value(available_options):
-    return available_options[0]['value']
-
-
-# Drug response    
+# app
 @app.callback(Output("dr_dropdown_table", "children"),
     [Input('dr_dropdown', 'value')])
 def render_callback(User_selected):

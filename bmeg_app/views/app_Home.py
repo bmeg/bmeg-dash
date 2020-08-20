@@ -68,7 +68,6 @@ encoded_image0 = base64.b64encode(open(image_filename, 'rb').read())
 image_filename = 'bmeg_app/images/example1.png' 
 encoded_image1 = base64.b64encode(open(image_filename, 'rb').read())
  
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 tab_layout = html.Div(children=[
     html.H4(children='What is stored inside the database?',style=styles['section_spaced']),
     dcc.Loading(id="cards",

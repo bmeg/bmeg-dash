@@ -8,7 +8,7 @@ import dash
 import dash_html_components as html
 import dash_core_components as dcc
 from dash.dependencies import Input, Output
-from bmeg_app.views import app_Home, app_Examples
+from bmeg_app.views import app_Home, app_tcga, app_drugresp
 import base64
 
 
@@ -67,9 +67,10 @@ app.layout = html.Div([
     # html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode()),
     #     style={'height':'100%', 'width':'100%', 'textAlign': 'left', 'marginTop': 20, 'marginBottom':0}),
     # Tab at top of page
-    dcc.Tabs(id='main-tab', value='tab-Examples', children=[
+    dcc.Tabs(id='main-tab', value='tab-Tcga', children=[
         dcc.Tab(label='Home', value='tab-Home', style=tab_style, selected_style=tab_style),
-        dcc.Tab(label='Examples', value='tab-Examples',style=tab_style, selected_style=tab_style)
+        dcc.Tab(label='TCGA', value='tab-Tcga',style=tab_style, selected_style=tab_style),
+        dcc.Tab(label='Drug Response', value='tab-DrugResponse',style=tab_style, selected_style=tab_style),
     ]),
     html.Div(html.Img(src='data:image/png;base64,{}'.format(encoded_image3.decode()),
         style={'height':'25%','width':'25%', 'marginTop': 0, 'marginBottom':0})
@@ -86,9 +87,10 @@ app.layout = html.Div([
 def render_content(tab):
     if tab == 'tab-Home':
         return html.Div([app_Home.tab_layout])
-    elif tab == 'tab-Examples':
-        return html.Div([app_Examples.tab_layout])    
-
+    elif tab == 'tab-Tcga':
+        return html.Div([app_tcga.tab_layout])    
+    elif tab == 'tab-DrugResponse':
+        return html.Div([app_drugresp.tab_layout]) 
 
 if __name__ == '__main__':
     app.run_server(host='0.0.0.0', debug=True, port=80)

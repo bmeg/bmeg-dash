@@ -77,13 +77,30 @@ def get_df(dropdown_selection,property):
     data = {}
     for row in q:
         if row[0] !=[]:
-            stage = row[0][0].replace(' ',':').upper() 
-            sample = row[1]
-            key=stage+"__"+sample
+            if property == '$c._data.gdc_attributes.diagnoses.tumor_stage': #handling tumor stage selection 
+                stage = row[0][0].replace(' ',':').upper() 
+                sample = row[1]
+                key=stage+"__"+sample
+            else:
+                key=str(row[0][0])+'___'+str(row[1])
             gid = row[2]
             vals=row[3]
             data[key]= vals
+    # for row in q:
+    #     if row[0] !=[]:
+    #         if type(row[0][0])==int:
+    #             key='data___'+str(row[0][0])
+    #         elif 'STAGE' in row[0][0]: #handling tumor stage selection 
+    #             print(row[0][0])
+    #             stage = row[0][0].replace(' ',':').upper() 
+    #             sample = row[1]
+    #             key=stage+"__"+sample
+    #         gid = row[2]
+    #         vals=row[3]
+    #         data[key]= vals
+    #         print(key)
     return pd.DataFrame(data).transpose()
+
 
 
 def get_umap(df, input_title):
@@ -110,8 +127,42 @@ def dropdown_options():
     return options
 
 def mappings(selected_project):
+    # if 'TCGA' in selected_project:
+    #     exclude=['created_datetime','state','submitter_id','updated_datetime','days_to_recurrence'']
+    #     # Using tcga chol just to grab properties currently loaded in graph
+    #     q=G.query().V("Project:TCGA-CHOL").out("cases").as_('c').out("samples").as_('s').out("aliquots").out("gene_expressions").as_('gexp')
+    #     q=q.render(['$c._data.gdc_attributes.diagnoses']).limit(1)
+    # 
+    #     dict1={}
+    #     for row in q:
+    #         prop_list = list(row[0][0].keys()) 
+    #         for a in prop_list:
+    #             if a not in exclude:
+    #                 q= '$c._data.gdc_attributes.diagnoses.'+a
+    #                 string = a.replace('_',' ').upper()
+    #                 dict1[string]=q
+    #     return dict1
     if 'TCGA' in selected_project:
         return {
-        'Tumor Stage':'$c._data.gdc_attributes.diagnoses.tumor_stage',"Tissue/Organ of Origin":'$c._data.gdc_attributes.diagnoses.tissue_or_organ_of_origin',"Prior Malignancy":'$c._data.gdc_attributes.diagnoses.prior_malignancy',"Prior Treatment":'$c._data.gdc_attributes.diagnoses.prior_treatment'
-        }
+        # 'AGE AT DIAGNOSIS': '$c._data.gdc_attributes.diagnoses.age_at_diagnosis', #age appears to be loaded into bmeg wrong
+         # 'CLASSIFICATION OF TUMOR': '$c._data.gdc_attributes.diagnoses.classification_of_tumor', # all are not reported
+         'DAYS TO DIAGNOSIS': '$c._data.gdc_attributes.diagnoses.days_to_diagnosis',
+         'DAYS TO LAST FOLLOW UP': '$c._data.gdc_attributes.diagnoses.days_to_last_follow_up',
+         'DAYS TO LAST KNOWN DISEASE STATUS': '$c._data.gdc_attributes.diagnoses.days_to_last_known_disease_status',
+         # 'DAYS TO RECURRENCE': '$c._data.gdc_attributes.diagnoses.days_to_recurrence', #all None
+         # 'DIAGNOSIS ID': '$c._data.gdc_attributes.diagnoses.diagnosis_id', #exclude
+         'ICD 10 CODE': '$c._data.gdc_attributes.diagnoses.icd_10_code',
+         'LAST KNOWN DISEASE STATUS': '$c._data.gdc_attributes.diagnoses.last_known_disease_status',
+         'MORPHOLOGY': '$c._data.gdc_attributes.diagnoses.morphology',
+         'PRIMARY DIAGNOSIS': '$c._data.gdc_attributes.diagnoses.primary_diagnosis',
+         'PRIOR MALIGNANCY': '$c._data.gdc_attributes.diagnoses.prior_malignancy',
+         'PRIOR TREATMENT': '$c._data.gdc_attributes.diagnoses.prior_treatment',
+         'PROGRESSION OR RECURRENCE': '$c._data.gdc_attributes.diagnoses.progression_or_recurrence',
+         'SITE OF RESECTION OR BIOPSY': '$c._data.gdc_attributes.diagnoses.site_of_resection_or_biopsy',
+         'SYNCHRONOUS MALIGNANCY': '$c._data.gdc_attributes.diagnoses.synchronous_malignancy',
+         'TISSUE OR ORGAN OF ORIGIN': '$c._data.gdc_attributes.diagnoses.tissue_or_organ_of_origin',
+         'TUMOR GRADE': '$c._data.gdc_attributes.diagnoses.tumor_grade',
+         'TUMOR STAGE': '$c._data.gdc_attributes.diagnoses.tumor_stage',
+         'YEAR OF DIAGNOSIS': '$c._data.gdc_attributes.diagnoses.year_of_diagnosis'
+         }
     #elif other project...load project specific properties
