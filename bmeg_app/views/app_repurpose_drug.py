@@ -69,13 +69,14 @@ print('loading app layout')
 tab_layout = html.Div(children=[
     html.H4(children='Repurpose Drugs',style=styles['section_spaced']),
     html.Label('Breast Cancer Drug Repurposing'),
-    # html.Div([dcc.Dropdown(id='dr_dropdown',
-    #     options=[
-    #         {'label': g, 'value': g} for g in select_genes.keys()],
-    #     value=[],
-    #     multi=True,
-    #     ),     
-    # ],style={'width': '48%', 'display': 'inline-block'}), 
+    html.Div([dcc.Dropdown(id='repurp_PROJECT_dropdown',
+        options=[
+            {'label': a, 'value': a} for a in ['CCLE']],
+        value='CCLE',
+        ),     
+    ],style={'width': '48%', 'display': 'inline-block'}), 
+    dcc.Dropdown(id='repurp_DRUG_dropdown'),
+
     html.Hr(),
     dbc.Button('?', id='open_repurp'),
     dbc.Modal(
@@ -97,13 +98,27 @@ tab_layout = html.Div(children=[
 ########
 # Callbacks 
 ########
+@app.callback(
+    dash.dependencies.Output('repurp_DRUG_dropdown', 'options'),
+    [dash.dependencies.Input('repurp_PROJECT_dropdown', 'value')])
+def set_cities_options(selected_project):
+    return [{'label': k, 'value': v} for k,v in repurpose.mappings(selected_project).items()]
+    
+@app.callback(
+    dash.dependencies.Output('repurp_DRUG_dropdown', 'value'),
+    [dash.dependencies.Input('repurp_DRUG_dropdown', 'options')])
+def set_cities_value(available_options):
+    return available_options[0]['value']
+    
+    
+
 @app.callback(Output("figs_repurp", "children"),
-    [Input('url', 'pathname')])
-def render_age_hist(href):
-    if href is None: # if event is trigged before page/url fully loaded
-        raise PreventUpdate
+    [Input('repurp_PROJECT_dropdown', 'value'),
+    Input('repurp_DRUG_dropdown', 'value')])
+def render_age_hist(selected_project, selected_drug):
     # Query
-    drugDF, disease = repurpose.get_matrix('CCLE','$dr._data.aac')
+    drugDF, disease = repurpose.get_matrix(selected_project,'$dr._data.aac')
+    # drugDF, disease = repurpose.get_matrix('CCLE','$dr._data.aac')
     # Preprocess:Rename drugs to common name
     drugDF=drugDF[drugDF.columns.drop(list(drugDF.filter(regex='NO_ONTOLOGY')))] # TODO fix it so dont have to drop
     cols=drugDF.columns
@@ -114,7 +129,7 @@ def render_age_hist(href):
             common.append(row[0])
     drugDF.columns=common
     # Final processing + figure 
-    fig = repurpose.compare_drugs('PACLITAXEL', drugDF, disease)[1] #grab index0 if want to do more figs from table that generates this fig
+    fig = repurpose.compare_drugs(selected_drug, drugDF, disease,'Drug Response (AAC)')[1] #grab index0 if want to do more figs from table that generates this fig
     return dcc.Graph(figure=fig),
 
 

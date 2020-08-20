@@ -31,7 +31,7 @@ def get_matrix(PROJECT, DRUGRESPONSE):
     drugDF = drugDF.sort_index().sort_index(axis=1) #sort rows by cell line name, sort cols by drug name
     return drugDF, disease
 
-def compare_drugs(est,drugDF,disease):
+def compare_drugs(est,drugDF,disease,fig_yaxisLabel):
     '''
     ex. compare_drugs('PACLITAXEL',drugDF,disease)
     '''
@@ -63,6 +63,15 @@ def compare_drugs(est,drugDF,disease):
         fig.add_trace(go.Violin(x=melt_drugDF['Drug'][melt_drugDF['Drug'] == d],
                                 y=melt_drugDF['Drug Response'][melt_drugDF['Drug'] == d],
                                 name=d,box_visible=True,meanline_visible=True))
-    fig.update_layout(margin={'t':10, 'b':10},height=400,yaxis=dict(title='Drug Response Value'))
+    fig.update_layout(margin={'t':10, 'b':10},height=400,yaxis=dict(title=fig_yaxisLabel))
     fig.update_xaxes(tickangle=45)
     return melt_drugDF, fig
+
+
+def mappings(selected_project):
+    if 'CCLE' == selected_project:
+        return {
+        'Paclitaxel':'PACLITAXEL',
+        'Nilotinib':'NILOTINIB'
+         }
+    #elif other project...load project specific properties
