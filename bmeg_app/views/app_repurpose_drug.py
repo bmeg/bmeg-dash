@@ -94,31 +94,6 @@ tab_layout = html.Div(children=[
     dcc.Loading(id="figs_repurp",type="default",children=html.Div(id="figs_repurp_out")),
 
 ])
-
-
-##### TESting 
-@app.callback(
-    dash.dependencies.Output('highlight_drugInfo', 'children'),
-    [dash.dependencies.Input('repurp_DRUG_dropdown', 'value')])
-def render_callback(DRUG):
-    q=G.query().V().hasLabel('Compound').has(gripql.eq('_data.synonym', DRUG))
-    q=q.render(['_data.synonym','_data.pubchem_id','_data.taxonomy.description'])
-    for row in q:
-        print('starting search')
-        header = row[0].upper() + ' ('+ row[1]+')'
-        descrip = row[2]
-    print(header)
-    fig = dbc.Card(
-        dbc.CardBody(
-            [
-            html.H4(header, className="card-title",style={'fontFamily':'Arial','font-size' : '14px', 'fontWeight':'bold'}),
-            html.P(descrip,style={'fontFamily':'Arial','font-size' : '12px'}) 
-            ]),
-        color="info", inverse=True,style={'Align': 'center', 'width':'98%','fontFamily':'Arial'})
-    return fig,
-
-
-
 ########
 # Callbacks 
 ########
@@ -145,9 +120,27 @@ def set_cities_options(selected_project):
     [dash.dependencies.Input('repurp_DRUG_dropdown', 'options')])
 def set_cities_value(available_options):
     return available_options[0]['value']
-    
-    
 
+@app.callback(
+    dash.dependencies.Output('highlight_drugInfo', 'children'),
+    [dash.dependencies.Input('repurp_DRUG_dropdown', 'value')])
+def render_callback(DRUG):
+    q=G.query().V().hasLabel('Compound').has(gripql.eq('_data.synonym', DRUG))
+    q=q.render(['_data.synonym','_data.pubchem_id','_data.taxonomy.description'])
+    for row in q:
+        print('starting search')
+        header = row[0].upper() + ' ('+ row[1]+')'
+        descrip = row[2]
+    print(header)
+    fig = dbc.Card(
+        dbc.CardBody(
+            [
+            html.H4(header, className="card-title",style={'fontFamily':'Arial','font-size' : '14px', 'fontWeight':'bold'}),
+            html.P(descrip,style={'fontFamily':'Arial','font-size' : '12px'}) 
+            ]),
+        color="info", inverse=True,style={'Align': 'center', 'width':'98%','fontFamily':'Arial'})
+    return fig,
+    
 @app.callback(Output("figs_repurp", "children"),
     [Input('repurp_PROJECT_dropdown', 'value'),
     Input('repurp_RESPONSE_dropdown', 'value'),
