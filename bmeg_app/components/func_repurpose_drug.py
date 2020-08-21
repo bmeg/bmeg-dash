@@ -1,4 +1,6 @@
 from ..db import G
+import gripql 
+import pandas as pd 
 
 def get_matrix(PROJECT, DRUGRESPONSE):
     '''
@@ -83,3 +85,28 @@ def mappings_drugResp(selected_project):
         'EC50': '$dr._data.ec50'
          }
     #elif other project...load project specific properties
+
+def drugDetails(drugs_list):
+    '''
+    create table of drugs and their taxon.
+    '''
+    a=[]
+    b=[]
+    c=[]
+    d=[]
+    e=[]
+    f=[]
+    g=[]
+    for DRUG in drugs_list:
+        q=G.query().V().hasLabel('Compound').has(gripql.eq('_data.synonym', DRUG))
+        q=q.render(['_data.synonym','_data.pubchem_id','_data.taxonomy.direct-parent','_data.taxonomy.kingdom','_data.taxonomy.superclass','_data.taxonomy.class','_data.taxonomy.subclass','_data.taxonomy.description'])
+        for row in q:
+            a.append(row[0])
+            b.append(row[1])
+            c.append(row[2])
+            d.append(row[3])
+            e.append(row[4])
+            f.append(row[5])
+            g.append(row[6])
+    df = pd.DataFrame(list(zip(a,b,c,d,e,f,g)),columns=['Drug','PubChem ID','Direct Parent','Kingdom','Superclass','Class','Subclass'])
+    return df

@@ -19,8 +19,7 @@ from urllib.request import urlopen
 import dash_core_components as dcc
 from plotly.subplots import make_subplots
 import dash_bootstrap_components as dbc
-
-
+import dash_table
 
         
 ######################
@@ -67,7 +66,7 @@ styles = {
 ####### 
 print('loading app layout')   
 tab_layout = html.Div(children=[
-    html.H4(children='Repurposing Known Breat Cancer Drugs',style=styles['section_spaced']),
+    html.H4(children='Repurposing Known Breast Cancer Drugs',style=styles['section_spaced']),
     html.Label('Project'),
     html.Div([dcc.Dropdown(id='repurp_PROJECT_dropdown',
         options=[
@@ -81,50 +80,51 @@ tab_layout = html.Div(children=[
     dcc.Dropdown(id='repurp_DRUG_dropdown'),
 
     html.Hr(),
-    dbc.Button('?', id='open_repurp'),
-    dbc.Modal(
-        [
-            dbc.ModalHeader('Header'),
-            dbc.ModalBody('Desc'),
-            dbc.ModalFooter(
-                dbc.Button('Close',id='close_repurp',className='ml-auto')
-            ),
-        ],
-        id='modal_repurp',
-        size='sm',
-        centered=True,
-    ),
+    html.Div([
+        dbc.Button("?", id="help_violin-target", color="secondary",size='sm'),
+        dbc.Popover([dbc.PopoverHeader("Drug Response Distributions"),
+            dbc.PopoverBody("Responses of breast cancer derived cell lines to all drugs tested in selected project"),
+            dbc.PopoverBody(""),
+            ],
+            id="help_violin",is_open=False,target="help_violin-target",flip=True,
+            style={'width': '100%'},
+        ),
+    ]),
+    
     # dcc.Loading(type="default",children=html.Div(id="dr_dropdown_table")),  
-    dcc.Loading(id="figs_repurp",type="default",children=html.Div(id="figs_repurp_out")),
+
+    
+    
     
     html.Div([dbc.CardDeck(
         [
         dbc.Card(
             dbc.CardBody(
                 [
-                    html.H4("PACLITAXEL (CID36314)", className="card-title"),
-                    html.P("Taxanes and derivatives"),
-                    html.P("This compound belongs to the class of organic compounds known as taxanes and derivatives. These are diterpenoids with a structure based either on the taxane skeleton, or a derivative thereof. In term of phytochemistry, several derivatives of the taxane skeleton exist: 2(3->20)-abeotaxane, 3,11-cyclotaxane, 11(15->1),11(10->9)-abeotaxane, 3,8-seco-taxane, and 11(15->1)-abeotaxane, among others. More complex skeletons have been found recently, which include the taxane-derived [3.3.3] propellane ring system") 
+                    html.H4("PACLITAXEL (CID36314)", className="card-title",style={'fontFamily':'Arial','font-size' : '14px', 'fontWeight':'bold'}),
+                    html.P("This compound belongs to the class of organic compounds known as taxanes and derivatives. These are diterpenoids with a structure based either on the taxane skeleton, or a derivative thereof. In term of phytochemistry, several derivatives of the taxane skeleton exist: 2(3->20)-abeotaxane, 3,11-cyclotaxane, 11(15->1),11(10->9)-abeotaxane, 3,8-seco-taxane, and 11(15->1)-abeotaxane, among others. More complex skeletons have been found recently, which include the taxane-derived [3.3.3] propellane ring system",style={'fontFamily':'Arial','font-size' : '12px'}) 
                 ]
-            ),
-            style={'font-size' : '12px'}, 
+            ), 
             color="info", inverse=True,
         ),
-        dbc.Card(
-            dbc.CardBody(
-                [
-                    html.H4("Title", className="card-title"),
-                    html.H6("Card subtitle", className="card-subtitle"),
-                    html.P(
-                        "Some quick example text to build on the card title and make "
-                        "up the bulk of the card's content.",
-                        className="card-text",
-                    ),
-                ]
-            ),
-            style={'font-size' : '12px'}, 
-            color="success", inverse=True,)]) ], style={'Align': 'center', 'width':'80%'} ),
-        
+        # dbc.Card(
+        #     dbc.CardBody(
+        #         [
+        #             html.H4("Title", className="card-title"),
+        #             html.H6("Card subtitle", className="card-subtitle"),
+        #             html.P(
+        #                 "Some quick example text to build on the card title and make "
+        #                 "up the bulk of the card's content.",
+        #                 className="card-text",
+        #             ),
+        #         ]
+        #     ),
+        #     style={'font-size' : '12px'}, 
+        #     color="success", inverse=True,)
+        ]) ], style={'Align': 'center', 'width':'98%','fontFamily':'Arial'} ),
+
+    dcc.Loading(id="figs_repurp",type="default",children=html.Div(id="figs_repurp_out")),
+
 ])
 
 ########
@@ -176,20 +176,26 @@ def render_age_hist(selected_project, selected_drugResp, selected_drug):
         for row in q:
             common.append(row[0])
     drugDF.columns=common
-    # Final processing + figure 
-    fig = repurpose.compare_drugs(selected_drug, drugDF, disease,'Drug Response Metric' )[1] #grab index0 if want to do more figs from table that generates this fig
-    return dcc.Graph(figure=fig),
+    # Final processing + figure violins
+    fig_violin = repurpose.compare_drugs(selected_drug, drugDF, disease,'Drug Response Metric' )[1] #grab index0 if want to do more figs from table that generates this fig
+    # Figure drug table
+    fig_table = repurpose.drugDetails(common)
+    return dcc.Graph(figure=fig_violin),html.Div([dash_table.DataTable(data = fig_table.to_dict('records'),columns=[{"name": i, "id": i} for i in fig_table.columns],
+        style_table={'overflowY': 'scroll', 'maxHeight':200},
+        style_data_conditional=[{'if': {'row_index': 'odd'},'backgroundColor': 'rgb(248, 248, 248)'}],
+        style_header={'backgroundColor': 'rgb(230, 230, 230)','fontSize':12,'fontWeight': 'bold','fontFamily':'Arial'},
+        style_data={'fontFamily':'Arial','fontSize':12},
+        )],style={'width': '98%'}),
 
 
 
-# help button 
 @app.callback(
-    Output("modal_repurp", "is_open"),
-    [Input("open_repurp", "n_clicks"), Input("close_repurp", "n_clicks")],
-    [State("modal_repurp", "is_open")],
+    Output("help_violin", "is_open"),
+    [Input("help_violin-target", "n_clicks")],
+    [State("help_violin", "is_open")],
 )
-def toggle_modal(n1, n2, is_open):
-    if n1 or n2:
+def toggle_popover(n, is_open):
+    if n:
         return not is_open
     return is_open
     
