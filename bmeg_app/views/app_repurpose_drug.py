@@ -84,7 +84,7 @@ tab_layout = html.Div(children=[
         dbc.Button("?", id="help_violin-target", color="secondary",size='sm'),
         dbc.Popover([dbc.PopoverHeader("Drug Response Distributions"),
             dbc.PopoverBody("Responses of breast cancer derived cell lines to all drugs tested in selected project"),
-            dbc.PopoverBody(""),
+            dbc.PopoverBody("More info TBD"),
             ],
             id="help_violin",is_open=False,target="help_violin-target",flip=True,
             style={'width': '100%'},
