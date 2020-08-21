@@ -89,43 +89,35 @@ tab_layout = html.Div(children=[
             id="help_violin",is_open=False,target="help_violin-target",flip=True,
             style={'width': '100%'},
         ),
-    ]),
-    
-    # dcc.Loading(type="default",children=html.Div(id="dr_dropdown_table")),  
-
-    
-    
-    
-    html.Div([dbc.CardDeck(
-        [
-        dbc.Card(
-            dbc.CardBody(
-                [
-                    html.H4("PACLITAXEL (CID36314)", className="card-title",style={'fontFamily':'Arial','font-size' : '14px', 'fontWeight':'bold'}),
-                    html.P("This compound belongs to the class of organic compounds known as taxanes and derivatives. These are diterpenoids with a structure based either on the taxane skeleton, or a derivative thereof. In term of phytochemistry, several derivatives of the taxane skeleton exist: 2(3->20)-abeotaxane, 3,11-cyclotaxane, 11(15->1),11(10->9)-abeotaxane, 3,8-seco-taxane, and 11(15->1)-abeotaxane, among others. More complex skeletons have been found recently, which include the taxane-derived [3.3.3] propellane ring system",style={'fontFamily':'Arial','font-size' : '12px'}) 
-                ]
-            ), 
-            color="info", inverse=True,
-        ),
-        # dbc.Card(
-        #     dbc.CardBody(
-        #         [
-        #             html.H4("Title", className="card-title"),
-        #             html.H6("Card subtitle", className="card-subtitle"),
-        #             html.P(
-        #                 "Some quick example text to build on the card title and make "
-        #                 "up the bulk of the card's content.",
-        #                 className="card-text",
-        #             ),
-        #         ]
-        #     ),
-        #     style={'font-size' : '12px'}, 
-        #     color="success", inverse=True,)
-        ]) ], style={'Align': 'center', 'width':'98%','fontFamily':'Arial'} ),
-
+    ]),    
+    dcc.Loading(id="highlight_drugInfo",type="default",children=html.Div(id="TESTINGcard_out")),
     dcc.Loading(id="figs_repurp",type="default",children=html.Div(id="figs_repurp_out")),
 
 ])
+
+
+##### TESting 
+@app.callback(
+    dash.dependencies.Output('highlight_drugInfo', 'children'),
+    [dash.dependencies.Input('repurp_DRUG_dropdown', 'value')])
+def render_callback(DRUG):
+    q=G.query().V().hasLabel('Compound').has(gripql.eq('_data.synonym', DRUG))
+    q=q.render(['_data.synonym','_data.pubchem_id','_data.taxonomy.description'])
+    for row in q:
+        print('starting search')
+        header = row[0].upper() + ' ('+ row[1]+')'
+        descrip = row[2]
+    print(header)
+    fig = dbc.Card(
+        dbc.CardBody(
+            [
+            html.H4(header, className="card-title",style={'fontFamily':'Arial','font-size' : '14px', 'fontWeight':'bold'}),
+            html.P(descrip,style={'fontFamily':'Arial','font-size' : '12px'}) 
+            ]),
+        color="info", inverse=True,style={'Align': 'center', 'width':'98%','fontFamily':'Arial'})
+    return fig,
+
+
 
 ########
 # Callbacks 
@@ -142,9 +134,6 @@ def set_cities_options(selected_project):
 def set_cities_value(available_options):
     return available_options[0]['value']
     
-    
-    
-
 @app.callback(
     dash.dependencies.Output('repurp_DRUG_dropdown', 'options'),
     [dash.dependencies.Input('repurp_PROJECT_dropdown', 'value')])
