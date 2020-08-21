@@ -20,7 +20,7 @@ from urllib.request import urlopen
 import dash_core_components as dcc
 from plotly.subplots import make_subplots
 import dash_bootstrap_components as dbc
-
+import json
 
 
         
@@ -115,6 +115,7 @@ tab_layout = html.Div(children=[
         size='sm',
         centered=True,
     ),
+    html.Div(id='intermediate_baseDF', style={'display': 'none'}),
     dcc.Loading(type="default",children=html.Div(id="umap_fig")),
 ])
 
@@ -132,19 +133,27 @@ def toggle_modal(n1, n2, is_open):
         return not is_open
     return is_open
 
+@app.callback(Output('intermediate_baseDF', 'children'), 
+    [Input('project-dropdown', 'value')])    
+def createDF(selected_project):
+    baseDF = gC.get_df(selected_project,'$c._data.gdc_attributes.diagnoses.tumor_stage')
+    return baseDF.to_json(orient="index")    # if selected_project is None: 
+
 # TCGA 
 @app.callback(Output("umap_fig", "children"),
-    [Input('project-dropdown', 'value'),
+    [Input('intermediate_baseDF', 'children'),
     Input('property-dropdown', 'value')])
-def render_callback(selected_project, selected_property):
-    if selected_project is None: 
-        return
-    if selected_project !=[]:
-        print(selected_project)
-        data = gC.get_df(selected_project,selected_property)
-        fig1=gC.get_umap(data, 'UMAP')
+def render_callback(jsonstring,selected_property):
+    temp=json.loads(jsonstring)
+    baseDF = pd.DataFrame.from_dict(temp, orient='index')
+    if selected_property=='$c._data.gdc_attributes.diagnoses.tumor_stage':
+        fig1=gC.get_umap(baseDF, 'UMAP', selected_property.split('.')[-1])
         return dcc.Graph(figure=fig1),
-
+    else:
+        updatedDF= gC.update_umap(selected_property, baseDF)
+        fig1=gC.get_umap(updatedDF, 'UMAP', selected_property.split('.')[-1])
+        return dcc.Graph(figure=fig1),
+        
 @app.callback(
     dash.dependencies.Output('property-dropdown', 'options'),
     [dash.dependencies.Input('project-dropdown', 'value')])

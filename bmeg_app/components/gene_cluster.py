@@ -1,8 +1,11 @@
 from ..db import G
 import pandas as pd
 import gripql
+import json 
+import plotly.express as px
 
 def get_df(dropdown_selection,property):
+    import umap.umap_ as umap
     lookup = {'CCLE': 'Project:CCLE',
      'CTRP': 'Project:CTRP',
      'TCGA-OV': 'Project:TCGA-OV',
@@ -70,50 +73,54 @@ def get_df(dropdown_selection,property):
      'GTEx_Adipose Tissue': 'Project:GTEx_Adipose Tissue',
      'GTEx_Spleen': 'Project:GTEx_Spleen',
      'GTEx_Thyroid': 'Project:GTEx_Thyroid'}
+     
+    ######
+    # 1. Create df for first property
+    ######
+    property_query='$c._data.gdc_attributes.diagnoses.tumor_stage'
+    property_name=property_query.split('.')[-1]
+
     data = {}
     label = lookup[dropdown_selection]
     q=G.query().V(label).out("cases").as_('c').out("samples").as_('s').out("aliquots").out("gene_expressions").as_('gexp')
-    q=q.render([property, '$s._gid', '$gexp._gid','$gexp._data.values'])
+    q=q.render([property_query, '$s._gid', '$gexp._gid','$gexp._data.values'])
     data = {}
     for row in q:
-        if row[0] !=[]:
-            if property == '$c._data.gdc_attributes.diagnoses.tumor_stage': #handling tumor stage selection 
-                stage = row[0][0].replace(' ',':').upper() 
-                sample = row[1]
-                key=stage+"__"+sample
-            else:
-                key=str(row[0][0])+'___'+str(row[1])
-            gid = row[2]
-            vals=row[3]
-            data[key]= vals
-    # for row in q:
-    #     if row[0] !=[]:
-    #         if type(row[0][0])==int:
-    #             key='data___'+str(row[0][0])
-    #         elif 'STAGE' in row[0][0]: #handling tumor stage selection 
-    #             print(row[0][0])
-    #             stage = row[0][0].replace(' ',':').upper() 
-    #             sample = row[1]
-    #             key=stage+"__"+sample
-    #         gid = row[2]
-    #         vals=row[3]
-    #         data[key]= vals
-    #         print(key)
-    return pd.DataFrame(data).transpose()
-
-
-
-def get_umap(df, input_title):
-    import plotly.express as px
-    import umap.umap_ as umap
+        stage = row[0][0].replace(' ',':').upper() 
+        sample = row[1]
+        key=stage+"__"+sample
+        gid = row[2]
+        vals=row[3]
+        data[key]= vals
+    df = pd.DataFrame(data).transpose() #sample rows and gene cols
     locs = umap.UMAP().fit_transform(df)
     uDF = pd.concat( [pd.DataFrame(locs, index=df.index), df.index.to_series()], axis=1, ignore_index=True )
-    uDF['group']= [a.split('__')[0] for a in uDF.index]
-    fig = px.scatter(uDF, x=0, y=1, hover_name=2,color='group')
+    uDF[property_name]= [a.split('__')[0] for a in uDF.index]
+    return uDF
+
+def update_umap(p, cached_df):
+    '''
+    Input existing df for umap and new attribute to show
+    
+    + adds new col and returns this df
+    '''
+    ordered_samp = [a.split('__')[1] for a in cached_df.index]
+
+    new_colname=p.split('.')[-1]
+    new_col = []
+    for s in ordered_samp:
+        q=G.query().V().hasLabel('Sample').as_('s').has(gripql.eq('$s._gid', s)).out("case").as_('c').render([p])
+        for a in q:
+            new_col.append(a[0][0])
+    cached_df[new_colname]= new_col
+    return cached_df
+
+def get_umap(uDF, input_title,cached_df_column):
+    fig = px.scatter(uDF, x='0', y='1', hover_name='2',color=cached_df_column)
     fig.update_layout(title=input_title,height=400)
     return fig
-    
 
+    
 def dropdown_options():
     '''
     All projects a
