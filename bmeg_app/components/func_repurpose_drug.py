@@ -72,10 +72,13 @@ def compare_drugs(est,drugDF,disease,fig_yaxisLabel):
 
 def mappings(selected_project):
     if 'CCLE' == selected_project:
-        return {
-        'Paclitaxel':'PACLITAXEL',
-        'Nilotinib':'NILOTINIB'
-         }
+        q = G.query().V('Project:CCLE').out("cases").as_("p").out("samples").out("aliquots").out("drug_response").as_("dr").out("compounds").as_("c")
+        drugRes = q.aggregate(gripql.term("drugs", '_data.synonym')).execute()
+        drug_opts = [a['key'].upper() for a in drugRes[0]['drugs']['buckets']]
+        drug_opts = {}
+        for a in drugRes[0]['drugs']['buckets']:
+            drug_opts[a['key'].upper()]= a['key']
+        return drug_opts
     #elif other project...load project specific properties
 def mappings_drugResp(selected_project):
     if 'CCLE' == selected_project:

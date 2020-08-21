@@ -119,7 +119,8 @@ def set_cities_options(selected_project):
     dash.dependencies.Output('repurp_DRUG_dropdown', 'value'),
     [dash.dependencies.Input('repurp_DRUG_dropdown', 'options')])
 def set_cities_value(available_options):
-    return available_options[0]['value']
+    # return available_options[0]['value']
+    return 'PACLITAXEL'
 
 @app.callback(
     dash.dependencies.Output('highlight_drugInfo', 'children'),
