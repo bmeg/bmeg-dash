@@ -58,7 +58,7 @@ styles={
         'padding':5},
 }
 
-image_filename = 'bmeg_app/images/bmeg_funnel.png' 
+image_filename = 'bmeg_app/images/bmeg_logo.png' 
 encoded_image3 = base64.b64encode(open(image_filename, 'rb').read())
  
  
@@ -76,7 +76,7 @@ app.layout = html.Div([
         
     ]),
     html.Div(html.Img(src='data:image/png;base64,{}'.format(encoded_image3.decode()),
-        style={'height':'25%','width':'25%', 'marginTop': 0, 'marginBottom':0})
+        style={'height':'15%','width':'15%', 'marginTop': 0, 'marginBottom':0})
     ,style={'textAlign':'center'}),
     html.H4(children='',style=styles['section_spaced']),
 
