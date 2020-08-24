@@ -33,7 +33,7 @@ option_projects = gC.dropdown_options()
 ####### 
 print('loading app layout')   
 tab_layout = html.Div(children=[
-    html.H4(children='Explore TCGA Data',style=styles['sectionHeader']),
+    html.H4(children='Explore TCGA Sample Characteristics',style=styles['sectionHeader']),
     html.Label('Cancer Type'),
     dcc.Dropdown(
         id='project-dropdown',

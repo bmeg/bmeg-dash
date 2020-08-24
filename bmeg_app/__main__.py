@@ -25,9 +25,9 @@ encoded_image3 = base64.b64encode(open(image_filename, 'rb').read())
 app.layout = html.Div([
     dcc.Location(id='url'),
     dcc.Tabs(id='main-tab', value='tab-Repurp', children=[
-        dcc.Tab(label='TCGA', value='tab-Tcga',style=tab_style, selected_style=tab_style),
-        dcc.Tab(label='Drug Response', value='tab-DrugResponse',style=tab_style, selected_style=tab_style),
-        dcc.Tab(label='Repurposing Drugs', value='tab-Repurp',style=tab_style, selected_style=tab_style),
+        dcc.Tab(label='Drug Repurposing', value='tab-Repurp',style=tab_style, selected_style=tab_style),
+        dcc.Tab(label='TCGA Clustering', value='tab-Tcga',style=tab_style, selected_style=tab_style),
+        dcc.Tab(label='Literature Drug Responses', value='tab-DrugResponse',style=tab_style, selected_style=tab_style),
         dcc.Tab(label='About', value='tab-About', style=tab_style, selected_style=tab_style),
     ]),
     html.Div(html.Img(src='data:image/png;base64,{}'.format(encoded_image3.decode()),
@@ -39,10 +39,10 @@ app.layout = html.Div([
 @app.callback(Output('main-tab-content', 'children'),
               [Input('main-tab', 'value')])
 def render_content(tab):
-    if tab == 'tab-Tcga':
-        return html.Div([app_tcga.tab_layout])    
-    elif tab == 'tab-DrugResponse':
+    if tab == 'tab-DrugResponse':
         return html.Div([app_drugresp.tab_layout]) 
+    elif tab == 'tab-Tcga':
+        return html.Div([app_tcga.tab_layout])    
     elif tab == 'tab-Repurp':
         return html.Div([app_repurpose_drug.tab_layout]) 
     elif tab == 'tab-About':
