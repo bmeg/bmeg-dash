@@ -105,13 +105,11 @@ def update_umap(p, cached_df):
     + adds new col and returns this df
     '''
     ordered_samp = [a.split('__')[1] for a in cached_df.index]
-
     new_colname=p.split('.')[-1]
     new_col = []
-    for s in ordered_samp:
-        q=G.query().V().hasLabel('Sample').as_('s').has(gripql.eq('$s._gid', s)).out("case").as_('c').render([p])
-        for a in q:
-            new_col.append(a[0][0])
+    q=G.query().V(ordered_samp).as_('s').out("case").as_('c').render([p])
+    for a in q:
+        new_col.append(a[0][0])
     cached_df[new_colname]= new_col
     return cached_df
 
