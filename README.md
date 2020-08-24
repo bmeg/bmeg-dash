@@ -2,7 +2,7 @@
 
 ## Setup 
 
-Python 3 and pip are assumed to be already set up on your machine.
+Python 3 and pip are assumed to be already set up on your machine. The gripql config file `bmeg_app/db/__init__.py` **must be saved as** `bmeg_app/secrets/bmeg_credentials.json`. Instructions on generating the BMEG credential file can be found at [installing gripql and getting started](https://bmegio.ohsu.edu/analyze/getting_started/)
 
 Install an environment module and app dependencies. Here the **virtualenv** module is used.
 
