@@ -1,72 +1,31 @@
-#!/usr/bin/env python
-
 from ..app import app
 from ..db import G
 from ..components import func_repurpose_drug as repurpose
+from .. import appLayout as ly
 import pandas as pd
-import time
-import sys
 import gripql
-from collections import Counter
 import plotly.express as px
-import json
 import dash
 import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
-from urllib.request import urlopen
 import dash_core_components as dcc
-from plotly.subplots import make_subplots
 import dash_bootstrap_components as dbc
-import dash_table
 
-        
 ######################
-# Layout
+# Prep
 ######################
 # Main color scheme
-main_colors = {
-    'background': 'lightcyan',
-    'text': 'black',
-    'pale_yellow':'#FCE181',
-    'pale_orange':'#F4976C',
-    'lightblue':'#17BECF',
-    'darkgreen_border':'#556B2F',
-    'lightgreen_borderfill':'olivedrab',
-    'lightgrey':'whitesmoke',
-    'tab_lightblue':'#88BDBC',
-    'tab_darkblue':'#026670'}
+main_colors= ly.main_colors
+styles=ly.styles
 
-styles = {
-    'section_spaced': {
-        # 'border': 'thin #556B2F solid',
-        'backgroundColor': main_colors['tab_lightblue'],
-        'textAlign': 'center',
-        # 'color':main_colors['tab_darkblue'],
-        'color':'white',
-        'fontSize': 15,
-        'marginTop':20,
-        'marginBottom':0,
-        'padding':5},
-    'outline': {
-        'borderLeft': 'thin #556B2F solid',
-        'borderRight': 'thin #556B2F solid'},
-    'font_source_middle': {'font_family': 'sans-serif', 'textAlign':'right','fontSize':10,'padding': 10,'borderLeft': 'thin #556B2F solid','borderRight': 'thin #556B2F solid','marginTop':0,'marginBottom':0},
-    'font_source_bottom': {'font_family': 'sans-serif', 'textAlign':'right','fontSize':10,'padding': 10, 'borderLeft': 'thin #556B2F solid','borderRight': 'thin #556B2F solid','borderBottom': 'thin #556B2F solid','marginTop':0,'marginBottom':0},
-    'pre': {
-        'border': 'thin lightgrey solid',
-        'overflowX': 'scroll'
-    },
-}
-
-
-########
+#######
 # Page  
 ####### 
 print('loading app layout')   
 tab_layout = html.Div(children=[
-    html.H4(children='Repurposing Known Breast Cancer Drugs',style=styles['section_spaced']),
+    html.H4(children='Repurposing Known Breast Cancer Drugs',style=styles['sectionHeader']),
     html.Label('Project'),
     html.Div([dcc.Dropdown(id='repurp_PROJECT_dropdown',
         options=[
@@ -77,8 +36,8 @@ tab_layout = html.Div(children=[
     html.Label('Drug Response Metric'),
     dcc.Dropdown(id='repurp_RESPONSE_dropdown'),
     html.Label('Drug to Compare Against Others'),
-    dcc.Dropdown(id='repurp_DRUG_dropdown'),
-
+    dcc.Dropdown(id='repurp_DRUG_dropdown', 
+        value='PACLITAXEL'),
     html.Hr(),
     html.Div([
         dbc.Button("?", id="help_violin-target", color="secondary",size='sm'),
@@ -94,9 +53,7 @@ tab_layout = html.Div(children=[
     dcc.Loading(id="figs_repurp",type="default",children=html.Div(id="figs_repurp_out")),
 
 ])
-########
-# Callbacks 
-########
+
 @app.callback(
     dash.dependencies.Output('repurp_RESPONSE_dropdown', 'options'),
     [dash.dependencies.Input('repurp_PROJECT_dropdown', 'value')])
@@ -114,13 +71,6 @@ def set_cities_value(available_options):
     [dash.dependencies.Input('repurp_PROJECT_dropdown', 'value')])
 def set_cities_options(selected_project):
     return [{'label': k, 'value': v} for k,v in repurpose.mappings(selected_project).items()]
-    
-@app.callback(
-    dash.dependencies.Output('repurp_DRUG_dropdown', 'value'),
-    [dash.dependencies.Input('repurp_DRUG_dropdown', 'options')])
-def set_cities_value(available_options):
-    # return available_options[0]['value']
-    return 'PACLITAXEL'
 
 @app.callback(
     dash.dependencies.Output('highlight_drugInfo', 'children'),
@@ -136,10 +86,10 @@ def render_callback(DRUG):
     fig = dbc.Card(
         dbc.CardBody(
             [
-            html.H4(header, className="card-title",style={'fontFamily':'Arial','font-size' : '14px', 'fontWeight':'bold'}),
-            html.P(descrip,style={'fontFamily':'Arial','font-size' : '12px'}) 
+            html.H4(header, className="card-title",style={'fontFamily':styles['textStyles']['type_font'],'font-size' : styles['textStyles']['size_font_card'], 'fontWeight':'bold'}),
+            html.P(descrip,style={'fontFamily':styles['textStyles']['type_font'],'font-size' : '12px'}) 
             ]),
-        color="info", inverse=True,style={'Align': 'center', 'width':'98%','fontFamily':'Arial'})
+        color="info", inverse=True,style={'Align': 'center', 'width':'98%','fontFamily':styles['textStyles']['type_font']})
     return fig,
     
 @app.callback(Output("figs_repurp", "children"),
@@ -149,7 +99,6 @@ def render_callback(DRUG):
 def render_age_hist(selected_project, selected_drugResp, selected_drug):
     # Query
     drugDF, disease = repurpose.get_matrix(selected_project,selected_drugResp)
-    # drugDF, disease = repurpose.get_matrix('CCLE','$dr._data.aac')
     # Preprocess:Rename drugs to common name
     drugDF=drugDF[drugDF.columns.drop(list(drugDF.filter(regex='NO_ONTOLOGY')))] # TODO fix it so dont have to drop
     cols=drugDF.columns
@@ -166,8 +115,8 @@ def render_age_hist(selected_project, selected_drugResp, selected_drug):
     return dcc.Graph(figure=fig_violin),html.Div([dash_table.DataTable(data = fig_table.to_dict('records'),columns=[{"name": i, "id": i} for i in fig_table.columns],
         style_table={'overflowY': 'scroll', 'maxHeight':200},
         style_data_conditional=[{'if': {'row_index': 'odd'},'backgroundColor': 'rgb(248, 248, 248)'}],
-        style_header={'backgroundColor': 'rgb(230, 230, 230)','fontSize':12,'fontWeight': 'bold','fontFamily':'Arial'},
-        style_data={'fontFamily':'Arial','fontSize':12},
+        style_header={'backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['textStyles']['size_font'],'fontWeight': 'bold','fontFamily':styles['textStyles']['type_font']},
+        style_data={'fontFamily':styles['textStyles']['type_font'],'fontSize':styles['textStyles']['size_font']},
         )],style={'width': '98%'}),
 
 
