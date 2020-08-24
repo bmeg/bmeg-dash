@@ -87,7 +87,9 @@ def render_callback(User_selected):
     baseDF = dresp.fullDF(drug_resp,data)
     ### High Level Gene-Drug ###
     # Table
-    tab= dash_table.DataTable(id='dropdown_table',data = baseDF.to_dict('records'),columns=[{"name": i, "id": i} for i in baseDF.columns])
+    tab= dash_table.DataTable(id='dropdown_table',
+        data = baseDF.to_dict('records'),columns=[{"name": i, "id": i} for i in baseDF.columns],
+        style_table={'overflowY': 'scroll', 'maxHeight':200})
     
     ### Detailed Gene-Drug ###
     df2 = baseDF[['Drug Compound', 'Cell Line', 'dr_metric', 'Dataset']]
@@ -97,5 +99,7 @@ def render_callback(User_selected):
     cellLine_plot= dcc.Graph(figure=bp.get_histogram_normal(df2['Cell Line'], 'Cell Line', 'Frequency',main_colors['pale_yellow'], 300, 10, 'cellline','yes'))
     resp_plot= dcc.Graph(figure=bp.get_histogram_normal(df2[drug_resp], drug_resp, 'Frequency',main_colors['pale_orange'], 300, 10,'drug','no'))
     # Table
-    tab2= dash_table.DataTable(data = df2.to_dict('records'),columns=[{"name": i, "id": i} for i in df2.columns])
+    tab2= dash_table.DataTable(data = df2.to_dict('records'),
+        columns=[{"name": i, "id": i} for i in df2.columns],
+        style_table={'overflowY': 'scroll', 'maxHeight':200})
     return drug_plot,html.H1(''),cellLine_plot,html.H1(''),resp_plot,html.H1(''), tab, html.H1(''),tab2
