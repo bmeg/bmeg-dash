@@ -2,14 +2,16 @@
 
 ## Setup 
 
-Here we assume Python 3 and pip are already set up on your machine.
+Python 3 and pip are assumed to be already set up on your machine.
 
-Install an environment module and app dependencies. Here we use **virtualenv**
+Install an environment module and app dependencies. Here the **virtualenv** module is used.
 
 ```
 # Install virtualenv
-python3 -m venv venv #On macOS and Linux
-py -m venv venv  #On Windows 
+#On macOS and Linux
+python3 -m venv venv 
+#On Windows 
+py -m venv venv  
 
 
 # Activate and Install Dependencies
@@ -27,10 +29,10 @@ python -m bmeg_app
 
 On the [BMEG Website](https://bmegio.ohsu.edu) there are several relevant links:
 
-[Installing gripql and Getting Started](https://bmegio.ohsu.edu/analyze/getting_started/)
++ [Installing gripql and Getting Started](https://bmegio.ohsu.edu/analyze/getting_started/)
 
-[Databases Loaded into BMEG](https://bmegio.ohsu.edu/explore/data)
++ [Databases Loaded into BMEG](https://bmegio.ohsu.edu/explore/data)
 
-[Graph Database Schema](https://bmegio.ohsu.edu/explore/schema)
++ [Graph Database Schema](https://bmegio.ohsu.edu/explore/schema)
 
-[Contact BMEG](https://gitter.im/bmeg/)
++ [Contact BMEG](https://gitter.im/bmeg/)
