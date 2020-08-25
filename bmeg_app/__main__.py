@@ -1,4 +1,5 @@
 from bmeg_app.app import app
+import bmeg_app.appLayout as ly
 from bmeg_app.views import app_about, app_tcga, app_drugresp, app_repurpose_drug
 import base64
 import dash
@@ -6,14 +7,24 @@ import dash_html_components as html
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
-# https://github.com/facultyai/dash-bootstrap-components/tree/master/examples/multi-page-apps/responsive-collapsible-sidebar
 
+# Layout 
+styles=ly.styles
 
+# Images
+image_filename = 'bmeg_app/images/bmeg_logo.png' 
+encoded_image3 = base64.b64encode(open(image_filename, 'rb').read())
+ 
+ 
 # we use the Row and Col components to construct the sidebar header
 # it consists of a title, and a toggle, the latter is hidden on large screens
 sidebar_header = dbc.Row(
     [
-        dbc.Col(html.H4("BMEG", className="display-4")),
+        dbc.Col(
+            html.Div(html.Img(src='data:image/png;base64,{}'.format(encoded_image3.decode()),
+                style={'height':'85%','width':'85%', 'marginTop': 0, 'marginBottom':0}),
+            ),
+            className="display-4"),
         dbc.Col(
             [
                 html.Button(
@@ -60,6 +71,7 @@ sidebar = html.Div(
                     "A graph database for "
                     "merging and analyzing connected data",
                     className="lead",
+                    style={'font-size':styles['textStyles']['size_font_card'],'fontFamily':styles['textStyles']['type_font']},
                 ),
             ],
             id="blurb",
@@ -68,9 +80,18 @@ sidebar = html.Div(
         dbc.Collapse(
             dbc.Nav(
                 [
-                    dbc.NavLink("Drug Repurposing", href="/page-1", id="page-1-link"),
-                    dbc.NavLink("TCGA Clustering", href="/page-2", id="page-2-link"),
-                    dbc.NavLink("Literature Drug Responses", href="/page-3", id="page-3-link"),
+                    dbc.NavLink("Drug Repurposing", href="/page-1", id="page-1-link",
+                        style={'font-size':styles['textStyles']['size_font_card'],
+                        'fontFamily':styles['textStyles']['type_font']
+                        },),
+                    dbc.NavLink("TCGA Clustering", href="/page-2", id="page-2-link",
+                        style={'font-size':styles['textStyles']['size_font_card'],
+                        'fontFamily':styles['textStyles']['type_font']
+                        },),
+                    dbc.NavLink("Literature Drug Responses", href="/page-3", id="page-3-link",
+                        style={'font-size':styles['textStyles']['size_font_card'],
+                        'fontFamily':styles['textStyles']['type_font']
+                        },),
                 ],
                 vertical=True,
                 pills=True,
