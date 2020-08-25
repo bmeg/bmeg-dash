@@ -92,6 +92,10 @@ sidebar = html.Div(
                         style={'font-size':styles['textStyles']['size_font_card'],
                         'fontFamily':styles['textStyles']['type_font']
                         },),
+                    dbc.NavLink("About", href="/page-4", id="page-4-link",
+                        style={'font-size':styles['textStyles']['size_font_card'],
+                        'fontFamily':styles['textStyles']['type_font']
+                        },),
                 ],
                 vertical=True,
                 pills=True,
@@ -110,14 +114,14 @@ app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
 # this callback uses the current pathname to set the active state of the
 # corresponding nav link to true, allowing users to tell see page they are on
 @app.callback(
-    [Output(f"page-{i}-link", "active") for i in range(1, 4)],
+    [Output(f"page-{i}-link", "active") for i in range(1, 5)],
     [Input("url", "pathname")],
 )
 def toggle_active_links(pathname):
     if pathname == "/":
         # Treat Drug Repurposing as the homepage / index
-        return True, False, False
-    return [pathname == f"/page-{i}" for i in range(1, 4)]
+        return True, False, False, False
+    return [pathname == f"/page-{i}" for i in range(1, 5)]
 
 
 @app.callback(Output("page-content", "children"), 
@@ -129,6 +133,8 @@ def render_page_content(pathname):
         return html.Div([app_tcga.tab_layout])    
     elif pathname == "/page-3":
         return html.Div([app_drugresp.tab_layout]) 
+    elif pathname == "/page-4":
+        return html.Div([app_about.tab_layout])
     # If the user tries to reach a different page, return a 404 message
     return dbc.Jumbotron(
         [
