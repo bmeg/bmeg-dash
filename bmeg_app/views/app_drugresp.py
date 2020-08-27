@@ -101,4 +101,13 @@ def render_callback(User_selected):
     tab2= dash_table.DataTable(data = df2.to_dict('records'),
         columns=[{"name": i, "id": i} for i in df2.columns],
         style_table={'overflowY': 'scroll', 'maxHeight':200})
-    return drug_plot,html.H1(''),cellLine_plot,html.H1(''),resp_plot,html.H1(''), tab, html.H1(''),tab2
+        
+    # formatting figure arrangement 
+    bar_plots = dbc.Row(
+        [
+            dbc.Col(drug_plot),
+            dbc.Col(cellLine_plot),
+            dbc.Col(resp_plot),
+        ]
+    )
+    return bar_plots, tab, html.H1(''),tab2
