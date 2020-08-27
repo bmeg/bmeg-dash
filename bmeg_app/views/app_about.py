@@ -24,7 +24,7 @@ tab_layout = html.Div(children=[
             type="default",children=html.Div(id="cards_output")),  
     dcc.Loading(id="node_cts_bar",
             type="default",children=html.Div(id="node_cts_bar_output")),
-    html.P(children='Explore Node Properties'),
+    html.P(children='Explore Node Properties',style={'font-size' : styles['textStyles']['size_font']}),
     html.Div([
         dcc.Dropdown(id='node_dd',
             options=[
@@ -33,11 +33,12 @@ tab_layout = html.Div(children=[
                 {'label': 'TODO Add all other nodes', 'value': 'todo'}
             ],
             value=[],
-            placeholder='Select Node'),
+            placeholder='Select Node',
+            style={'font-size' : styles['textStyles']['size_font']}),
         dcc.Loading(id="node_prop_table",
             type="default",children=html.Div(id="node_dd-selection")),
     ]),
-])
+],style={'fontFamily': styles['textStyles']['type_font'],})
 
 @app.callback(Output("node_dd-selection", "children"),
     [Input('url', 'pathname'),
@@ -63,7 +64,7 @@ def render_callback(href, node_selection):
             1,'\'UDP-Gal:betaGal beta 1,3-galactosyltransferase polypeptide 6\'',1170421,'ENSG00000176022','GRCh37','Project:Reference',1167629,'+','None','B3GALT6']
         definitions_gene= pd.DataFrame(list(zip(NodeProperty, Description, Example)),columns=['Node Property', 'Description', 'Example'])
         df= definitions_gene
-        return dash_table.DataTable(id='table_output',data = df.to_dict('records'),columns=[{"name": i, "id": i} for i in df.columns],style_table={'overflowY': 'scroll', 'maxHeight':200})
+        return dash_table.DataTable(id='table_output',data = df.to_dict('records'),columns=[{"name": i, "id": i} for i in df.columns],style_table={'overflowY': 'scroll', 'maxHeight':200,'font-size' : styles['textStyles']['size_font']})
         
     elif node_selection == 'project':
         NodeProperty = ['_gid','_label','_data',    
@@ -77,7 +78,7 @@ def render_callback(href, node_selection):
             'TCGA-LUSC', 'None']
         definitions_gene= pd.DataFrame(list(zip(NodeProperty, Description, Example)),columns=['Node Property', 'Description', 'Example'])
         df= definitions_gene
-        return dash_table.DataTable(id='table_output',data = df.to_dict('records'),columns=[{"name": i, "id": i} for i in df.columns],style_table={'overflowY': 'scroll', 'maxHeight':200})
+        return dash_table.DataTable(id='table_output',data = df.to_dict('records'),columns=[{"name": i, "id": i} for i in df.columns],style_table={'overflowY': 'scroll', 'maxHeight':200,'font-size' : styles['textStyles']['size_font']})
     elif node_selection=='todo':
         return
         

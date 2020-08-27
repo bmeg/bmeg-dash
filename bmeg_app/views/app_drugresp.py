@@ -36,16 +36,14 @@ option_projects = gC.dropdown_options()
 ####### 
 print('loading app layout')   
 tab_layout = html.Div(children=[
-    html.H4(children='Drug Screen Results Supported by Curated literature',style=styles['sectionHeader']),
-    # html.P(children='Differential gene experssion analysis has lead to a list of top differentially expressed genes. You want a quick and easy method to find what drug(s) might be useful. Task: Given a list of differentially expressed genes, what is the predicted drug response that is supported by published literature?', style={'textAlign': 'center'}),
-    html.Label('Gene(s)'),
+    html.Label('Drug Screen Results Supported by Curated Literature', style={'font-size' : styles['textStyles']['size_font']}),
     html.Div([dcc.Dropdown(id='dr_dropdown',
         options=[
             {'label': g, 'value': g} for g in select_genes.keys()],
         value=[],
         multi=True,
         ),     
-    ],style={'width': '100%', 'display': 'inline-block'}), 
+    ],style={'width': '100%', 'display': 'inline-block','font-size' : styles['textStyles']['size_font']}), 
     html.Hr(),
     dbc.Button('?', id='open_dr'),
     dbc.Modal(
@@ -59,9 +57,10 @@ tab_layout = html.Div(children=[
         id='modal_dr',
         size='sm',
         centered=True,
+        style={'font-size' : styles['textStyles']['size_font']},
     ),
     dcc.Loading(type="default",children=html.Div(id="dr_dropdown_table")),  
-])
+],style={'fontFamily': styles['textStyles']['type_font']})
 
 @app.callback(
     Output("modal_dr", "is_open"),

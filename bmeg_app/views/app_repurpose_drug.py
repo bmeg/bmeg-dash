@@ -25,34 +25,51 @@ styles=ly.styles
 ####### 
 print('loading app layout')   
 tab_layout = html.Div(children=[
-    html.H4(children='Repurposing Known Breast Cancer Drugs',style=styles['sectionHeader']),
-    html.Label('Project'),
-    html.Div([dcc.Dropdown(id='repurp_PROJECT_dropdown',
-        options=[
-            {'label': a, 'value': a} for a in ['CCLE']],
-        value='CCLE',
-        ),     
-    ],style={'width': '100%', 'display': 'inline-block'}), 
-    html.Label('Drug Response Metric'),
-    dcc.Dropdown(id='repurp_RESPONSE_dropdown'),
-    html.Label('Drug to Compare Against Others'),
-    dcc.Dropdown(id='repurp_DRUG_dropdown', 
-        value='PACLITAXEL'),
-    html.Hr(),
-    html.Div([
-        dbc.Button("?", id="help_violin-target", color="secondary",size='sm'),
-        dbc.Popover([dbc.PopoverHeader("Drug Response Distributions"),
-            dbc.PopoverBody("Responses of breast cancer derived cell lines to all drugs tested in selected project"),
-            dbc.PopoverBody("More info TBD"),
-            ],
-            id="help_violin",is_open=False,target="help_violin-target",flip=True,
-            style={'width': '100%'},
+    html.Label('Repurposing Known Breast Cancer Drugs',style={'font-size' : styles['textStyles']['size_font']}),
+    dbc.Row(
+        [
+        dbc.Col(html.Div([dcc.Dropdown(id='repurp_PROJECT_dropdown',
+            options=[
+                {'label': a, 'value': a} for a in ['CCLE']],
+            value='CCLE',
+            ),],style={'width': '100%', 'display': 'inline-block','font-size' : styles['textStyles']['size_font']}), 
         ),
-    ]),    
-    dcc.Loading(id="highlight_drugInfo",type="default",children=html.Div(id="TESTINGcard_out")),
+        dbc.Col(dcc.Dropdown(id='repurp_RESPONSE_dropdown',style={'font-size' : styles['textStyles']['size_font']}), ),
+        dbc.Col(dcc.Dropdown(id='repurp_DRUG_dropdown', 
+            value='PACLITAXEL', style={'font-size' : styles['textStyles']['size_font']}), ),       
+        ]
+    ),
+    html.Hr(),
+    # html.Div([
+    #     dbc.Button("?", id="help_violin-target", color="secondary",size='sm'),
+    #     dbc.Popover([dbc.PopoverHeader("Drug Response Distributions"),
+    #         dbc.PopoverBody("Responses of breast cancer derived cell lines to all drugs tested in selected project"),
+    #         dbc.PopoverBody("More info TBD"),
+    #         ],
+    #         id="help_violin",is_open=False,target="help_violin-target",flip=True,
+    #         style={'width': '100%'},
+    #     ),
+    # ]),    
+    dbc.Row([
+        dbc.Col(
+            dcc.Loading(id="highlight_drugInfo",type="default",children=html.Div(id="card_out"))
+        ),
+        dbc.Col(
+            html.Div([
+                dbc.Button("?", id="help_violin-target", color="secondary",size='sm'),
+                dbc.Popover([dbc.PopoverHeader("Drug Response Distributions"),
+                    dbc.PopoverBody("Responses of breast cancer derived cell lines to all drugs tested in selected project"),
+                    dbc.PopoverBody("More info TBD"),
+                    ],
+                    id="help_violin",is_open=False,target="help_violin-target",flip=True,
+                    style={'width': '100%'},
+                ),
+            ]),  
+        )
+    ]),
     dcc.Loading(id="figs_repurp",type="default",children=html.Div(id="figs_repurp_out")),
 
-])
+],style={'fontFamily': styles['textStyles']['type_font']})
 
 @app.callback(
     dash.dependencies.Output('repurp_RESPONSE_dropdown', 'options'),
