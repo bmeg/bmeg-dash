@@ -34,16 +34,34 @@ option_projects = gC.dropdown_options()
 ####### 
 print('loading app layout')   
 tab_layout = html.Div(children=[
-    html.Label(children='Explore TCGA Data', style={'font-size' : styles['textStyles']['size_font']}),
     dbc.Row(
         [
-        dbc.Col(dcc.Dropdown(
-            id='project-dropdown',
-            options=[{'label': k, 'value': k} for k in option_projects.keys()],
-            value='TCGA-CHOL',
-            ),style={'font-size' : styles['textStyles']['size_font']} ),
-        dbc.Col(dcc.Dropdown(id='property-dropdown'), style={'font-size' : styles['textStyles']['size_font']}),
-        ]),
+            dbc.Col(
+                html.Div([
+                    dbc.Button('Info', id='open2',color='primary',style={'font-size':styles['textStyles']['size_font']}),
+                    dbc.Modal(
+                        [
+                            dbc.ModalHeader('Header for TCGA'),
+                            dbc.ModalBody('Info on \
+                                TCGA. \
+                                Stuff 2'),
+                            dbc.ModalFooter(dbc.Button('Close',id='close2',className='ml-auto')),
+                        ],
+                        id='main_help2',
+                        size='sm',
+                        centered=True,
+                    ),
+                ]),
+                width=1, 
+            ),  
+            
+            dbc.Col(dcc.Dropdown(
+                id='project-dropdown',
+                options=[{'label': k, 'value': k} for k in option_projects.keys()],
+                value='TCGA-CHOL',
+                ),style={'font-size' : styles['textStyles']['size_font']} ),
+            dbc.Col(dcc.Dropdown(id='property-dropdown'), style={'font-size' : styles['textStyles']['size_font']}),
+    ]),
     html.Hr(),
     dbc.Button('?', id='open'),
     dbc.Modal(
@@ -68,6 +86,17 @@ tab_layout = html.Div(children=[
 ########
 # Callbacks 
 ########
+# help button main
+@app.callback(
+    Output("main_help2", "is_open"),
+    [Input("open2", "n_clicks"), Input("close2", "n_clicks")],
+    [State("main_help2", "is_open")],
+)
+def toggle_modal(n1, n2, is_open):
+    if n1 or n2:
+        return not is_open
+    return is_open
+    
 # help button 
 @app.callback(
     Output("modal_centered", "is_open"),

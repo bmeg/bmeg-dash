@@ -1,6 +1,9 @@
 from ..db import G
 import gripql 
 import pandas as pd 
+from collections import Counter
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 def get_matrix(PROJECT, DRUGRESPONSE):
     '''
@@ -33,9 +36,9 @@ def get_matrix(PROJECT, DRUGRESPONSE):
     drugDF = drugDF.sort_index().sort_index(axis=1) #sort rows by cell line name, sort cols by drug name
     return drugDF, disease
 
-def compare_drugs(est,drugDF,disease,fig_yaxisLabel):
+def compare_drugs(est,drugDF,disease,fig_yaxisLabel, selected_disease):
     '''
-    ex. compare_drugs('PACLITAXEL',drugDF,disease)
+    ex. compare_drugs('PACLITAXEL',drugDF,disease,'Breast Cancer')
     '''
     import plotly.graph_objects as go
     import pandas as pd
@@ -44,7 +47,7 @@ def compare_drugs(est,drugDF,disease,fig_yaxisLabel):
     for ind in drugDF.index:
         new_col.append(disease[ind])
     drugDF['disease']=new_col
-    drugDF=drugDF[drugDF['disease']=='Breast Cancer']
+    drugDF=drugDF[drugDF['disease']==selected_disease]
     # set established drug to first col
     new_col=drugDF.pop(est)
     drugDF.insert(0, est, new_col)
@@ -67,6 +70,7 @@ def compare_drugs(est,drugDF,disease,fig_yaxisLabel):
                                 name=d,box_visible=True,meanline_visible=True))
     fig.update_layout(margin={'t':10, 'b':10},height=400,yaxis=dict(title=fig_yaxisLabel))
     fig.update_xaxes(tickangle=45)
+    fig.update_layout(showlegend=False)
     return melt_drugDF, fig
 
 
@@ -113,3 +117,61 @@ def drugDetails(drugs_list):
             g.append(row[6])
     df = pd.DataFrame(list(zip(a,b,c,d,e,f,g)),columns=['Drug','PubChem ID','Direct Parent','Kingdom','Superclass','Class','Subclass'])
     return df
+
+def counting(vals_list):
+    '''
+    ex. counting(res['Gender'])
+    '''
+    lab=[]
+    cts=[]
+    for k,v in Counter(vals_list).items():
+        lab.append(k)
+        cts.append(v)
+    return lab, cts
+
+def get_histogram_normal(data):
+    '''
+    input values to plot. can be pandas df['col']
+    yticks == how far apart ticks
+     returns go figure
+    '''
+    import pandas as pd
+    import plotly.graph_objects as go
+    fig = go.Figure(data=[go.Histogram(
+        x=data,
+        #marker=dict(color=box_color)
+        )]).update_xaxes(categoryorder="total descending")
+    fig.update_layout(margin={'t':0, 'b':0},
+        height=200,
+        yaxis=dict(tickmode='linear'),
+        #plot_bgcolor='white'
+    )
+    fig.update_xaxes(showticklabels=False)
+    fig.update_yaxes(showticklabels=False)
+    return fig
+    
+def piecharts_celllines(drug1,df, proj):
+    # Grab all cell lines for that selected drug and look up metadata
+    # samples = df[df['Drug']==drug1]['Cell Line'].dropna()
+    samples = df[df['Drug']==drug1].dropna(subset=['Drug Response'])['Cell Line']
+    sample=[]
+    a=[]
+    b=[]
+    c=[]
+    for s in samples:
+        q=G.query().V().hasLabel('Case').has(gripql.eq('$._data.case_id', s)).has(gripql.eq('$._data.project_id', proj)).as_('c')
+        q=q.render(['$c._data.cellline_attributes.Gender','$c._data.cellline_attributes.Subtype Disease'])
+        for gender, subtype in q:
+            sample.append(s)
+            a.append(gender)
+            b.append(subtype)
+    resDF=pd.DataFrame(list(zip(sample,a,b)),columns=['Cell Line (Sample)','Gender','Subtype'])
+    # Pie charts
+    fig = make_subplots(rows=1, cols=2, specs=[[{'type':'domain'}, {'type':'domain'}]])
+    lab,cts=counting(resDF['Gender'])
+    fig.add_trace(go.Pie(labels=lab, values=cts,textinfo='label+percent', name="Gender",legendgroup='group1',showlegend=True),1, 1)
+    lab,cts=counting(resDF['Subtype'])
+    fig.add_trace(go.Pie(labels=lab, values=cts,textinfo='label+percent', name="Gender",legendgroup='group2',showlegend=True),1, 2)
+    fig.update_traces(textposition='inside', textinfo='percent+label')
+    fig.update_layout(showlegend=False,margin={'t':0, 'b':0,'r':0,'l':0})
+    return fig, resDF

@@ -25,50 +25,65 @@ styles=ly.styles
 ####### 
 print('loading app layout')   
 tab_layout = html.Div(children=[
-    html.Label('Repurposing Known Breast Cancer Drugs',style={'font-size' : styles['textStyles']['size_font']}),
     dbc.Row(
         [
-        dbc.Col(html.Div([dcc.Dropdown(id='repurp_PROJECT_dropdown',
-            options=[
-                {'label': a, 'value': a} for a in ['CCLE']],
-            value='CCLE',
-            ),],style={'width': '100%', 'display': 'inline-block','font-size' : styles['textStyles']['size_font']}), 
-        ),
-        dbc.Col(dcc.Dropdown(id='repurp_RESPONSE_dropdown',style={'font-size' : styles['textStyles']['size_font']}), ),
-        dbc.Col(dcc.Dropdown(id='repurp_DRUG_dropdown', 
-            value='PACLITAXEL', style={'font-size' : styles['textStyles']['size_font']}), ),       
+            dbc.Col(
+                html.Div([
+                    dbc.Button('Info', id='open1',color='primary',style={'font-size':styles['textStyles']['size_font']}),
+                    dbc.Modal(
+                        [
+                            dbc.ModalHeader('Identify Drugs Candidates with Similar Cell Reponses'),
+                            dbc.ModalBody('Interrogate cell line drug screening trials. For example, select a FDA drug that is widely known to treat a particular disease (Paclitaxel for breast cancer treatment) and identify other drugs that show a similar impact on cell lines.'),
+                            dbc.ModalBody( 'What’s going on behind the scenes?'),
+                            dbc.ModalBody( '•	Data is queried from BMEG, filtered for relevant cell lines (breast tissue derived cell lines kept if breast cancer is selected), and analyzed in the viewer.'),
+                            dbc.ModalBody( 'Features'),
+                            dbc.ModalBody( '• Boxed in blue is a summary of the selected drug to provide insight on the molecular and/or biological realm of the selected drug.'),
+                            dbc.ModalBody( '• Violin plots comparative overview: Identify alternative drugs by examining drug responses for similar distributions.'),
+                            dbc.ModalBody( '• Examine the drug characteristics table for taxonomic reasons for similar and different responses from drugs.'),
+                            dbc.ModalBody( '• Dive deeper to see the characteristics of the samples that generated the violin plots of particular drugs.'),
+                            dbc.ModalFooter(dbc.Button('Close',id='close1',className='ml-auto')),
+                        ],
+                        id='main_help1',
+                        size='med',
+                        centered=True,
+                    ),
+                ]),
+                width=1, 
+            ),  
+            dbc.Col(
+                html.Div([
+                    html.Label('Dataset'),
+                    dcc.Dropdown(id='repurp_PROJECT_dropdown',options=[{'label': a, 'value': a} for a in ['CCLE']],value='CCLE')
+                ],
+                style={'width': '100%', 'display': 'inline-block','font-size' : styles['textStyles']['size_font']})
+            ),
+            dbc.Col(
+                html.Div([
+                    html.Label('Disease'),
+                    # TODO: add all disease types to drop down menu
+                    dcc.Dropdown(id='repurp_DISEASE_dropdown',options=[{'label':'Breast Cancer', 'value': 'Breast Cancer'}],value='Breast Cancer', style={'font-size' : styles['textStyles']['size_font']})
+                ],
+                style={'width': '100%', 'display': 'inline-block','font-size' : styles['textStyles']['size_font']})
+            ),
+            dbc.Col(
+                html.Div([
+                    html.Label('Drug Treatment'),
+                    dcc.Dropdown(id='repurp_DRUG_dropdown', value='PACLITAXEL', style={'font-size' : styles['textStyles']['size_font']})
+                ],
+                style={'width': '100%', 'display': 'inline-block','font-size' : styles['textStyles']['size_font']})
+            ),
+            dbc.Col(
+                html.Div([
+                    html.Label('Drug Response Metric'),
+                    dcc.Dropdown(id='repurp_RESPONSE_dropdown',style={'font-size' : styles['textStyles']['size_font']})
+                ],
+                style={'width': '100%', 'display': 'inline-block','font-size' : styles['textStyles']['size_font']})
+            ),    
         ]
     ),
     html.Hr(),
-    # html.Div([
-    #     dbc.Button("?", id="help_violin-target", color="secondary",size='sm'),
-    #     dbc.Popover([dbc.PopoverHeader("Drug Response Distributions"),
-    #         dbc.PopoverBody("Responses of breast cancer derived cell lines to all drugs tested in selected project"),
-    #         dbc.PopoverBody("More info TBD"),
-    #         ],
-    #         id="help_violin",is_open=False,target="help_violin-target",flip=True,
-    #         style={'width': '100%'},
-    #     ),
-    # ]),    
-    dbc.Row([
-        dbc.Col(
-            dcc.Loading(id="highlight_drugInfo",type="default",children=html.Div(id="card_out"))
-        ),
-        dbc.Col(
-            html.Div([
-                dbc.Button("?", id="help_violin-target", color="secondary",size='sm'),
-                dbc.Popover([dbc.PopoverHeader("Drug Response Distributions"),
-                    dbc.PopoverBody("Responses of breast cancer derived cell lines to all drugs tested in selected project"),
-                    dbc.PopoverBody("More info TBD"),
-                    ],
-                    id="help_violin",is_open=False,target="help_violin-target",flip=True,
-                    style={'width': '100%'},
-                ),
-            ]),  
-        )
-    ]),
+    # dcc.Loading(id="highlight_drugInfo",type="default",children=html.Div(id="card_out")),
     dcc.Loading(id="figs_repurp",type="default",children=html.Div(id="figs_repurp_out")),
-
 ],style={'fontFamily': styles['textStyles']['type_font']})
 
 @app.callback(
@@ -99,7 +114,6 @@ def render_callback(DRUG):
         print('starting search')
         header = row[0].upper() + ' ('+ row[1]+')'
         descrip = row[2]
-    print(header)
     fig = dbc.Card(
         dbc.CardBody(
             [
@@ -112,8 +126,9 @@ def render_callback(DRUG):
 @app.callback(Output("figs_repurp", "children"),
     [Input('repurp_PROJECT_dropdown', 'value'),
     Input('repurp_RESPONSE_dropdown', 'value'),
-    Input('repurp_DRUG_dropdown', 'value')])
-def render_age_hist(selected_project, selected_drugResp, selected_drug):
+    Input('repurp_DRUG_dropdown', 'value'),
+    Input('repurp_DISEASE_dropdown','value')])
+def render_age_hist(selected_project, selected_drugResp, selected_drug, selected_disease):
     # Query
     drugDF, disease = repurpose.get_matrix(selected_project,selected_drugResp)
     # Preprocess:Rename drugs to common name
@@ -126,16 +141,37 @@ def render_age_hist(selected_project, selected_drugResp, selected_drug):
             common.append(row[0])
     drugDF.columns=common
     # Final processing + figure violins
-    fig_violin = repurpose.compare_drugs(selected_drug, drugDF, disease,'Drug Response Metric' )[1] #grab index0 if want to do more figs from table that generates this fig
+    finalDF,fig_violin = repurpose.compare_drugs(selected_drug, drugDF, disease,'Drug Response Metric',selected_disease )
+    finalDF.to_csv('TESTING_OUTPUT.tsv',sep='\t')
     # Figure drug table
     fig_table = repurpose.drugDetails(common)
-    return dcc.Graph(figure=fig_violin),html.Div([dash_table.DataTable(data = fig_table.to_dict('records'),columns=[{"name": i, "id": i} for i in fig_table.columns],
+    # Cell line (pie charts and df)
+    fig_CL, DF_CL=repurpose.piecharts_celllines(selected_drug,finalDF,'Project:'+selected_project)
+    # format layout 
+    content_cardsViolin = dbc.Row([
+        dbc.Col(dcc.Loading(id="highlight_drugInfo",type="default",children=html.Div(id="card_out")),width=4),
+        dbc.Col(dcc.Graph(figure=fig_violin),width=8),
+    ])
+    content_table = html.Div([dash_table.DataTable(data = fig_table.to_dict('records'),columns=[{"name": i, "id": i} for i in fig_table.columns],
         style_table={'overflowY': 'scroll', 'maxHeight':200},
         style_data_conditional=[{'if': {'row_index': 'odd'},'backgroundColor': 'rgb(248, 248, 248)'}],
         style_header={'backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['textStyles']['size_font'],'fontWeight': 'bold','fontFamily':styles['textStyles']['type_font']},
         style_data={'fontFamily':styles['textStyles']['type_font'],'fontSize':styles['textStyles']['size_font']},
-        )],style={'width': '98%'}),
+        )],style={'width': '98%'}
+    )
+    sample_celllines= dbc.Row([
+        dbc.Col(dcc.Graph(figure=fig_CL),width=5),
+        dbc.Col(dash_table.DataTable(data = DF_CL.to_dict('records'),columns=[{"name": i, "id": i} for i in DF_CL.columns],
+            style_table={'overflowY': 'scroll', 'maxHeight':200},
+            style_data_conditional=[{'if': {'row_index': 'odd'},'backgroundColor': 'rgb(248, 248, 248)'}],
+            style_header={'backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['textStyles']['size_font'],'fontWeight': 'bold','fontFamily':styles['textStyles']['type_font']},
+            style_data={'fontFamily':styles['textStyles']['type_font'],'fontSize':styles['textStyles']['size_font']}),
+            width=7,
+            align='center'
+        ),
+    ])        
 
+    return content_cardsViolin, html.Hr(),html.P('Drug Characteristics'),content_table, html.Hr(),html.P('Sample Characteristics'),sample_celllines,html.P('TODO add second drug selector to compare side by side and pop pie charts and table for it'),
 
 
 @app.callback(
@@ -148,3 +184,13 @@ def toggle_popover(n, is_open):
         return not is_open
     return is_open
     
+# help button 
+@app.callback(
+    Output("main_help1", "is_open"),
+    [Input("open1", "n_clicks"), Input("close1", "n_clicks")],
+    [State("main_help1", "is_open")],
+)
+def toggle_modal(n1, n2, is_open):
+    if n1 or n2:
+        return not is_open
+    return is_open

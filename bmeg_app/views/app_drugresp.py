@@ -36,20 +36,39 @@ option_projects = gC.dropdown_options()
 ####### 
 print('loading app layout')   
 tab_layout = html.Div(children=[
-    html.Label('Drug Screen Results Supported by Curated Literature', style={'font-size' : styles['textStyles']['size_font']}),
-    html.Div([dcc.Dropdown(id='dr_dropdown',
-        options=[
-            {'label': g, 'value': g} for g in select_genes.keys()],
-        value=[],
-        multi=True,
-        ),     
-    ],style={'width': '100%', 'display': 'inline-block','font-size' : styles['textStyles']['size_font']}), 
+    dbc.Row(
+        [
+            dbc.Col(
+                html.Div([
+                    dbc.Button('Info', id='open3',color='primary',style={'font-size':styles['textStyles']['size_font']}),
+                    dbc.Modal(
+                        [
+                            dbc.ModalHeader('Curated Published Literature for Gene-Drug Associations'),
+                            dbc.ModalBody('Explore your list of top genes from differential gene expression analysis for trends reported in literature. Quickly identify aspects about your results that align and deviate from literature curated for strength by the Variant Interpretation for Cancer Consortium.'),
+                            dbc.ModalFooter(dbc.Button('Close',id='close3',className='ml-auto')),
+                        ],
+                        id='main_help3',
+                        size='med',
+                        centered=True,
+                    ),
+                ]),
+                width=1, 
+            ), 
+            dbc.Col(html.Div([dcc.Dropdown(id='dr_dropdown',
+                options=[
+                    {'label': g, 'value': g} for g in select_genes.keys()],
+                value=[],
+                multi=True,
+                ),     
+                ],style={'width': '100%', 'display': 'inline-block','font-size' : styles['textStyles']['size_font']}), 
+            )
+        ]),
     html.Hr(),
     dbc.Button('?', id='open_dr'),
     dbc.Modal(
         [
-            dbc.ModalHeader('Explore Published Literature Gene-Drug Associations'),
-            dbc.ModalBody('Find cell line responses to drug treatments from literature curation and the dataset.'),
+            dbc.ModalHeader('Header here'),
+            dbc.ModalBody('Description here.'),
             dbc.ModalFooter(
                 dbc.Button('Close',id='close_dr',className='ml-auto')
             ),
@@ -62,6 +81,18 @@ tab_layout = html.Div(children=[
     dcc.Loading(type="default",children=html.Div(id="dr_dropdown_table")),  
 ],style={'fontFamily': styles['textStyles']['type_font']})
 
+
+# help button main
+@app.callback(
+    Output("main_help3", "is_open"),
+    [Input("open3", "n_clicks"), Input("close3", "n_clicks")],
+    [State("main_help3", "is_open")],
+)
+def toggle_modal(n1, n2, is_open):
+    if n1 or n2:
+        return not is_open
+    return is_open
+    
 @app.callback(
     Output("modal_dr", "is_open"),
     [Input("open_dr", "n_clicks"), Input("close_dr", "n_clicks")],
@@ -93,6 +124,7 @@ def render_callback(User_selected):
     ### Detailed Gene-Drug ###
     df2 = baseDF[['Drug Compound', 'Cell Line', 'dr_metric', 'Dataset']]
     df2= df2.rename(columns={'dr_metric':drug_resp})
+    df2.to_csv('ignore.tsv',sep='\t',index=False)
     # Histograms
     drug_plot= dcc.Graph(figure=bp.get_histogram_normal(df2['Drug Compound'], 'Drug Compound', 'Frequency', main_colors['pale_orange'], 300, 200, 'drug','yes'))
     cellLine_plot= dcc.Graph(figure=bp.get_histogram_normal(df2['Cell Line'], 'Cell Line', 'Frequency',main_colors['pale_yellow'], 300, 10, 'cellline','yes'))
