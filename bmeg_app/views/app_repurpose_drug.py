@@ -157,6 +157,9 @@ def render_age_hist(selected_project, selected_drugResp, selected_drug, selected
         style_data_conditional=[{'if': {'row_index': 'odd'},'backgroundColor': 'rgb(248, 248, 248)'}],
         style_header={'backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['textStyles']['size_font'],'fontWeight': 'bold','fontFamily':styles['textStyles']['type_font']},
         style_data={'fontFamily':styles['textStyles']['type_font'],'fontSize':styles['textStyles']['size_font']},
+        export_format='xlsx',
+        export_headers='names',
+        page_size=5,        
         )],style={'width': '98%'}
     )
     sample_celllines= dbc.Row([
@@ -165,8 +168,11 @@ def render_age_hist(selected_project, selected_drugResp, selected_drug, selected
             style_table={'overflowY': 'scroll', 'maxHeight':200},
             style_data_conditional=[{'if': {'row_index': 'odd'},'backgroundColor': 'rgb(248, 248, 248)'}],
             style_header={'backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['textStyles']['size_font'],'fontWeight': 'bold','fontFamily':styles['textStyles']['type_font']},
-            style_data={'fontFamily':styles['textStyles']['type_font'],'fontSize':styles['textStyles']['size_font']}),
-            width=7,
+            style_data={'fontFamily':styles['textStyles']['type_font'],'fontSize':styles['textStyles']['size_font']},
+            export_format='xlsx',
+            export_headers='names',
+            page_size=5,
+            ),width=7,
             align='center'
         ),
     ])        

@@ -64,7 +64,7 @@ def render_callback(href, node_selection):
             1,'\'UDP-Gal:betaGal beta 1,3-galactosyltransferase polypeptide 6\'',1170421,'ENSG00000176022','GRCh37','Project:Reference',1167629,'+','None','B3GALT6']
         definitions_gene= pd.DataFrame(list(zip(NodeProperty, Description, Example)),columns=['Node Property', 'Description', 'Example'])
         df= definitions_gene
-        return dash_table.DataTable(id='table_output',data = df.to_dict('records'),columns=[{"name": i, "id": i} for i in df.columns],style_table={'overflowY': 'scroll', 'maxHeight':200,'font-size' : styles['textStyles']['size_font']})
+        return dash_table.DataTable(id='table_output',data = df.to_dict('records'),columns=[{"name": i, "id": i} for i in df.columns],style_table={'overflowY': 'scroll','font-size' : styles['textStyles']['size_font']},page_size=10)
         
     elif node_selection == 'project':
         NodeProperty = ['_gid','_label','_data',    
@@ -78,7 +78,7 @@ def render_callback(href, node_selection):
             'TCGA-LUSC', 'None']
         definitions_gene= pd.DataFrame(list(zip(NodeProperty, Description, Example)),columns=['Node Property', 'Description', 'Example'])
         df= definitions_gene
-        return dash_table.DataTable(id='table_output',data = df.to_dict('records'),columns=[{"name": i, "id": i} for i in df.columns],style_table={'overflowY': 'scroll', 'maxHeight':200,'font-size' : styles['textStyles']['size_font']})
+        return dash_table.DataTable(id='table_output',data = df.to_dict('records'),columns=[{"name": i, "id": i} for i in df.columns],style_table={'overflowY': 'scroll','font-size' : styles['textStyles']['size_font']},page_size=10)
     elif node_selection=='todo':
         return
         
