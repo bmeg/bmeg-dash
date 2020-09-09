@@ -1,6 +1,6 @@
 from bmeg_app.app import app
 import bmeg_app.appLayout as ly
-from bmeg_app.views import app_about, app_tcga, app_drugresp, app_repurpose_drug
+from bmeg_app.views import app_about, app_tcga, app_lit, app_repurpose_drug
 import base64
 import dash
 import dash_html_components as html
@@ -88,7 +88,7 @@ sidebar = html.Div(
                         style={'font-size':styles['textStyles']['size_font_card'],
                         'fontFamily':styles['textStyles']['type_font']
                         },),
-                    dbc.NavLink("Literature Drug Responses", href="/page-3", id="page-3-link",
+                    dbc.NavLink("Literature Gene-Drug Associations", href="/page-3", id="page-3-link",
                         style={'font-size':styles['textStyles']['size_font_card'],
                         'fontFamily':styles['textStyles']['type_font']
                         },),
@@ -132,7 +132,7 @@ def render_page_content(pathname):
     elif pathname == "/page-2":
         return html.Div([app_tcga.tab_layout])    
     elif pathname == "/page-3":
-        return html.Div([app_drugresp.tab_layout]) 
+        return html.Div([app_lit.tab_layout]) 
     elif pathname == "/page-4":
         return html.Div([app_about.tab_layout])
     # If the user tries to reach a different page, return a 404 message

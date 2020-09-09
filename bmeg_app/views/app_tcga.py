@@ -1,6 +1,6 @@
 from ..app import app
 from ..db import G
-from ..components import dresp, basic_plots as bp, gene_cluster as gC
+from ..components import basic_plots as bp, gene_cluster as gC
 from .. import appLayout as ly
 import pandas as pd
 import gripql

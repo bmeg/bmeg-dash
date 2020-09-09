@@ -89,19 +89,19 @@ tab_layout = html.Div(children=[
 @app.callback(
     dash.dependencies.Output('repurp_RESPONSE_dropdown', 'options'),
     [dash.dependencies.Input('repurp_PROJECT_dropdown', 'value')])
-def set_cities_options(selected_project):
+def set_options(selected_project):
     return [{'label': k, 'value': v} for k,v in repurpose.mappings_drugResp(selected_project).items()]
     
 @app.callback(
     dash.dependencies.Output('repurp_RESPONSE_dropdown', 'value'),
     [dash.dependencies.Input('repurp_RESPONSE_dropdown', 'options')])
-def set_cities_value(available_options):
+def set_options(available_options):
     return available_options[0]['value']
     
 @app.callback(
     dash.dependencies.Output('repurp_DRUG_dropdown', 'options'),
     [dash.dependencies.Input('repurp_PROJECT_dropdown', 'value')])
-def set_cities_options(selected_project):
+def set_options(selected_project):
     return [{'label': k, 'value': v} for k,v in repurpose.mappings(selected_project).items()]
 
 @app.callback(
