@@ -183,7 +183,7 @@ def pull_data(dictionary,variantKey1,variantKey2, level):
 def build_bio_table(resultsDict):
     '''
     build biological relevance table
-    ['Curated Isoform','Gene Alias','Gene Info','Oncogene','Tumor Suppressor Gene','Gene Alteration', 'Alteration Type','Alteration Description']
+    ['Curated Isoform','Gene Alias','Gene Info','Oncogene','TS Gene','Gene Alteration', 'Alteration Type','Alteration Description']
     '''
     if 'variant' in resultsDict:
         iso=pull_data(resultsDict, 'gene','curatedIsoform',2)   
@@ -194,7 +194,7 @@ def build_bio_table(resultsDict):
         alter=pull_data(resultsDict, 'alteration','',1) 
         alter_term=pull_data(resultsDict, 'consequence','term',2)
         desp=pull_data(resultsDict, 'consequence','description',2)  
-        return pd.DataFrame(list(zip(iso,alia,nm,og,tsupg,alter,alter_term,desp)),columns=['Curated Isoform','Gene Alias','Gene Info','Oncogene','Tumor Suppressor Gene','Gene Alteration', 'Alteration Type','Alteration Description'])
+        return pd.DataFrame(list(zip(iso,alia,nm,og,tsupg,alter,alter_term,desp)),columns=['Curated Isoform','Gene Alias','Gene Info','Oncogene','TS Gene','Gene Alteration', 'Alteration Type','Alteration Description'])
     else:
         return pd.DataFrame((['-','-','-','-','-','-','-','-'],['-','-','-','-','-','-','-','-'],['-','-','-','-','-','-','-','-']),columns=['Curated Isoform','Gene Alias','Gene Info','Oncogene','Tumor Suppressor Gene','Gene Alteration', 'Alteration Type','Alteration Description'])
     
