@@ -72,9 +72,7 @@ tab_layout = html.Div(children=[
     html.Hr(),
     html.Div(id='baseDF_userSelected', style={'display': 'none'}),
     dcc.Loading(id='pie', type="default",children=html.Div(id="pie")),
-    html.Label('Published Literature Summary'),
     dcc.Loading(id='pubTable', type="default",children=html.Div(id="pubTable")),
-    html.Label('Published Literature Details'),
     dcc.Loading(id='bioTable', type="default",children=html.Div(id="bioTable")),
 ],style={'fontFamily': styles['textStyles']['type_font']})
 
@@ -118,7 +116,7 @@ def render_callback(jsonstring):
     subsetDF = pd.DataFrame.from_dict(temp, orient='index')
     fig_pie = lit.piecharts(subsetDF)
     return html.Div(dcc.Graph(figure=fig_pie)),
-    
+
 @app.callback(Output("pubTable", "children"),
     [Input('baseDF_userSelected', 'children')])
 def render_callback(jsonstring):
@@ -126,18 +124,23 @@ def render_callback(jsonstring):
     temp=json.loads(jsonstring)
     subsetDF = pd.DataFrame.from_dict(temp, orient='index')
     resultsDict = lit.get_resultsDict(subsetDF, 'litETC')
-    df_pub=lit.build_publication_table(resultsDict)
-    content_table = html.Div([dash_table.DataTable(data = df_pub.to_dict('records'),columns=[{"name": i, "id": i} for i in df_pub.columns],
-        style_table={'overflowY':'scroll','maxHeight':200},
+    df=lit.build_publication_table(resultsDict)
+    content_table = dash_table.DataTable(
+        data = df.to_dict('records'),
+        columns=[{"name": i, "id": i} for i in df.columns],
+        style_header={'text-align':'center','backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['textStyles']['size_font'],'fontWeight': 'bold','fontFamily':styles['textStyles']['type_font']},
+        style_cell={'maxWidth':'100px','padding-left': '20px','padding-right': '20px'},
+        style_data={'whiteSpace':'normal','height':'auto','text-align':'center','fontFamily':styles['textStyles']['type_font'],'fontSize':styles['textStyles']['size_font']},
         style_data_conditional=[{'if': {'row_index': 'odd'},'backgroundColor': 'rgb(248, 248, 248)'}],
-        style_header={'backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['textStyles']['size_font'],'fontWeight': 'bold','fontFamily':styles['textStyles']['type_font']},
-        style_data={'fontFamily':styles['textStyles']['type_font'],'fontSize':styles['textStyles']['size_font']},
+        style_table={'overflow':'hidden'},
+        style_as_list_view=True,
+        tooltip_data=[{column: {'value': str(value), 'type': 'markdown'} for column, value in row.items()} for row in df.to_dict('records')],
+        tooltip_duration=None,
         export_format='xlsx',
         export_headers='display',
-        page_size=5,
-        )],style={'width': '98%'}
+        page_size=4,
     )
-    return content_table,
+    return content_table,    
     
     
 @app.callback(Output("bioTable", "children"),
@@ -147,15 +150,20 @@ def render_callback(jsonstring):
     temp=json.loads(jsonstring)
     subsetDF = pd.DataFrame.from_dict(temp, orient='index')
     resultsDict = lit.get_resultsDict(subsetDF, 'litETC')
-    df_bio=lit.build_bio_table(resultsDict)
-    content_table = html.Div([dash_table.DataTable(data = df_bio.to_dict('records'),columns=[{"name": i, "id": i} for i in df_bio.columns],
-        style_table={'overflowY': 'scroll', 'maxHeight':200},
+    df=lit.build_bio_table(resultsDict)
+    content_table = dash_table.DataTable(
+        data = df.to_dict('records'),
+        columns=[{"name": i, "id": i} for i in df.columns],
+        style_header={'text-align':'center','backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['textStyles']['size_font'],'fontWeight': 'bold','fontFamily':styles['textStyles']['type_font']},
+        style_cell={'maxWidth':'100px','padding-left': '20px','padding-right': '20px'},
+        style_data={'whiteSpace':'normal','height':'auto','text-align':'center','fontFamily':styles['textStyles']['type_font'],'fontSize':styles['textStyles']['size_font']},
         style_data_conditional=[{'if': {'row_index': 'odd'},'backgroundColor': 'rgb(248, 248, 248)'}],
-        style_header={'backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['textStyles']['size_font'],'fontWeight': 'bold','fontFamily':styles['textStyles']['type_font']},
-        style_data={'fontFamily':styles['textStyles']['type_font'],'fontSize':styles['textStyles']['size_font']},
+        style_table={'overflow':'hidden'},
+        style_as_list_view=True,
+        tooltip_data=[{column: {'value': str(value), 'type': 'markdown'} for column, value in row.items()} for row in df.to_dict('records')],
+        tooltip_duration=None,
         export_format='xlsx',
         export_headers='display',
-        page_size=5,
-        )],style={'width': '98%'}
+        page_size=3,
     )
     return content_table,
