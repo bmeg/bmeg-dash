@@ -72,9 +72,36 @@ tab_layout = html.Div(children=[
     html.Hr(),
     html.Div(id='baseDF_userSelected', style={'display': 'none'}),
     dcc.Loading(id='pie', type="default",children=html.Div(id="pie")),
+    dbc.Row(html.Button("Download", id="export_button_pub",style={'fontFamily':styles['textStyles']['type_font'],'fontSize':styles['textStyles']['size_font']}), style={'padding-left':styles['buttons']['paddingleft'],'padding-top':styles['buttons']['paddingtop']}),
     dcc.Loading(id='pubTable', type="default",children=html.Div(id="pubTable")),
+    dbc.Row(html.Button("Download", id="export_button_bio",style={'fontFamily':styles['textStyles']['type_font'],'fontSize':styles['textStyles']['size_font']}), style={'padding-left':styles['buttons']['paddingleft'],'padding-top':styles['buttons']['paddingtop']} ),
     dcc.Loading(id='bioTable', type="default",children=html.Div(id="bioTable")),
 ],style={'fontFamily': styles['textStyles']['type_font']})
+
+# TESTING 
+app.clientside_callback(
+    """
+    function(n_clicks) {
+        if (n_clicks > 0)
+            document.querySelector("#export_pubTable button.export").click()
+        return ""
+    }
+    """,
+    Output("export_button_pub", "data-dummy"),
+    [Input("export_button_pub", "n_clicks")]
+)
+
+app.clientside_callback(
+    """
+    function(n_clicks) {
+        if (n_clicks > 0)
+            document.querySelector("#export_pubTable button.export").click()
+        return ""
+    }
+    """,
+    Output("export_button_bio", "data-dummy"),
+    [Input("export_button_bio", "n_clicks")]
+)
 
 
 @app.callback(Output("main_help3", "is_open"),
@@ -126,6 +153,7 @@ def render_callback(jsonstring):
     resultsDict = lit.get_resultsDict(subsetDF, 'litETC')
     df=lit.build_publication_table(resultsDict)
     content_table = dash_table.DataTable(
+        id='export_pubTable',
         data = df.to_dict('records'),
         columns=[{"name": i, "id": i} for i in df.columns],
         style_header={'text-align':'center','backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['textStyles']['size_font'],'fontWeight': 'bold','fontFamily':styles['textStyles']['type_font']},
@@ -152,6 +180,7 @@ def render_callback(jsonstring):
     resultsDict = lit.get_resultsDict(subsetDF, 'litETC')
     df=lit.build_bio_table(resultsDict)
     content_table = dash_table.DataTable(
+        id='export_bioTable',
         data = df.to_dict('records'),
         columns=[{"name": i, "id": i} for i in df.columns],
         style_header={'text-align':'center','backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['textStyles']['size_font'],'fontWeight': 'bold','fontFamily':styles['textStyles']['type_font']},

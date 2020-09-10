@@ -32,5 +32,9 @@ styles = {
         'type_font':'Arial',
         'size_font':12,
         'size_font_card':14,
+    },
+    'buttons': {
+        'paddingleft':'15px',
+        'paddingtop':'15px'
     }
 }
