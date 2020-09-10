@@ -55,17 +55,13 @@ tab_layout = html.Div(children=[
                     options=[
                         {'label': v, 'value': k} for k,v in gene_options.items()],
                     value='ENSG00000198793',
-                    multi=False,
                     ),     
                 ],style={'width': '100%','display': 'inline-block','font-size' : styles['textStyles']['size_font']}), 
             ),
-            dbc.Col(html.Div([
-                html.Label('Drug'),
-                dcc.Dropdown(id='drug_dd',
-                    # options=[
-                    #     {'label': synonym, 'value': gid} for gid,synonym in drug_options.items()],
-                    multi=False,
-                    ),     
+            dbc.Col(html.Div(
+                [
+                    html.Label('Drug'),
+                    dcc.Dropdown(id='drug_dd'),     
                 ],style={'width': '100%','display': 'inline-block','font-size' : styles['textStyles']['size_font']}), 
             )
         ]),
@@ -78,7 +74,6 @@ tab_layout = html.Div(children=[
     dcc.Loading(id='bioTable', type="default",children=html.Div(id="bioTable")),
 ],style={'fontFamily': styles['textStyles']['type_font']})
 
-# TESTING 
 app.clientside_callback(
     """
     function(n_clicks) {

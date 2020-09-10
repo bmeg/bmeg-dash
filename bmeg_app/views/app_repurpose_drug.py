@@ -13,6 +13,8 @@ from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 
+# TODO format export buttons 
+
 ######################
 # Prep
 ######################
@@ -86,6 +88,7 @@ tab_layout = html.Div(children=[
     dcc.Loading(id="figs_repurp",type="default",children=html.Div(id="figs_repurp_out")),
 ],style={'fontFamily': styles['textStyles']['type_font']})
 
+
 @app.callback(
     dash.dependencies.Output('repurp_RESPONSE_dropdown', 'options'),
     [dash.dependencies.Input('repurp_PROJECT_dropdown', 'value')])
@@ -152,29 +155,41 @@ def render_age_hist(selected_project, selected_drugResp, selected_drug, selected
         dbc.Col(dcc.Loading(id="highlight_drugInfo",type="default",children=html.Div(id="card_out")),width=4),
         dbc.Col(dcc.Graph(figure=fig_violin),width=8),
     ])
-    content_table = html.Div([dash_table.DataTable(data = fig_table.to_dict('records'),columns=[{"name": i, "id": i} for i in fig_table.columns],
-        style_table={'overflowY': 'scroll', 'maxHeight':200},
+    content_table = dash_table.DataTable(
+        id='drug_char_table',
+        data = fig_table.to_dict('records'),
+        columns=[{"name": i, "id": i} for i in fig_table.columns],
+        style_header={'text-align':'center','backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['textStyles']['size_font'],'fontWeight': 'bold','fontFamily':styles['textStyles']['type_font']},
+        style_cell={'maxWidth':'100px','padding-left': '20px','padding-right': '20px'},
+        style_data={'whiteSpace':'normal','height':'auto','text-align':'center','fontFamily':styles['textStyles']['type_font'],'fontSize':styles['textStyles']['size_font']},
         style_data_conditional=[{'if': {'row_index': 'odd'},'backgroundColor': 'rgb(248, 248, 248)'}],
-        style_header={'backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['textStyles']['size_font'],'fontWeight': 'bold','fontFamily':styles['textStyles']['type_font']},
-        style_data={'fontFamily':styles['textStyles']['type_font'],'fontSize':styles['textStyles']['size_font']},
+        style_table={'overflow':'hidden'},
+        style_as_list_view=True,
+        tooltip_data=[{column: {'value': str(value), 'type': 'markdown'} for column, value in row.items()} for row in fig_table.to_dict('records')],
+        tooltip_duration=None,
         export_format='xlsx',
-        export_headers='names',
-        page_size=5,        
-        )],style={'width': '98%'}
+        export_headers='display',
+        page_size=5,
     )
+    
     sample_celllines= dbc.Row([
         dbc.Col(dcc.Graph(figure=fig_CL),width=5),
-        dbc.Col(dash_table.DataTable(data = DF_CL.to_dict('records'),columns=[{"name": i, "id": i} for i in DF_CL.columns],
-            style_table={'overflowY': 'scroll', 'maxHeight':200},
+        dbc.Col(dash_table.DataTable(
+            id='sample_char_table',
+            data = DF_CL.to_dict('records'),
+            columns=[{"name": i, "id": i} for i in DF_CL.columns],
+            style_header={'text-align':'center','backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['textStyles']['size_font'],'fontWeight': 'bold','fontFamily':styles['textStyles']['type_font']},
+            style_cell={'maxWidth':'100px','padding-left': '20px','padding-right': '20px'},
+            style_data={'whiteSpace':'normal','height':'auto','text-align':'center','fontFamily':styles['textStyles']['type_font'],'fontSize':styles['textStyles']['size_font']},
             style_data_conditional=[{'if': {'row_index': 'odd'},'backgroundColor': 'rgb(248, 248, 248)'}],
-            style_header={'backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['textStyles']['size_font'],'fontWeight': 'bold','fontFamily':styles['textStyles']['type_font']},
-            style_data={'fontFamily':styles['textStyles']['type_font'],'fontSize':styles['textStyles']['size_font']},
+            style_table={'overflow':'hidden'},
+            style_as_list_view=True,
+            tooltip_data=[{column: {'value': str(value), 'type': 'markdown'} for column, value in row.items()} for row in DF_CL.to_dict('records')],
+            tooltip_duration=None,
             export_format='xlsx',
-            export_headers='names',
+            export_headers='display',
             page_size=5,
-            ),width=7,
-            align='center'
-        ),
+        ),width=7,align='center'),
     ])        
 
     return content_cardsViolin, html.Hr(),html.P('Drug Characteristics'),content_table,dbc.Row(html.P('Sample Characteristics')),sample_celllines,html.P('TODO add second drug selector to compare side by side and pop pie charts and table for it'),
