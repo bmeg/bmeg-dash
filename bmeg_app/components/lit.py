@@ -167,7 +167,7 @@ def build_publication_table(resultsDict):
     if 'cancerType' in resultsDict:
         return pd.DataFrame(list(zip(resultsDict['cancerType'],resultsDict['level'],resultsDict['level_label'],resultsDict['drugAbstracts'])),columns=['Cancer Studied', 'Evidence Level','Evidence Meaning','Study'])
     else:
-        return pd.DataFrame((),columns=['Cancer Studied', 'Evidence Level','Evidence Meaning','Study'])
+        return pd.DataFrame((['-','-','-','-'],['-','-','-','-'],['-','-','-','-'],['-','-','-','-']),columns=['Cancer Studied', 'Evidence Level','Evidence Meaning','Study'])
 
 
 def pull_data(dictionary,variantKey1,variantKey2, level):
@@ -196,7 +196,7 @@ def build_bio_table(resultsDict):
         desp=pull_data(resultsDict, 'consequence','description',2)  
         return pd.DataFrame(list(zip(iso,alia,nm,og,tsupg,alter,alter_term,desp)),columns=['Curated Isoform','Gene Alias','Gene Info','Oncogene','Tumor Suppressor Gene','Gene Alteration', 'Alteration Type','Alteration Description'])
     else:
-        return pd.DataFrame((),columns=['Curated Isoform','Gene Alias','Gene Info','Oncogene','Tumor Suppressor Gene','Gene Alteration', 'Alteration Type','Alteration Description'])
+        return pd.DataFrame((['-','-','-','-','-','-','-','-'],['-','-','-','-','-','-','-','-'],['-','-','-','-','-','-','-','-']),columns=['Curated Isoform','Gene Alias','Gene Info','Oncogene','Tumor Suppressor Gene','Gene Alteration', 'Alteration Type','Alteration Description'])
     
 
 
