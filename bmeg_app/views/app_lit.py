@@ -128,7 +128,7 @@ def render_callback(jsonstring):
     resultsDict = lit.get_resultsDict(subsetDF, 'litETC')
     df_pub=lit.build_publication_table(resultsDict)
     content_table = html.Div([dash_table.DataTable(data = df_pub.to_dict('records'),columns=[{"name": i, "id": i} for i in df_pub.columns],
-        style_table={'overflowY': 'scroll', 'maxHeight':200},
+        style_table={'overflowY':'scroll','maxHeight':200},
         style_data_conditional=[{'if': {'row_index': 'odd'},'backgroundColor': 'rgb(248, 248, 248)'}],
         style_header={'backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['textStyles']['size_font'],'fontWeight': 'bold','fontFamily':styles['textStyles']['type_font']},
         style_data={'fontFamily':styles['textStyles']['type_font'],'fontSize':styles['textStyles']['size_font']},

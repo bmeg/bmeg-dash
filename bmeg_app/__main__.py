@@ -80,7 +80,7 @@ sidebar = html.Div(
         dbc.Collapse(
             dbc.Nav(
                 [
-                    dbc.NavLink("Drug Repurposing", href="/page-1", id="page-1-link",
+                    dbc.NavLink("Compare Drug Treatments", href="/page-1", id="page-1-link",
                         style={'font-size':styles['textStyles']['size_font_card'],
                         'fontFamily':styles['textStyles']['type_font']
                         },),

@@ -177,7 +177,7 @@ def render_age_hist(selected_project, selected_drugResp, selected_drug, selected
         ),
     ])        
 
-    return content_cardsViolin, html.Hr(),html.P('Drug Characteristics'),content_table, html.Hr(),html.P('Sample Characteristics'),sample_celllines,html.P('TODO add second drug selector to compare side by side and pop pie charts and table for it'),
+    return content_cardsViolin, html.Hr(),html.P('Drug Characteristics'),content_table,dbc.Row(html.P('Sample Characteristics')),sample_celllines,html.P('TODO add second drug selector to compare side by side and pop pie charts and table for it'),
 
 
 @app.callback(
