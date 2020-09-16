@@ -1,6 +1,6 @@
 from bmeg_app.app import app
 import bmeg_app.appLayout as ly
-from bmeg_app.views import app_about, app_tcga, app_lit, app_repurpose_drug
+from bmeg_app.views import data_types_view, tumor_match_normal_view, literature_support_view, compare_trt_view
 import base64
 import dash
 import dash_html_components as html
@@ -92,7 +92,7 @@ sidebar = html.Div(
                         style={'font-size':styles['textStyles']['size_font_card'],
                         'fontFamily':styles['textStyles']['type_font']
                         },),
-                    dbc.NavLink("About", href="/page-4", id="page-4-link",
+                    dbc.NavLink("BMEG Data Types", href="/page-4", id="page-4-link",
                         style={'font-size':styles['textStyles']['size_font_card'],
                         'fontFamily':styles['textStyles']['type_font']
                         },),
@@ -128,13 +128,13 @@ def toggle_active_links(pathname):
     [Input("url", "pathname")])
 def render_page_content(pathname):
     if pathname in ["/", "/page-1"]:
-        return html.Div([app_repurpose_drug.tab_layout]) 
+        return html.Div([compare_trt_view.tab_layout]) 
     elif pathname == "/page-2":
-        return html.Div([app_tcga.tab_layout])    
+        return html.Div([tumor_match_normal_view.tab_layout])    
     elif pathname == "/page-3":
-        return html.Div([app_lit.tab_layout]) 
+        return html.Div([literature_support_view.tab_layout]) 
     elif pathname == "/page-4":
-        return html.Div([app_about.tab_layout])
+        return html.Div([data_types_view.tab_layout])
     # If the user tries to reach a different page, return a 404 message
     return dbc.Jumbotron(
         [

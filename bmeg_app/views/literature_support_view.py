@@ -1,6 +1,6 @@
 from ..app import app
 from ..db import G
-from ..components import lit, basic_plots as bp
+from ..components import literature_support_component as lsu, basic_plots as bp
 from .. import appLayout as ly
 import pandas as pd
 import gripql
@@ -21,10 +21,10 @@ main_colors= ly.main_colors
 styles=ly.styles
 
 # Grab baseDF for Page (multiple genes, multi drugs)
-# baseDF = lit.get_baseDF() # commented out for ONLY dev to speed up loading
+# baseDF = lsu.get_baseDF() # commented out for ONLY dev to speed up loading
 # baseDF.to_csv('bmeg_app/source/basedf.tsv',sep='\t',index=False) # commented out for ONLY dev to speed up loading
 baseDF=pd.read_csv('bmeg_app/source/basedf.tsv',sep='\t') # TEMP TODO change to cached
-gene_options = lit.gene_dd_selections(baseDF,'geneID','gene')
+# gene_options = 
 
 ########
 # Page  
@@ -53,7 +53,7 @@ tab_layout = html.Div(children=[
                 html.Label('Gene Symbol'),
                 dcc.Dropdown(id='gene_dd',
                     options=[
-                        {'label': v, 'value': k} for k,v in gene_options.items()],
+                        {'label': l, 'value': gid} for l,gid in lsu.gene_dd_selections(baseDF,'geneID','gene').items()],
                     value='ENSG00000198793',
                     ),     
                 ],style={'width': '100%','display': 'inline-block','font-size' : styles['textStyles']['size_font']}), 
@@ -113,7 +113,7 @@ def toggle_modal(n1, n2, is_open):
     [Input('gene_dd', 'value')])
 def set_options(selected_gene):
     '''dropdown menu - drug'''
-    return [{'label': v, 'value': k} for k,v in lit.drug_dd_selections(selected_gene, 'drugID','drug',baseDF).items()]
+    return [{'label': l, 'value': gid} for gid,l in lsu.drug_dd_selections(selected_gene, 'drugID','drug',baseDF).items()]
 @app.callback(Output('drug_dd', 'value'),
     [Input('drug_dd', 'options')])
 def set_options(available_options):
@@ -126,7 +126,7 @@ def set_options(available_options):
     Input('drug_dd', 'value')])
 def createDF(selected_gene,selected_drug):
     '''Store baseDF filtered for user selected gene, drug'''
-    subsetDF = lit.reduce_df(baseDF, 'geneID', selected_gene, 'drugID', selected_drug)
+    subsetDF = lsu.reduce_df(baseDF, 'geneID', selected_gene, 'drugID', selected_drug)
     return subsetDF.to_json(orient="index") 
         
 
@@ -136,7 +136,7 @@ def render_callback(jsonstring):
     '''create pie charts'''
     temp=json.loads(jsonstring)
     subsetDF = pd.DataFrame.from_dict(temp, orient='index')
-    fig_pie = lit.piecharts(subsetDF)
+    fig_pie = lsu.piecharts(subsetDF)
     return html.Div(dcc.Graph(figure=fig_pie)),
 
 @app.callback(Output("pubTable", "children"),
@@ -145,8 +145,8 @@ def render_callback(jsonstring):
     '''publication info table'''
     temp=json.loads(jsonstring)
     subsetDF = pd.DataFrame.from_dict(temp, orient='index')
-    resultsDict = lit.get_resultsDict(subsetDF, 'litETC')
-    df=lit.build_publication_table(resultsDict)
+    resultsDict = lsu.get_resultsDict(subsetDF, 'litETC')
+    df=lsu.build_publication_table(resultsDict)
     content_table = dash_table.DataTable(
         id='export_pubTable',
         data = df.to_dict('records'),
@@ -172,8 +172,8 @@ def render_callback(jsonstring):
     '''biological relevance info table'''
     temp=json.loads(jsonstring)
     subsetDF = pd.DataFrame.from_dict(temp, orient='index')
-    resultsDict = lit.get_resultsDict(subsetDF, 'litETC')
-    df=lit.build_bio_table(resultsDict)
+    resultsDict = lsu.get_resultsDict(subsetDF, 'litETC')
+    df=lsu.build_bio_table(resultsDict)
     content_table = dash_table.DataTable(
         id='export_bioTable',
         data = df.to_dict('records'),

@@ -8,21 +8,16 @@ from plotly.subplots import make_subplots
 def get_matrix(PROJECT, DRUGRESPONSE):
     '''
     Get row col matrix of cell line vs drug for a specific project. And return dictionary of cellline_caseid:disease state
-    ex. get_matrix('CCLE','$dr._data.aac')
+    ex. get_matrix('Project:CCLE','$dr._data.aac')
     
     disease state
     {'ACH-000956': 'Prostate Cancer',
      'ACH-002219': 'Colon/Colorectal Cancer',...}
     '''
     import gripql
-    import pandas as pd 
-    p1 = []
-    for row in G.query().V().hasLabel("Project"): #start query at vertex and look for labels starting with Project
-        if row.data.project_id.startswith(PROJECT):
-            p1.append(row.gid)
-            
+    import pandas as pd     
     #Drug Matrix == Project > **Case** > Sample > Aliquot > **DrugResponse** > **Compound**
-    q1 = G.query().V(p1).out("cases").as_("p").out("samples").out("aliquots").out("drug_response").as_("dr").out("compounds").as_("c")
+    q1 = G.query().V(PROJECT).out("cases").as_("p").out("samples").out("aliquots").out("drug_response").as_("dr").out("compounds").as_("c")
     q1 = q1.render(["$p._data.case_id", "$c._gid", DRUGRESPONSE,"$p._data.cellline_attributes.Primary Disease"])
     data = {}
     disease = {}
@@ -42,7 +37,8 @@ def compare_drugs(est,drugDF,disease,fig_yaxisLabel, selected_disease):
     '''
     import plotly.graph_objects as go
     import pandas as pd
-    # exclude non-breast cancer derived cell lines
+    est = G.query().V(est).render(['$._data.synonym']).execute()[0][0]
+    # exclude non disease related derived cell lines
     new_col=[]
     for ind in drugDF.index:
         new_col.append(disease[ind])
@@ -74,29 +70,51 @@ def compare_drugs(est,drugDF,disease,fig_yaxisLabel, selected_disease):
     return melt_drugDF, fig
 
 
-def mappings(selected_project):
-    if 'CCLE' == selected_project:
-        q = G.query().V('Project:CCLE').out("cases").as_("p").out("samples").out("aliquots").out("drug_response").as_("dr").out("compounds").as_("c")
-        drugRes = q.aggregate(gripql.term("drugs", '_data.synonym')).execute()
-        drug_opts = [a['key'].upper() for a in drugRes[0]['drugs']['buckets']]
-        drug_opts = {}
-        for a in drugRes[0]['drugs']['buckets']:
-            drug_opts[a['key'].upper()]= a['key']
-        return drug_opts
-    #elif other project...load project specific properties
+def options_project():
+    '''project dropdown menu options '''
+    project_label=['CCLE'] # TODO incorp CTRP and GDSC and check all downstream queries
+    options ={}
+    for row in G.query().V().hasLabel('Project').render(['$._gid']):
+        if project_label[0] in row[0]:
+            options[row[0]]=project_label[0]
+    return options
+
+def options_disease(selected_project):
+    '''disease dropdown menu options'''
+    options={}
+    for row in G.query().V(selected_project).out("cases").render(['$._data.cellline_attributes.Primary Disease']):
+        if row[0] is not None and row[0]!='Unknown':
+            options[row[0]]=''
+    return options
+
+def options_drug(selected_project):
+    '''drug dropdown menu options. if no synonym then use GID'''
+    options={}
+    if selected_project=='Project:CCLE':
+        for row in G.query().V('Project:CCLE').out("cases").as_("p").out("samples").out("aliquots").out("drug_response").as_("dr").out("compounds").as_("c").render(['$._gid','$._data.synonym']):
+            if row[1] is None:
+                options[row[0]]=row[0]
+            else:
+                options[row[0]]=row[1].capitalize()
+    # TODO add elif other project...load project specific properties
+    return options
+
+    
 def mappings_drugResp(selected_project):
-    if 'CCLE' == selected_project:
-        return {
-        'AAC':'$dr._data.aac',
-        'IC50':'$dr._data.ic50',
-        'EC50': '$dr._data.ec50'
-         }
+    if 'Project:CCLE' == selected_project:
+        options = {
+            'AAC':'$dr._data.aac',
+            'IC50':'$dr._data.ic50',
+            'EC50': '$dr._data.ec50'
+             }
+        return options
     #elif other project...load project specific properties
 
 def drugDetails(drugs_list):
     '''
     create table of drugs and their taxon.
     '''
+    print(drugs_list)
     a=[]
     b=[]
     c=[]
@@ -116,6 +134,7 @@ def drugDetails(drugs_list):
             f.append(row[5])
             g.append(row[6])
     df = pd.DataFrame(list(zip(a,b,c,d,e,f,g)),columns=['Drug','PubChem ID','Direct Parent','Kingdom','Superclass','Class','Subclass'])
+    df.to_csv('CHECKING_ORIGINAL.tsv',sep='\t')
     return df
 
 def counting(vals_list):
@@ -151,6 +170,7 @@ def get_histogram_normal(data):
     return fig
     
 def piecharts_celllines(drug1,df, proj):
+    drug1=G.query().V(drug1).render(['$._data.synonym']).execute()[0][0]
     # Grab all cell lines for that selected drug and look up metadata
     # samples = df[df['Drug']==drug1]['Cell Line'].dropna()
     samples = df[df['Drug']==drug1].dropna(subset=['Drug Response'])['Cell Line']

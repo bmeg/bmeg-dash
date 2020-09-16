@@ -1,6 +1,6 @@
 from ..app import app
 from ..db import G
-from ..components import basic_plots as bp, gene_cluster as gC
+from ..components import basic_plots as bp, tumor_match_normal_component as tmn
 from .. import appLayout as ly
 import pandas as pd
 import gripql
@@ -26,8 +26,7 @@ q= q.render(['$gene._gid','$lit._data.response_type'])
 select_genes={}
 for a,b in q:
     select_genes[a]=1
-# clustering options drop dropdown_table 
-option_projects = gC.dropdown_options()
+
 
 ########
 # Page  
@@ -57,8 +56,8 @@ tab_layout = html.Div(children=[
             
             dbc.Col(dcc.Dropdown(
                 id='project-dropdown',
-                options=[{'label': k, 'value': k} for k in option_projects.keys()],
-                value='TCGA-CHOL',
+                options=[{'label': l, 'value': gid} for gid,l in tmn.options_project().items()],
+                value='Project:TCGA-CHOL',
                 ),style={'font-size' : styles['textStyles']['size_font']} ),
             dbc.Col(dcc.Dropdown(id='property-dropdown'), style={'font-size' : styles['textStyles']['size_font']}),
     ]),
@@ -111,10 +110,9 @@ def toggle_modal(n1, n2, is_open):
 @app.callback(Output('intermediate_baseDF', 'children'), 
     [Input('project-dropdown', 'value')])    
 def createDF(selected_project):
-    baseDF = gC.get_df(selected_project,'$c._data.gdc_attributes.diagnoses.tumor_stage')
+    baseDF = tmn.get_df(selected_project,'$c._data.gdc_attributes.diagnoses.tumor_stage')
     return baseDF.to_json(orient="index")    # if selected_project is None: 
-
-# TCGA 
+ 
 @app.callback(Output("umap_fig", "children"),
     [Input('intermediate_baseDF', 'children'),
     Input('property-dropdown', 'value')])
@@ -122,18 +120,18 @@ def render_callback(jsonstring,selected_property):
     temp=json.loads(jsonstring)
     baseDF = pd.DataFrame.from_dict(temp, orient='index')
     if selected_property=='$c._data.gdc_attributes.diagnoses.tumor_stage':
-        fig1=gC.get_umap(baseDF, 'UMAP', selected_property.split('.')[-1])
+        fig1=tmn.get_umap(baseDF, 'UMAP', selected_property.split('.')[-1])
         return dcc.Graph(figure=fig1),
     else:
-        updatedDF= gC.update_umap(selected_property, baseDF)
-        fig1=gC.get_umap(updatedDF, 'UMAP', selected_property.split('.')[-1])
+        updatedDF= tmn.update_umap(selected_property, baseDF)
+        fig1=tmn.get_umap(updatedDF, 'UMAP', selected_property.split('.')[-1])
         return dcc.Graph(figure=fig1),
         
 @app.callback(
     dash.dependencies.Output('property-dropdown', 'options'),
     [dash.dependencies.Input('project-dropdown', 'value')])
 def set_cities_options(selected_project):
-    return [{'label': k, 'value': v} for k,v in gC.mappings(selected_project).items()]
+    return [{'label': l, 'value': query_string} for l,query_string in tmn.options_property(selected_project).items()]
     
 @app.callback(
     dash.dependencies.Output('property-dropdown', 'value'),

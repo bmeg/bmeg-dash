@@ -1,6 +1,6 @@
 from ..app import app
 from ..db import G
-from ..components import basic_plots as bp, cards
+from ..components import basic_plots as bp, data_types_component as dty
 from .. import appLayout as ly
 import pandas as pd
 import gripql
@@ -92,7 +92,7 @@ def render_callback(href):
     res = {}
     for l in nodes_interest:
         res[l] = G.query().V().hasLabel(l).count().execute()[0]['count']
-    fig= cards.counts(100, res,main_colors['lightgrey'],styles['textStyles']['type_font'])
+    fig= dty.counts(100, res,main_colors['lightgrey'],styles['textStyles']['type_font'])
     return dcc.Graph(id='cards_output', figure=fig),
         
     

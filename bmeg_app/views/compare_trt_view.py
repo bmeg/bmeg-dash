@@ -1,6 +1,6 @@
 from ..app import app
 from ..db import G
-from ..components import func_repurpose_drug as repurpose
+from ..components import compare_trt_component as ctrt
 from .. import appLayout as ly
 import pandas as pd
 import gripql
@@ -55,22 +55,21 @@ tab_layout = html.Div(children=[
             dbc.Col(
                 html.Div([
                     html.Label('Dataset'),
-                    dcc.Dropdown(id='repurp_PROJECT_dropdown',options=[{'label': a, 'value': a} for a in ['CCLE']],value='CCLE')
+                    dcc.Dropdown(id='repurp_PROJECT_dropdown',options=[{'label': l, 'value': gid} for gid,l in ctrt.options_project().items()],value='Project:CCLE')
                 ],
                 style={'width': '100%', 'display': 'inline-block','font-size' : styles['textStyles']['size_font']})
             ),
             dbc.Col(
                 html.Div([
                     html.Label('Disease'),
-                    # TODO: add all disease types to drop down menu
-                    dcc.Dropdown(id='repurp_DISEASE_dropdown',options=[{'label':'Breast Cancer', 'value': 'Breast Cancer'}],value='Breast Cancer', style={'font-size' : styles['textStyles']['size_font']})
+                    dcc.Dropdown(id='repurp_DISEASE_dropdown', value='Breast Cancer', style={'font-size' : styles['textStyles']['size_font']})
                 ],
                 style={'width': '100%', 'display': 'inline-block','font-size' : styles['textStyles']['size_font']})
             ),
             dbc.Col(
                 html.Div([
                     html.Label('Drug Treatment'),
-                    dcc.Dropdown(id='repurp_DRUG_dropdown', value='PACLITAXEL', style={'font-size' : styles['textStyles']['size_font']})
+                    dcc.Dropdown(id='repurp_DRUG_dropdown', value='Compound:CID36314', style={'font-size' : styles['textStyles']['size_font']})
                 ],
                 style={'width': '100%', 'display': 'inline-block','font-size' : styles['textStyles']['size_font']})
             ),
@@ -93,26 +92,31 @@ tab_layout = html.Div(children=[
     dash.dependencies.Output('repurp_RESPONSE_dropdown', 'options'),
     [dash.dependencies.Input('repurp_PROJECT_dropdown', 'value')])
 def set_options(selected_project):
-    return [{'label': k, 'value': v} for k,v in repurpose.mappings_drugResp(selected_project).items()]
-    
+    return [{'label': k, 'value': v} for k,v in ctrt.mappings_drugResp(selected_project).items()]
 @app.callback(
     dash.dependencies.Output('repurp_RESPONSE_dropdown', 'value'),
     [dash.dependencies.Input('repurp_RESPONSE_dropdown', 'options')])
 def set_options(available_options):
     return available_options[0]['value']
+
+@app.callback(
+    dash.dependencies.Output('repurp_DISEASE_dropdown', 'options'),
+    [dash.dependencies.Input('repurp_PROJECT_dropdown', 'value')])
+def set_options(selected_project):
+    return [{'label': k, 'value': k} for k in ctrt.options_disease(selected_project).keys()]
+
     
 @app.callback(
     dash.dependencies.Output('repurp_DRUG_dropdown', 'options'),
     [dash.dependencies.Input('repurp_PROJECT_dropdown', 'value')])
 def set_options(selected_project):
-    return [{'label': k, 'value': v} for k,v in repurpose.mappings(selected_project).items()]
+    return [{'label': l, 'value': gid} for gid,l in ctrt.options_drug(selected_project).items()]
 
 @app.callback(
     dash.dependencies.Output('highlight_drugInfo', 'children'),
     [dash.dependencies.Input('repurp_DRUG_dropdown', 'value')])
 def render_callback(DRUG):
-    q=G.query().V().hasLabel('Compound').has(gripql.eq('_data.synonym', DRUG))
-    q=q.render(['_data.synonym','_data.pubchem_id','_data.taxonomy.description'])
+    q=G.query().V(DRUG).render(['_data.synonym','_data.pubchem_id','_data.taxonomy.description'])
     for row in q:
         print('starting search')
         header = row[0].upper() + ' ('+ row[1]+')'
@@ -125,7 +129,8 @@ def render_callback(DRUG):
             ]),
         color="info", inverse=True,style={'Align': 'center', 'width':'98%','fontFamily':styles['textStyles']['type_font']})
     return fig,
-    
+
+# TODO fix drug selection to be value instead of label (update query)    
 @app.callback(Output("figs_repurp", "children"),
     [Input('repurp_PROJECT_dropdown', 'value'),
     Input('repurp_RESPONSE_dropdown', 'value'),
@@ -133,23 +138,22 @@ def render_callback(DRUG):
     Input('repurp_DISEASE_dropdown','value')])
 def render_age_hist(selected_project, selected_drugResp, selected_drug, selected_disease):
     # Query
-    drugDF, disease = repurpose.get_matrix(selected_project,selected_drugResp)
+    drugDF, disease = ctrt.get_matrix(selected_project,selected_drugResp)
     # Preprocess:Rename drugs to common name
     drugDF=drugDF[drugDF.columns.drop(list(drugDF.filter(regex='NO_ONTOLOGY')))] # TODO fix it so dont have to drop
     cols=drugDF.columns
-    common=[]
-    for compound in cols:
-        q=G.query().V().hasLabel('Compound').has(gripql.eq('_gid',compound)).as_('c').render(['$c._data.synonym'])
-        for row in q:
-            common.append(row[0])
-    drugDF.columns=common
+    colRemap={}
+    for row in G.query().V( list(cols) ).render(['$._gid', '$.synonym']):
+        colRemap[row[0]] = row[1]
+    common = list( colRemap[i] for i in drugDF.columns )
+    drugDF.columns=common    
     # Final processing + figure violins
-    finalDF,fig_violin = repurpose.compare_drugs(selected_drug, drugDF, disease,'Drug Response Metric',selected_disease )
+    finalDF,fig_violin = ctrt.compare_drugs(selected_drug, drugDF, disease,'Drug Response Metric',selected_disease )
     finalDF.to_csv('TESTING_OUTPUT.tsv',sep='\t')
     # Figure drug table
-    fig_table = repurpose.drugDetails(common)
+    fig_table = ctrt.drugDetails(common)
     # Cell line (pie charts and df)
-    fig_CL, DF_CL=repurpose.piecharts_celllines(selected_drug,finalDF,'Project:'+selected_project)
+    fig_CL, DF_CL=ctrt.piecharts_celllines(selected_drug,finalDF,'Project:'+selected_project)
     # format layout 
     content_cardsViolin = dbc.Row([
         dbc.Col(dcc.Loading(id="highlight_drugInfo",type="default",children=html.Div(id="card_out")),width=4),

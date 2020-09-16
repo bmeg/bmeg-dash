@@ -2,12 +2,10 @@ from ..db import G
 import pandas as pd
 import gripql
 
-def gene_dd_selections(df, colKEY, colVALUE):
-    '''
-    Input gene options
-    '''
-    dict1 = dict(zip(df[colKEY],df[colVALUE]))
-    return dict1
+def gene_dd_selections(df, colVALUE, colKEY):
+    '''Gene dropdown menu options. Input gene symbol or ensembl id'''
+    options = dict(zip(df[colKEY],df[colVALUE]))
+    return options
     
     
 def drug_dd_selections(selected_gene, colKEY, colVALUE, baseDF):
@@ -15,8 +13,8 @@ def drug_dd_selections(selected_gene, colKEY, colVALUE, baseDF):
     Get drug selections avail for the user selected gene
     '''
     filtered1= baseDF[baseDF['geneID']==selected_gene].reset_index(drop=True)
-    dict1 = dict(zip(filtered1[colKEY],filtered1[colVALUE]))
-    return dict1
+    options = dict(zip(filtered1[colKEY],filtered1[colVALUE]))
+    return options
     
     
 def reduce_df(df, col, col_value, col2, col2_value):
