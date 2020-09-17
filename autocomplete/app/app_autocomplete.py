@@ -75,7 +75,11 @@ def update_multi_options(search_value, value):
     [dash.dependencies.Input('process-single', 'n_clicks')],
     [dash.dependencies.State('single-dropdown', 'value')])
 def process_single(n_clicks, value):
-    return f'The input value was "{value}", button was clicked {n_clicks}'
+    """As an example backend, call ensemble."""
+    if not value:
+        raise PreventUpdate
+    phenotypes = fetch_phenotypes(value.split('/')[1])
+    return f'phenotypes: {phenotypes} '
 
 
 @app.callback(
@@ -83,7 +87,11 @@ def process_single(n_clicks, value):
     [dash.dependencies.Input('process-multiple', 'n_clicks')],
     [dash.dependencies.State('multi-dropdown', 'value')])
 def process_multiple(n_clicks, value):
-    return f'The input value was "{value}", button was clicked {n_clicks}'
+    """As an example backend, call ensemble."""
+    if not value:
+        raise PreventUpdate
+    phenotypes = [fetch_phenotypes(v.split('/')[1]) for v in value]
+    return f'phenotypes: {phenotypes}'
 
 
 # listen on all ports

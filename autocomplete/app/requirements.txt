@@ -6,3 +6,5 @@ python-i18n[YAML]
 elasticsearch-dsl>=7.0.0,<8.0.0
 # cli
 Click
+# example ensembl backend
+requests[security]
