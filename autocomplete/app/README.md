@@ -11,8 +11,12 @@ Given
 
 ```
 
+# drop the elastic index
 DELETE genes
 
+# setup elastic index.
+# define two fields [symbol, ensemble_id] as `search_as_you_type`
+# use the `simple_pattern_split` tokenizer to remove "ENSG0*" from the ensemble_id search index
 PUT genes
 {
   "settings": {
@@ -43,6 +47,8 @@ PUT genes
   }
 }
 
+# add some test data
+
 PUT genes/_doc/ENSG00000121410?refresh
 {
   "ensemble_id": "ENSG00000121410",
@@ -55,6 +61,7 @@ PUT genes/_doc/ENSG00000073331?refresh
   "symbol": "ALPK1"    
 }
 
+# example searches
 
 POST genes/_search
 {
@@ -181,3 +188,79 @@ pprint([h for h in search])
 # >>> [<Hit(genes/ENSG00000073331): {'ensemble_id': 'ENSG00000073331', 'symbol': 'ALPK1'}>]
 
 ```
+
+## docker compose
+
+```
+alias dc=docker-compose
+
+# start all
+dc up -d
+
+# status
+dc ps
+
+# show logs
+dc logs
+
+# show logs for app
+dc logs app
+
+# rebuild app
+dc stop app ; dc rm -f app  ; dc build app
+
+# load data, etc 
+dc exec app bash
+>> root@13e50cf7f2c5:/app#
+
+# rebuild elastic index
+dc exec app bash
+>> root@13e50cf7f2c5:/app# 
+cd data
+./fetch-gene-names.sh
+./setup-elastic.sh
+./load_genes.py
+
+
+```
+
+## services
+
+```
+# elastic
+curl localhost:9200
+{
+  "name" : "elastic",
+  "cluster_name" : "odfe-cluster",
+  "cluster_uuid" : "v54nupTqTH2iezTxZGE6kw",
+  "version" : {
+    "number" : "7.9.1",
+    "build_flavor" : "oss",
+    "build_type" : "docker",
+    "build_hash" : "083627f112ba94dffc1232e8b42b73492789ef91",
+    "build_date" : "2020-09-01T21:22:21.964974Z",
+    "build_snapshot" : false,
+    "lucene_version" : "8.6.2",
+    "minimum_wire_compatibility_version" : "6.8.0",
+    "minimum_index_compatibility_version" : "6.0.0-beta1"
+  },
+  "tagline" : "You Know, for Search"
+}
+
+## kibana
+
+> provided as a convenience for exploring data, not required
+
+![image](https://user-images.githubusercontent.com/47808/93501339-2b31fd00-f8ca-11ea-83e0-e035d4887fc9.png)
+
+## dash app
+
+`http://localhost:8050/`
+
+
+## sample `backend`
+
+* To introduce some realistic lag, we added a simple call to retrieve phenotypes per gene.
+
+![image](https://user-images.githubusercontent.com/47808/93521354-cb951b00-f8e4-11ea-865c-9d26b74b7c54.png)
+

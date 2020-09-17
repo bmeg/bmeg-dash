@@ -41,6 +41,7 @@ services:
   app:
     build: ./app
     container_name: odfe-app
+    # for development: map host directory to container's /app directory
     volumes: 
     - ./app:/app  
     ports:
