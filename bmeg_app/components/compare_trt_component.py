@@ -4,70 +4,74 @@ import pandas as pd
 from collections import Counter
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-
-def get_matrix(PROJECT, DRUGRESPONSE):
-    '''
-    Get row col matrix of cell line vs drug for a specific project. And return dictionary of cellline_caseid:disease state
-    ex. get_matrix('Project:CCLE','$dr._data.aac')
     
-    disease state
-    {'ACH-000956': 'Prostate Cancer',
-     'ACH-002219': 'Colon/Colorectal Cancer',...}
-    '''
-    import gripql
-    import pandas as pd     
-    #Drug Matrix == Project > **Case** > Sample > Aliquot > **DrugResponse** > **Compound**
-    q1 = G.query().V(PROJECT).out("cases").as_("p").out("samples").out("aliquots").out("drug_response").as_("dr").out("compounds").as_("c")
-    q1 = q1.render(["$p._data.case_id", "$c._gid", DRUGRESPONSE,"$p._data.cellline_attributes.Primary Disease"])
+def line2disease(CELLLINES):
+    '''Dictionary mapping cell line GID to reported primary disease'''
+    # some vals are None
+    disease_dict = {}
+    q=G.query().V(CELLLINES).render(["$._gid",'$._data.cellline_attributes.Primary Disease'])
+    for row in q:
+        disease_dict[row[0]]=row[1]
+    return disease_dict
+
+
+def get_base_matrix(PROJECT, DRUGRESPONSE,est,selected_disease):
+    '''Get row col matrix of cell line vs drug for a specific project'''   
+    # Query results
+    q1 = G.query().V(PROJECT).out("cases").as_("ca").out("samples").out("aliquots").out("drug_response").as_("dr").out("compounds").as_("c")
+    q1 = q1.render(["$ca._gid", "$c._gid", DRUGRESPONSE])
     data = {}
-    disease = {}
     for row in q1:
-        disease[row[0]]=row[3]
         if row[0] not in data: 
             data[row[0]] = { row[1] :  row[2] } 
         else: 
             data[row[0]][row[1]] = row[2]  
     drugDF = pd.DataFrame(data).transpose()
-    drugDF = drugDF.sort_index().sort_index(axis=1) #sort rows by cell line name, sort cols by drug name
-    return drugDF, disease
-
-def compare_drugs(est,drugDF,disease,fig_yaxisLabel, selected_disease):
-    '''
-    ex. compare_drugs('PACLITAXEL',drugDF,disease,'Breast Cancer')
-    '''
-    import plotly.graph_objects as go
-    import pandas as pd
-    est = G.query().V(est).render(['$._data.synonym']).execute()[0][0]
+    drugDF = drugDF.sort_index().sort_index(axis=1) #sort by rows, cols
+    # create disease mapping dict
+    disease =line2disease(list(drugDF.index))
     # exclude non disease related derived cell lines
     new_col=[]
-    for ind in drugDF.index:
-        new_col.append(disease[ind])
+    for a in list(drugDF.index):
+        new_col.append(disease.get(a))
     drugDF['disease']=new_col
-    drugDF=drugDF[drugDF['disease']==selected_disease]
-    # set established drug to first col
-    new_col=drugDF.pop(est)
-    drugDF.insert(0, est, new_col)
-    drugDF.pop('disease')
-    # Melt df (cols: cellline, drug, value)
-    melt_drugDF= drugDF
-    melt_drugDF['Cell Line']=melt_drugDF.index
-    melt_drugDF= melt_drugDF.melt(id_vars=['Cell Line'])
-    melt_drugDF.columns=['Cell Line', 'Drug', 'Drug Response']
+    subsetDF=drugDF[drugDF['disease']==selected_disease]
+    # set established drug to first col and rm disease col
+    new_col=subsetDF.pop(est)
+    subsetDF.insert(0, est, new_col)
+    subsetDF.pop('disease')
+    return subsetDF
+    
+    
+def get_table(df,disease,fig_yaxisLabel):
+    '''Return melted df'''
+    df['Cell Line']=df.index
+    df= df.melt(id_vars=['Cell Line'])
+    df.columns=['Cell Line', 'Drug', 'Drug Response']
+    return df
+    
+    
+def violins(compound,df,fig_yaxisLabel):
+    '''    '''
+    import plotly.graph_objects as go
+    import pandas as pd
+    compound = G.query().V(compound).render(['$._data.synonym']).execute()[0][0]
+
     # Generate violin plots
     fig = go.Figure()
-    drugs = list(set(melt_drugDF['Drug']))
-    assert est in drugs
-    drugs.remove(est)
-    drugs.insert(0,est) # place established drug at index0
+    drugs = list(set(df['Drug']))
+    assert compound in drugs
+    drugs.remove(compound)
+    drugs.insert(0,compound) # place established drug at index0
 
     for d in drugs:
-        fig.add_trace(go.Violin(x=melt_drugDF['Drug'][melt_drugDF['Drug'] == d],
-                                y=melt_drugDF['Drug Response'][melt_drugDF['Drug'] == d],
+        fig.add_trace(go.Violin(x=df['Drug'][df['Drug'] == d],
+                                y=df['Drug Response'][df['Drug'] == d],
                                 name=d,box_visible=True,meanline_visible=True))
     fig.update_layout(margin={'t':10, 'b':10},height=400,yaxis=dict(title=fig_yaxisLabel))
     fig.update_xaxes(tickangle=45)
     fig.update_layout(showlegend=False)
-    return melt_drugDF, fig
+    return fig
 
 
 def options_project():
@@ -114,7 +118,6 @@ def drugDetails(drugs_list):
     '''
     create table of drugs and their taxon.
     '''
-    print(drugs_list)
     a=[]
     b=[]
     c=[]
@@ -169,29 +172,26 @@ def get_histogram_normal(data):
     fig.update_yaxes(showticklabels=False)
     return fig
     
-def piecharts_celllines(drug1,df, proj):
-    drug1=G.query().V(drug1).render(['$._data.synonym']).execute()[0][0]
-    # Grab all cell lines for that selected drug and look up metadata
-    # samples = df[df['Drug']==drug1]['Cell Line'].dropna()
-    samples = df[df['Drug']==drug1].dropna(subset=['Drug Response'])['Cell Line']
-    sample=[]
-    a=[]
-    b=[]
-    c=[]
-    for s in samples:
-        q=G.query().V().hasLabel('Case').has(gripql.eq('$._data.case_id', s)).has(gripql.eq('$._data.project_id', proj)).as_('c')
-        q=q.render(['$c._data.cellline_attributes.Gender','$c._data.cellline_attributes.Subtype Disease'])
-        for gender, subtype in q:
-            sample.append(s)
-            a.append(gender)
-            b.append(subtype)
-    resDF=pd.DataFrame(list(zip(sample,a,b)),columns=['Cell Line (Sample)','Gender','Subtype'])
-    # Pie charts
+def sample_table(df):
+    '''table of pie chart details. cols [Cell Line,Drug,Drug Response,Gender,Subtype,Disease Subtype]'''
+    lookup={}
+    for row in G.query().V(list(df['Cell Line'])).render(['$._gid','$._data.cellline_attributes.Gender','$._data.cellline_attributes.Subtype Disease']):
+        lookup[row[0]]=[row[1],row[2]]
+    new_col1=[]
+    new_col2=[]
+    for c in df['Cell Line']:
+        new_col1.append(lookup.get(c)[0])
+        new_col2.append(lookup.get(c)[1])
+    df['Gender']=new_col1
+    df['Disease Subtype']=new_col2
+    return df
+    
+def piecharts_celllines(df):
     fig = make_subplots(rows=1, cols=2, specs=[[{'type':'domain'}, {'type':'domain'}]])
-    lab,cts=counting(resDF['Gender'])
+    lab,cts=counting(df['Gender'])
     fig.add_trace(go.Pie(labels=lab, values=cts,textinfo='label+percent', name="Gender",legendgroup='group1',showlegend=True),1, 1)
-    lab,cts=counting(resDF['Subtype'])
+    lab,cts=counting(df['Disease Subtype'])
     fig.add_trace(go.Pie(labels=lab, values=cts,textinfo='label+percent', name="Gender",legendgroup='group2',showlegend=True),1, 2)
     fig.update_traces(textposition='inside', textinfo='percent+label')
     fig.update_layout(showlegend=False,margin={'t':0, 'b':0,'r':0,'l':0})
-    return fig, resDF
+    return fig    

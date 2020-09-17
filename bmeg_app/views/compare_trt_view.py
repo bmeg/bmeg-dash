@@ -12,6 +12,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
+import json 
 
 # TODO format export buttons 
 
@@ -83,8 +84,24 @@ tab_layout = html.Div(children=[
         ]
     ),
     html.Hr(),
-    # dcc.Loading(id="highlight_drugInfo",type="default",children=html.Div(id="card_out")),
-    dcc.Loading(id="figs_repurp",type="default",children=html.Div(id="figs_repurp_out")),
+    
+    html.Div(id='baseDF_userSelected_ctrt', style={'display': 'none'}),
+
+
+    dbc.Row([
+        dbc.Col(dcc.Loading(id="highlight_drugInfo",type="default",children=html.Div(id="card_out")),width=4),  
+        dbc.Col(dcc.Loading(id="violin_plot",type="default",children=html.Div(id="violin_plot_out")),width=8),
+    ]),
+    
+    html.Hr(),
+    html.P('Drug Characteristics'),
+    dcc.Loading(id="drug_char_table",type="default",children=html.Div(id="drug_char_table_out")),
+     
+    dbc.Row(html.P('Sample Characteristics')),
+    dcc.Loading(id="sample_char_table",type="default",children=html.Div(id="sample_char_table_out")),
+     
+     
+    # dcc.Loading(id="figs_repurp",type="default",children=html.Div(id="figs_repurp_out")),
 ],style={'fontFamily': styles['textStyles']['type_font']})
 
 
@@ -130,15 +147,27 @@ def render_callback(DRUG):
         color="info", inverse=True,style={'Align': 'center', 'width':'98%','fontFamily':styles['textStyles']['type_font']})
     return fig,
 
-# TODO fix drug selection to be value instead of label (update query)    
-@app.callback(Output("figs_repurp", "children"),
+
+@app.callback(Output('baseDF_userSelected_ctrt', 'children'), 
     [Input('repurp_PROJECT_dropdown', 'value'),
     Input('repurp_RESPONSE_dropdown', 'value'),
-    Input('repurp_DRUG_dropdown', 'value'),
+    Input('repurp_DRUG_dropdown','value'),
     Input('repurp_DISEASE_dropdown','value')])
-def render_age_hist(selected_project, selected_drugResp, selected_drug, selected_disease):
-    # Query
-    drugDF, disease = ctrt.get_matrix(selected_project,selected_drugResp)
+def createDF(selected_project,selected_drugResp,selected_drug,selected_disease):
+    '''Store intermediate df filtered for user selected project and drug response metric'''
+    drugDF = ctrt.get_base_matrix(selected_project,selected_drugResp,selected_drug,selected_disease)
+    print('dim of intermediate df: ', drugDF.shape)
+    return drugDF.to_json(orient="index") 
+
+
+@app.callback(Output("violin_plot", "children"),
+    [Input('baseDF_userSelected_ctrt', 'children'),
+    Input('repurp_DRUG_dropdown', 'value')])
+def render_callback(jsonstring, selected_drug):
+    '''create violin plot'''
+    temp=json.loads(jsonstring)
+    drugDF = pd.DataFrame.from_dict(temp, orient='index')
+    disease_dict = ctrt.line2disease(list(drugDF.index))
     # Preprocess:Rename drugs to common name
     drugDF=drugDF[drugDF.columns.drop(list(drugDF.filter(regex='NO_ONTOLOGY')))] # TODO fix it so dont have to drop
     cols=drugDF.columns
@@ -146,20 +175,30 @@ def render_age_hist(selected_project, selected_drugResp, selected_drug, selected
     for row in G.query().V( list(cols) ).render(['$._gid', '$.synonym']):
         colRemap[row[0]] = row[1]
     common = list( colRemap[i] for i in drugDF.columns )
-    drugDF.columns=common    
-    # Final processing + figure violins
-    finalDF,fig_violin = ctrt.compare_drugs(selected_drug, drugDF, disease,'Drug Response Metric',selected_disease )
-    finalDF.to_csv('TESTING_OUTPUT.tsv',sep='\t')
-    # Figure drug table
-    fig_table = ctrt.drugDetails(common)
-    # Cell line (pie charts and df)
-    fig_CL, DF_CL=ctrt.piecharts_celllines(selected_drug,finalDF,'Project:'+selected_project)
+    drugDF.columns=common  
+    # Create violin plots
+    fig=ctrt.violins(selected_drug, ctrt.get_table(drugDF,disease_dict,'Selected Drug Response Metric'),'Drug Response Metric' )
     # format layout 
-    content_cardsViolin = dbc.Row([
-        dbc.Col(dcc.Loading(id="highlight_drugInfo",type="default",children=html.Div(id="card_out")),width=4),
-        dbc.Col(dcc.Graph(figure=fig_violin),width=8),
-    ])
-    content_table = dash_table.DataTable(
+    return dcc.Graph(figure=fig),
+    
+        
+
+@app.callback(Output("drug_char_table", "children"),
+    [Input('baseDF_userSelected_ctrt', 'children')])
+def render_callback(jsonstring):
+    '''create drug characteristics table'''
+    temp=json.loads(jsonstring)
+    baseDF = pd.DataFrame.from_dict(temp, orient='index')
+    # Preprocess:Rename drugs to common name
+    df=baseDF[baseDF.columns.drop(list(baseDF.filter(regex='NO_ONTOLOGY')))] # TODO fix it so dont have to drop
+    cols=df.columns
+    colRemap={}
+    for row in G.query().V( list(cols) ).render(['$._gid', '$.synonym']):
+        colRemap[row[0]] = row[1]
+    common = list( colRemap[i] for i in df.columns )
+    df.columns=common  
+    fig_table = ctrt.drugDetails(common)
+    table_res = dash_table.DataTable(
         id='drug_char_table',
         data = fig_table.to_dict('records'),
         columns=[{"name": i, "id": i} for i in fig_table.columns],
@@ -175,28 +214,102 @@ def render_age_hist(selected_project, selected_drugResp, selected_drug, selected
         export_headers='display',
         page_size=5,
     )
+    return table_res,
     
+    
+@app.callback(Output("sample_char_table", "children"),
+    [Input('baseDF_userSelected_ctrt', 'children')])
+def render_callback(jsonstring):
+    '''create pie charts'''
+    temp=json.loads(jsonstring)
+    baseDF = pd.DataFrame.from_dict(temp, orient='index')
+    disease_dict = ctrt.line2disease(list(baseDF.index))
+    # Preprocess:Rename drugs to common name
+    df2=baseDF[baseDF.columns.drop(list(baseDF.filter(regex='NO_ONTOLOGY')))] # TODO fix it so dont have to drop
+    cols=df2.columns
+    colRemap={}
+    for row in G.query().V( list(cols) ).render(['$._gid', '$.synonym']):
+        colRemap[row[0]] = row[1]
+    common = list( colRemap[i] for i in df2.columns )
+    df2.columns=common  
+    df3 = ctrt.get_table(df2,disease_dict,'Selected Drug Response Metric')
+    fig_table = ctrt.sample_table(df3)
+    fig =ctrt.piecharts_celllines(df3)
     sample_celllines= dbc.Row([
-        dbc.Col(dcc.Graph(figure=fig_CL),width=5),
+        dbc.Col(dcc.Graph(figure=fig),width=5),
         dbc.Col(dash_table.DataTable(
             id='sample_char_table',
-            data = DF_CL.to_dict('records'),
-            columns=[{"name": i, "id": i} for i in DF_CL.columns],
+            data = fig_table.to_dict('records'),
+            columns=[{"name": i, "id": i} for i in fig_table.columns],
             style_header={'text-align':'center','backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['textStyles']['size_font'],'fontWeight': 'bold','fontFamily':styles['textStyles']['type_font']},
             style_cell={'maxWidth':'100px','padding-left': '20px','padding-right': '20px'},
             style_data={'whiteSpace':'normal','height':'auto','text-align':'center','fontFamily':styles['textStyles']['type_font'],'fontSize':styles['textStyles']['size_font']},
             style_data_conditional=[{'if': {'row_index': 'odd'},'backgroundColor': 'rgb(248, 248, 248)'}],
             style_table={'overflow':'hidden'},
             style_as_list_view=True,
-            tooltip_data=[{column: {'value': str(value), 'type': 'markdown'} for column, value in row.items()} for row in DF_CL.to_dict('records')],
+            tooltip_data=[{column: {'value': str(value), 'type': 'markdown'} for column, value in row.items()} for row in fig_table.to_dict('records')],
             tooltip_duration=None,
             export_format='xlsx',
             export_headers='display',
             page_size=5,
         ),width=7,align='center'),
     ])        
+    return sample_celllines
 
-    return content_cardsViolin, html.Hr(),html.P('Drug Characteristics'),content_table,dbc.Row(html.P('Sample Characteristics')),sample_celllines,html.P('TODO add second drug selector to compare side by side and pop pie charts and table for it'),
+
+    
+
+
+
+    
+    
+    
+    
+# @app.callback(Output("figs_repurp", "children"),
+#     [Input('baseDF_userSelected_ctrt', 'children'),
+#     Input('repurp_PROJECT_dropdown', 'value'),
+#     Input('repurp_RESPONSE_dropdown', 'value'),
+#     Input('repurp_DRUG_dropdown', 'value'),
+#     Input('repurp_DISEASE_dropdown','value')])
+# def render_callback(jsonstring,selected_project, selected_drugResp, selected_drug, selected_disease):
+#     '''create pie charts'''
+#     temp=json.loads(jsonstring)
+#     drugDF = pd.DataFrame.from_dict(temp, orient='index')
+#     disease_dict = ctrt.line2disease(list(drugDF.index))
+# 
+#     # Preprocess:Rename drugs to common name
+#     drugDF=drugDF[drugDF.columns.drop(list(drugDF.filter(regex='NO_ONTOLOGY')))] # TODO fix it so dont have to drop
+#     cols=drugDF.columns
+#     colRemap={}
+#     for row in G.query().V( list(cols) ).render(['$._gid', '$.synonym']):
+#         colRemap[row[0]] = row[1]
+#     common = list( colRemap[i] for i in drugDF.columns )
+#     drugDF.columns=common  
+#     # Create table
+#     finalDF = ctrt.get_table(drugDF,disease_dict,'Selected Drug Response Metric')
+#     DF_CL = ctrt.sample_table(finalDF)
+#     fig_CL =ctrt.piecharts_celllines(finalDF)
+#     sample_celllines= dbc.Row([
+#         dbc.Col(dcc.Graph(figure=fig_CL),width=5),
+#         dbc.Col(dash_table.DataTable(
+#             id='sample_char_table',
+#             data = DF_CL.to_dict('records'),
+#             columns=[{"name": i, "id": i} for i in DF_CL.columns],
+#             style_header={'text-align':'center','backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['textStyles']['size_font'],'fontWeight': 'bold','fontFamily':styles['textStyles']['type_font']},
+#             style_cell={'maxWidth':'100px','padding-left': '20px','padding-right': '20px'},
+#             style_data={'whiteSpace':'normal','height':'auto','text-align':'center','fontFamily':styles['textStyles']['type_font'],'fontSize':styles['textStyles']['size_font']},
+#             style_data_conditional=[{'if': {'row_index': 'odd'},'backgroundColor': 'rgb(248, 248, 248)'}],
+#             style_table={'overflow':'hidden'},
+#             style_as_list_view=True,
+#             tooltip_data=[{column: {'value': str(value), 'type': 'markdown'} for column, value in row.items()} for row in DF_CL.to_dict('records')],
+#             tooltip_duration=None,
+#             export_format='xlsx',
+#             export_headers='display',
+#             page_size=5,
+#         ),width=7,align='center'),
+#     ])        
+# 
+#     return dbc.Row(html.P('Sample Characteristics')),sample_celllines,html.P('TODO add second drug selector to compare side by side and pop pie charts and table for it'),
 
 
 @app.callback(
