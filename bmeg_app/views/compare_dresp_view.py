@@ -80,10 +80,7 @@ tab_layout = html.Div(children=[
         ]
     ),
     html.Hr(),
-    
     html.Div(id='hidden_base_df_cdr', style={'display': 'none'}),
-
-
     dbc.Row([
         dbc.Col(dcc.Loading(id="drug_box",type="default",children=html.Div()),width=4),  
         dbc.Col(dcc.Loading(id="violin_plot",type="default",children=html.Div()),width=8),
@@ -98,6 +95,29 @@ tab_layout = html.Div(children=[
      
 ],style={'fontFamily': styles['t']['type_font']})
 
+app.clientside_callback(
+    """
+    function(n_clicks) {
+        if (n_clicks > 0)
+            document.querySelector("#export_drug_table button.export").click()
+        return ""
+    }
+    """,
+    Output("export_button_drug", "data-dummy"),
+    [Input("export_button_drug", "n_clicks")]
+)
+
+app.clientside_callback(
+    """
+    function(n_clicks) {
+        if (n_clicks > 0)
+            document.querySelector("#export_sample_table button.export").click()
+        return ""
+    }
+    """,
+    Output("export_button_sample", "data-dummy"),
+    [Input("export_button_sample", "n_clicks")]
+)
 
 @app.callback(
     Output('dresp_dd_cdr', 'options'),
@@ -195,22 +215,25 @@ def render_callback(jsonstring):
     df = pd.DataFrame.from_dict(temp, orient='index')
     df2=df[df.columns.drop(list(df.filter(regex='NO_ONTOLOGY')))]
     fig_table = cdr.drugDetails(list(df2.columns))
-    table_res = dash_table.DataTable(
-        id='drug_char_table',
-        data = fig_table.to_dict('records'),
-        columns=[{"name": i, "id": i} for i in fig_table.columns],
-        style_header={'text-align':'center','backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['t']['size_font'],'fontWeight': 'bold','fontFamily':styles['t']['type_font']},
-        style_cell={'maxWidth':'100px','padding-left': '20px','padding-right': '20px'},
-        style_data={'whiteSpace':'normal','height':'auto','text-align':'center','fontFamily':styles['t']['type_font'],'fontSize':styles['t']['size_font']},
-        style_data_conditional=[{'if': {'row_index': 'odd'},'backgroundColor': 'rgb(248, 248, 248)'}],
-        style_table={'overflow':'hidden'},
-        style_as_list_view=True,
-        tooltip_data=[{column: {'value': str(value), 'type': 'markdown'} for column, value in row.items()} for row in fig_table.to_dict('records')],
-        tooltip_duration=None,
-        export_format='xlsx',
-        export_headers='display',
-        page_size=5,
-    )
+    table_res = dbc.Col([
+        dbc.Row(html.Button("Download", id="export_button_drug",style={'fontFamily':styles['t']['type_font'],'fontSize':styles['t']['size_font']}), style={'padding-left':styles['b']['padding_left'],'padding-top':styles['b']['padding_top']}),
+        dash_table.DataTable(
+            id='export_drug_table',
+            data = fig_table.to_dict('records'),
+            columns=[{"name": i, "id": i} for i in fig_table.columns],
+            style_header={'text-align':'center','backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['t']['size_font'],'fontWeight': 'bold','fontFamily':styles['t']['type_font']},
+            style_cell={'maxWidth':'100px','padding-left': '20px','padding-right': '20px'},
+            style_data={'whiteSpace':'normal','height':'auto','text-align':'center','fontFamily':styles['t']['type_font'],'fontSize':styles['t']['size_font']},
+            style_data_conditional=[{'if': {'row_index': 'odd'},'backgroundColor': 'rgb(248, 248, 248)'}],
+            style_table={'overflow':'hidden'},
+            style_as_list_view=True,
+            tooltip_data=[{column: {'value': str(value), 'type': 'markdown'} for column, value in row.items()} for row in fig_table.to_dict('records')],
+            tooltip_duration=None,
+            export_format='xlsx',
+            export_headers='display',
+            page_size=5,
+        )
+    ])
     return table_res,
     
     
@@ -236,22 +259,27 @@ def render_callback(jsonstring):
     fig =cdr.piecharts_celllines(df3)
     fig_cluster= dbc.Row([
         dbc.Col(dcc.Graph(figure=fig),width=5),
-        dbc.Col(dash_table.DataTable(
-            id='sample_char_table',
-            data = fig_table.to_dict('records'),
-            columns=[{"name": i, "id": i} for i in fig_table.columns],
-            style_header={'text-align':'center','backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['t']['size_font'],'fontWeight': 'bold','fontFamily':styles['t']['type_font']},
-            style_cell={'maxWidth':'100px','padding-left': '20px','padding-right': '20px'},
-            style_data={'whiteSpace':'normal','height':'auto','text-align':'center','fontFamily':styles['t']['type_font'],'fontSize':styles['t']['size_font']},
-            style_data_conditional=[{'if': {'row_index': 'odd'},'backgroundColor': 'rgb(248, 248, 248)'}],
-            style_table={'overflow':'hidden'},
-            style_as_list_view=True,
-            tooltip_data=[{column: {'value': str(value), 'type': 'markdown'} for column, value in row.items()} for row in fig_table.to_dict('records')],
-            tooltip_duration=None,
-            export_format='xlsx',
-            export_headers='display',
-            page_size=5,
-        ),width=7,align='center'),
+        dbc.Col(
+            [
+                dbc.Row(html.Button("Download", id="export_button_sample",style={'fontFamily':styles['t']['type_font'],'fontSize':styles['t']['size_font']}), style={'padding-left':styles['b']['padding_left'],'padding-top':styles['b']['padding_top']}),
+                dash_table.DataTable(
+                    id='export_sample_table',
+                    data = fig_table.to_dict('records'),
+                    columns=[{"name": i, "id": i} for i in fig_table.columns],
+                    style_header={'text-align':'center','backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['t']['size_font'],'fontWeight': 'bold','fontFamily':styles['t']['type_font']},
+                    style_cell={'maxWidth':'100px','padding-left': '20px','padding-right': '20px'},
+                    style_data={'whiteSpace':'normal','height':'auto','text-align':'center','fontFamily':styles['t']['type_font'],'fontSize':styles['t']['size_font']},
+                    style_data_conditional=[{'if': {'row_index': 'odd'},'backgroundColor': 'rgb(248, 248, 248)'}],
+                    style_table={'overflow':'hidden'},
+                    style_as_list_view=True,
+                    tooltip_data=[{column: {'value': str(value), 'type': 'markdown'} for column, value in row.items()} for row in fig_table.to_dict('records')],
+                    tooltip_duration=None,
+                    export_format='xlsx',
+                    export_headers='display',
+                    page_size=5
+                )
+            ],width=7,align='center'
+        ),
     ])        
     return fig_cluster
 
