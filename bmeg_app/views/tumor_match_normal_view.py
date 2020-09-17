@@ -1,34 +1,29 @@
-from ..app import app
-from ..db import G
-from ..components import basic_plots as bp, tumor_match_normal_component as tmn
 from .. import appLayout as ly
-import pandas as pd
-import gripql
+from ..app import app
+from ..components import tumor_match_normal_component as tmn
+from ..db import G
 import dash
-import dash_core_components as dcc
-import dash_html_components as html
-from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
+import dash_core_components as dcc
+from dash.dependencies import Input, Output, State
+import dash_html_components as html
+import gripql
 import json
+import pandas as pd
 
-######################
+#######
 # Prep
-######################
-# Main color scheme
+#######
 main_colors= ly.main_colors
 styles=ly.styles
-
-# Populate list of all genes for selection of 2.Drug response table 
-# TODO: cache select_genes list so can remove (below) .limit()
-print('querying initial data 1')
+print('querying initial data 1') # TODO: cache select_genes list so can remove (below) .limit()
 q= G.query().V().hasLabel('Gene').limit(150).as_('gene').out('g2p_associations').as_('lit').out('compounds').as_('comp').out('drug_responses')
 q= q.render(['$gene._gid','$lit._data.response_type'])
 select_genes={}
 for a,b in q:
     select_genes[a]=1
 
-
-########
+#######
 # Page  
 ####### 
 print('loading app layout')   
@@ -37,7 +32,7 @@ tab_layout = html.Div(children=[
         [
             dbc.Col(
                 html.Div([
-                    dbc.Button('Info', id='open2',color='primary',style={'font-size':styles['textStyles']['size_font']}),
+                    dbc.Button('Info', id='open2',color='primary',style={'font-size':styles['t']['size_font']}),
                     dbc.Modal(
                         [
                             dbc.ModalHeader('Header for TCGA'),
@@ -55,14 +50,14 @@ tab_layout = html.Div(children=[
             ),  
             
             dbc.Col(dcc.Dropdown(
-                id='project-dropdown',
+                id='project_dd_tmn',
                 options=[{'label': l, 'value': gid} for gid,l in tmn.options_project().items()],
                 value='Project:TCGA-CHOL',
-                ),style={'font-size' : styles['textStyles']['size_font']} ),
-            dbc.Col(dcc.Dropdown(id='property-dropdown'), style={'font-size' : styles['textStyles']['size_font']}),
+                ),style={'font-size' : styles['t']['size_font']} ),
+            dbc.Col(dcc.Dropdown(id='property_dd_tmn'), style={'font-size' : styles['t']['size_font']}),
     ]),
     html.Hr(),
-    dbc.Button('?', id='open'),
+    dbc.Button('?', id='info_open_tmn'),
     dbc.Modal(
         [
             dbc.ModalHeader('TCGA Gene Expression Clustering'),
@@ -71,21 +66,18 @@ tab_layout = html.Div(children=[
                 Uniform manifold approximation and projection (UMAP) is a popular technique that is a similar visualization to t-SNE, \
                 but can be used for general non-linear dimension reduction.'),
             dbc.ModalFooter(
-                dbc.Button('Close',id='close',className='ml-auto')
+                dbc.Button('Close',id='info_close_tmn',className='ml-auto')
             ),
         ],
-        id='modal_centered',
+        id='info_modal',
         size='sm',
         centered=True,
     ),
-    html.Div(id='intermediate_baseDF', style={'display': 'none'}),
+    html.Div(id='hidden_base_df_tmn', style={'display': 'none'}),
     dcc.Loading(type="default",children=html.Div(id="umap_fig")),
-],style={'fontFamily': styles['textStyles']['type_font']})
+],style={'fontFamily': styles['t']['type_font']})
 
-########
-# Callbacks 
-########
-# help button main
+
 @app.callback(
     Output("main_help2", "is_open"),
     [Input("open2", "n_clicks"), Input("close2", "n_clicks")],
@@ -96,45 +88,50 @@ def toggle_modal(n1, n2, is_open):
         return not is_open
     return is_open
     
-# help button 
 @app.callback(
-    Output("modal_centered", "is_open"),
-    [Input("open", "n_clicks"), Input("close", "n_clicks")],
-    [State("modal_centered", "is_open")],
+    Output("info_modal", "is_open"),
+    [Input("info_open_tmn", "n_clicks"), Input("info_close_tmn", "n_clicks")],
+    [State("info_modal", "is_open")],
 )
 def toggle_modal(n1, n2, is_open):
     if n1 or n2:
         return not is_open
     return is_open
 
-@app.callback(Output('intermediate_baseDF', 'children'), 
-    [Input('project-dropdown', 'value')])    
+@app.callback(
+    Output('hidden_base_df_tmn', 'children'), 
+    [Input('project_dd_tmn', 'value')]
+)    
 def createDF(selected_project):
-    baseDF = tmn.get_df(selected_project,'$c._data.gdc_attributes.diagnoses.tumor_stage')
-    return baseDF.to_json(orient="index")    # if selected_project is None: 
+    df = tmn.get_df(selected_project,'$c._data.gdc_attributes.diagnoses.tumor_stage')
+    return df.to_json(orient="index") 
  
-@app.callback(Output("umap_fig", "children"),
-    [Input('intermediate_baseDF', 'children'),
-    Input('property-dropdown', 'value')])
+@app.callback(
+    Output("umap_fig", "children"),
+    [Input('hidden_base_df_tmn', 'children'),
+    Input('property_dd_tmn', 'value')]
+)
 def render_callback(jsonstring,selected_property):
     temp=json.loads(jsonstring)
-    baseDF = pd.DataFrame.from_dict(temp, orient='index')
+    df = pd.DataFrame.from_dict(temp, orient='index')
     if selected_property=='$c._data.gdc_attributes.diagnoses.tumor_stage':
-        fig1=tmn.get_umap(baseDF, 'UMAP', selected_property.split('.')[-1])
-        return dcc.Graph(figure=fig1),
+        fig=tmn.get_umap(df, 'UMAP', selected_property.split('.')[-1])
+        return dcc.Graph(figure=fig),
     else:
-        updatedDF= tmn.update_umap(selected_property, baseDF)
-        fig1=tmn.get_umap(updatedDF, 'UMAP', selected_property.split('.')[-1])
-        return dcc.Graph(figure=fig1),
+        df2= tmn.update_umap(selected_property, df)
+        fig=tmn.get_umap(df2, 'UMAP', selected_property.split('.')[-1])
+        return dcc.Graph(figure=fig),
         
 @app.callback(
-    dash.dependencies.Output('property-dropdown', 'options'),
-    [dash.dependencies.Input('project-dropdown', 'value')])
+    Output('property_dd_tmn', 'options'),
+    [Input('project_dd_tmn', 'value')]
+)
 def set_cities_options(selected_project):
     return [{'label': l, 'value': query_string} for l,query_string in tmn.options_property(selected_project).items()]
     
 @app.callback(
-    dash.dependencies.Output('property-dropdown', 'value'),
-    [dash.dependencies.Input('property-dropdown', 'options')])
+    Output('property_dd_tmn', 'value'),
+    [Input('property_dd_tmn', 'options')]
+)
 def set_cities_value(available_options):
     return available_options[14]['value']

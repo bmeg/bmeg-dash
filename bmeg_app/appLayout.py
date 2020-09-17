@@ -11,7 +11,7 @@ main_colors = {
     'tab_darkblue':'#026670'}
 
 styles = {
-    'sectionHeader': {
+    'sh': {
         'backgroundColor': main_colors['tab_lightblue'],
         'textAlign': 'center',
         'color':'white',
@@ -20,21 +20,13 @@ styles = {
         'marginBottom':0,
         'padding':5
     },
-    'tab_style' : {
-        'border':main_colors['tab_darkblue'],
-        'backgroundColor': main_colors['tab_darkblue'],
-        'font_family':'sans-serif',
-        'fontSize': 15,
-        'color': 'azure',
-        'padding': '1px'
-    },
-    'textStyles': {
+    't': {
         'type_font':'Arial',
         'size_font':12,
         'size_font_card':14,
     },
-    'buttons': {
-        'paddingleft':'15px',
-        'paddingtop':'15px'
+    'b': {
+        'padding_left':'15px',
+        'padding_top':'15px'
     }
 }

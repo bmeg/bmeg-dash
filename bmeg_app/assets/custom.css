@@ -1,7 +1,7 @@
-#export_pubTable button.export {
+#export_pub_table button.export {
     display: none;
 }
 
-#export_bioTable button.export {
+#export_bio_table button.export {
     display: none;
 }

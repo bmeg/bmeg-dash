@@ -1,30 +1,32 @@
-from ..app import app
-from ..db import G
-from ..components import basic_plots as bp, data_types_component as dty
 from .. import appLayout as ly
-import pandas as pd
-import gripql
-import plotly.express as px
+from ..app import app
+from ..components import data_types_component as dty
+from ..db import G
 import dash
+from dash.dependencies import Input, Output
 import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+import gripql
+import pandas as pd
+import plotly.express as px
 
-######################
+#######
 # Prep
-######################
-# Main color scheme
+#######
 main_colors= ly.main_colors
 styles=ly.styles
- 
+
+#######
+# Page  
+####### 
 tab_layout = html.Div(children=[
-    html.H4(children='What is stored inside the database?',style=styles['sectionHeader']),
+    html.H4(children='What is stored inside the database?',style=styles['sh']),
     dcc.Loading(id="cards",
             type="default",children=html.Div(id="cards_output")),  
     dcc.Loading(id="node_cts_bar",
             type="default",children=html.Div(id="node_cts_bar_output")),
-    html.P(children='Explore Node Properties',style={'font-size' : styles['textStyles']['size_font']}),
+    html.P(children='Explore Node Properties',style={'font-size' : styles['t']['size_font']}),
     html.Div([
         dcc.Dropdown(id='node_dd',
             options=[
@@ -34,15 +36,18 @@ tab_layout = html.Div(children=[
             ],
             value=[],
             placeholder='Select Node',
-            style={'font-size' : styles['textStyles']['size_font']}),
+            style={'font-size' : styles['t']['size_font']}),
         dcc.Loading(id="node_prop_table",
             type="default",children=html.Div(id="node_dd-selection")),
     ]),
-],style={'fontFamily': styles['textStyles']['type_font'],})
+],style={'fontFamily': styles['t']['type_font'],})
 
-@app.callback(Output("node_dd-selection", "children"),
+
+@app.callback(
+    Output("node_dd-selection", "children"),
     [Input('url', 'pathname'),
-    Input('node_dd', 'value')])
+    Input('node_dd', 'value')]
+)
 def render_callback(href, node_selection):
     if href is None: # if event is trigged before page/url fully loaded
         raise PreventUpdate
@@ -64,8 +69,7 @@ def render_callback(href, node_selection):
             1,'\'UDP-Gal:betaGal beta 1,3-galactosyltransferase polypeptide 6\'',1170421,'ENSG00000176022','GRCh37','Project:Reference',1167629,'+','None','B3GALT6']
         definitions_gene= pd.DataFrame(list(zip(NodeProperty, Description, Example)),columns=['Node Property', 'Description', 'Example'])
         df= definitions_gene
-        return dash_table.DataTable(id='table_output',data = df.to_dict('records'),columns=[{"name": i, "id": i} for i in df.columns],style_table={'overflowY': 'scroll','font-size' : styles['textStyles']['size_font']},page_size=10)
-        
+        return dash_table.DataTable(id='table_output',data = df.to_dict('records'),columns=[{"name": i, "id": i} for i in df.columns],style_table={'overflowY': 'scroll','font-size' : styles['t']['size_font']},page_size=10)
     elif node_selection == 'project':
         NodeProperty = ['_gid','_label','_data',    
             '_data.gdc_attributes',
@@ -78,28 +82,30 @@ def render_callback(href, node_selection):
             'TCGA-LUSC', 'None']
         definitions_gene= pd.DataFrame(list(zip(NodeProperty, Description, Example)),columns=['Node Property', 'Description', 'Example'])
         df= definitions_gene
-        return dash_table.DataTable(id='table_output',data = df.to_dict('records'),columns=[{"name": i, "id": i} for i in df.columns],style_table={'overflowY': 'scroll','font-size' : styles['textStyles']['size_font']},page_size=10)
+        return dash_table.DataTable(id='table_output',data = df.to_dict('records'),columns=[{"name": i, "id": i} for i in df.columns],style_table={'overflowY': 'scroll','font-size' : styles['t']['size_font']},page_size=10)
     elif node_selection=='todo':
         return
-        
-        
-@app.callback(Output("cards", "children"),
-    [Input('url', 'pathname')])
+                
+@app.callback(
+    Output("cards", "children"),
+    [Input('url', 'pathname')]
+)
 def render_callback(href):
-    if href is None: # if event is trigged before page/url fully loaded
+    if href is None:
         raise PreventUpdate
     nodes_interest = ['Allele','Gene','Transcript','Exon','Protein','DrugResponse', 'Pathway','Compound', 'Interaction','Project','Publication', 'Aliquot']
     res = {}
     for l in nodes_interest:
         res[l] = G.query().V().hasLabel(l).count().execute()[0]['count']
-    fig= dty.counts(100, res,main_colors['lightgrey'],styles['textStyles']['type_font'])
-    return dcc.Graph(id='cards_output', figure=fig),
-        
+    fig= dty.counts(100, res,main_colors['lightgrey'],styles['t']['type_font'])
+    return dcc.Graph(id='cards_output', figure=fig),    
     
-@app.callback(Output("node_cts_bar", "children"),
-    [Input('url', 'pathname')])
+@app.callback(
+    Output("node_cts_bar", "children"),
+    [Input('url', 'pathname')]
+)
 def render_callback(href):
-    if href is None: # if event is trigged before page/url fully loaded
+    if href is None:
         raise PreventUpdate
     all_v =  G.listLabels()['vertex_labels']
     to_rm = ['Aliquot','Allele', 'Gene', 'Protein', 'Transcript', 'Exon','Pathway', 'Compound', 'DrugResponse', 'Interaction','Project', 'Publication']
@@ -113,5 +119,5 @@ def render_callback(href):
     for k,v in res.items():
         keys.append(k)
         values.append(v)
-    fig = bp.bar_thresh('','Node', keys, values, 5000, main_colors['pale_yellow'], 250, '', '')
+    fig = dty.bar('','Node', keys, values, main_colors['pale_yellow'], 250, '', '')
     return dcc.Graph(id='node_cts_bar_output', figure=fig),
