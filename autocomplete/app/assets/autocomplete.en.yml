@@ -1,0 +1,4 @@
+en:
+    instructions: Enter the gene symbol or ensembl id
+    single: Single gene
+    multiple: Multiple genes
