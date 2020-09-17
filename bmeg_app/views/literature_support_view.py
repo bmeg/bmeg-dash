@@ -24,7 +24,7 @@ styles=ly.styles
 # baseDF = lsu.get_baseDF() # commented out for ONLY dev to speed up loading
 # baseDF.to_csv('bmeg_app/source/basedf.tsv',sep='\t',index=False) # commented out for ONLY dev to speed up loading
 baseDF=pd.read_csv('bmeg_app/source/basedf.tsv',sep='\t') # TEMP TODO change to cached
-# gene_options = 
+
 
 ########
 # Page  

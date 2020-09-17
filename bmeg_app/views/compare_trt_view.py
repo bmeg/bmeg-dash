@@ -100,8 +100,6 @@ tab_layout = html.Div(children=[
     dbc.Row(html.P('Sample Characteristics')),
     dcc.Loading(id="sample_char_table",type="default",children=html.Div(id="sample_char_table_out")),
      
-     
-    # dcc.Loading(id="figs_repurp",type="default",children=html.Div(id="figs_repurp_out")),
 ],style={'fontFamily': styles['textStyles']['type_font']})
 
 
@@ -190,14 +188,8 @@ def render_callback(jsonstring):
     temp=json.loads(jsonstring)
     baseDF = pd.DataFrame.from_dict(temp, orient='index')
     # Preprocess:Rename drugs to common name
-    df=baseDF[baseDF.columns.drop(list(baseDF.filter(regex='NO_ONTOLOGY')))] # TODO fix it so dont have to drop
-    cols=df.columns
-    colRemap={}
-    for row in G.query().V( list(cols) ).render(['$._gid', '$.synonym']):
-        colRemap[row[0]] = row[1]
-    common = list( colRemap[i] for i in df.columns )
-    df.columns=common  
-    fig_table = ctrt.drugDetails(common)
+    df=baseDF[baseDF.columns.drop(list(baseDF.filter(regex='NO_ONTOLOGY')))]
+    fig_table = ctrt.drugDetails(list(df.columns))
     table_res = dash_table.DataTable(
         id='drug_char_table',
         data = fig_table.to_dict('records'),
@@ -255,62 +247,6 @@ def render_callback(jsonstring):
         ),width=7,align='center'),
     ])        
     return sample_celllines
-
-
-    
-
-
-
-    
-    
-    
-    
-# @app.callback(Output("figs_repurp", "children"),
-#     [Input('baseDF_userSelected_ctrt', 'children'),
-#     Input('repurp_PROJECT_dropdown', 'value'),
-#     Input('repurp_RESPONSE_dropdown', 'value'),
-#     Input('repurp_DRUG_dropdown', 'value'),
-#     Input('repurp_DISEASE_dropdown','value')])
-# def render_callback(jsonstring,selected_project, selected_drugResp, selected_drug, selected_disease):
-#     '''create pie charts'''
-#     temp=json.loads(jsonstring)
-#     drugDF = pd.DataFrame.from_dict(temp, orient='index')
-#     disease_dict = ctrt.line2disease(list(drugDF.index))
-# 
-#     # Preprocess:Rename drugs to common name
-#     drugDF=drugDF[drugDF.columns.drop(list(drugDF.filter(regex='NO_ONTOLOGY')))] # TODO fix it so dont have to drop
-#     cols=drugDF.columns
-#     colRemap={}
-#     for row in G.query().V( list(cols) ).render(['$._gid', '$.synonym']):
-#         colRemap[row[0]] = row[1]
-#     common = list( colRemap[i] for i in drugDF.columns )
-#     drugDF.columns=common  
-#     # Create table
-#     finalDF = ctrt.get_table(drugDF,disease_dict,'Selected Drug Response Metric')
-#     DF_CL = ctrt.sample_table(finalDF)
-#     fig_CL =ctrt.piecharts_celllines(finalDF)
-#     sample_celllines= dbc.Row([
-#         dbc.Col(dcc.Graph(figure=fig_CL),width=5),
-#         dbc.Col(dash_table.DataTable(
-#             id='sample_char_table',
-#             data = DF_CL.to_dict('records'),
-#             columns=[{"name": i, "id": i} for i in DF_CL.columns],
-#             style_header={'text-align':'center','backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['textStyles']['size_font'],'fontWeight': 'bold','fontFamily':styles['textStyles']['type_font']},
-#             style_cell={'maxWidth':'100px','padding-left': '20px','padding-right': '20px'},
-#             style_data={'whiteSpace':'normal','height':'auto','text-align':'center','fontFamily':styles['textStyles']['type_font'],'fontSize':styles['textStyles']['size_font']},
-#             style_data_conditional=[{'if': {'row_index': 'odd'},'backgroundColor': 'rgb(248, 248, 248)'}],
-#             style_table={'overflow':'hidden'},
-#             style_as_list_view=True,
-#             tooltip_data=[{column: {'value': str(value), 'type': 'markdown'} for column, value in row.items()} for row in DF_CL.to_dict('records')],
-#             tooltip_duration=None,
-#             export_format='xlsx',
-#             export_headers='display',
-#             page_size=5,
-#         ),width=7,align='center'),
-#     ])        
-# 
-#     return dbc.Row(html.P('Sample Characteristics')),sample_celllines,html.P('TODO add second drug selector to compare side by side and pop pie charts and table for it'),
-
 
 @app.callback(
     Output("help_violin", "is_open"),
