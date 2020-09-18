@@ -6,10 +6,6 @@
     display: none;
 }
 
-#export_drug_table button.export {
-    display: none;
-}
-
 #export_sample_table button.export {
     display: none;
 }

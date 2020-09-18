@@ -65,13 +65,6 @@ tab_layout = html.Div(children=[
             ),
             dbc.Col(
                 html.Div([
-                    html.Label('Drug Treatment'),
-                    dcc.Dropdown(id='drug_dd_cdr', value='Compound:CID36314', style={'font-size' : styles['t']['size_font']})
-                ],
-                style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']})
-            ),
-            dbc.Col(
-                html.Div([
                     html.Label('Drug Response Metric'),
                     dcc.Dropdown(id='dresp_dd_cdr',style={'font-size' : styles['t']['size_font']})
                 ],
@@ -80,32 +73,39 @@ tab_layout = html.Div(children=[
         ]
     ),
     html.Hr(),
-    html.Div(id='hidden_base_df_cdr', style={'display': 'none'}),
-    dbc.Row([
-        dbc.Col(dcc.Loading(id="drug_box",type="default",children=html.Div()),width=4),  
-        dbc.Col(dcc.Loading(id="violin_plot",type="default",children=html.Div()),width=8),
-    ]),
-    
-    html.Hr(),
-    html.P('Drug Characteristics'),
-    dcc.Loading(id="drug_char_table",type="default",children=html.Div()),
-     
-    dbc.Row(html.P('Sample Characteristics')),
+    html.Label('All drugs in selected dataset, disease, and drug response'),
     dcc.Loading(id="sample_char_table",type="default",children=html.Div()),
      
+    html.Hr(),
+    html.Label('Explore pairwise drug responses'),
+    html.Div(id='hidden_base_df_cdr', style={'display': 'none'}),
+    dbc.Row([
+        dbc.Col([
+            html.Div(
+                [
+                    html.Label('Drug 1'),
+                    dcc.Dropdown(id='drug_dd_cdr', value='Compound:CID36314', style={'font-size' : styles['t']['size_font']})
+                ],
+                style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']}
+            )
+        ],width=2),
+        dbc.Col([
+            html.Div(
+                [
+                    html.Label('Drug 2'),
+                    dcc.Dropdown(id='drug2_dd_cdr',style={'font-size' : styles['t']['size_font']})
+                ],
+                style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']}
+            ),
+        ],width=2), 
+    ]),
+    dbc.Row([
+        dbc.Col(dcc.Loading(id="pairwise",type="default",children=html.Div()),width=6 ),
+        dbc.Col(dcc.Loading(id="drug1_box",type="default",children=html.Div()),width=3),
+        dbc.Col(dcc.Loading(id="drug2_box",type="default",children=html.Div()),width=3),
+    ]),
+    dcc.Loading(id="drug_char_table",type="default",children=html.Div()),
 ],style={'fontFamily': styles['t']['type_font']})
-
-app.clientside_callback(
-    """
-    function(n_clicks) {
-        if (n_clicks > 0)
-            document.querySelector("#export_drug_table button.export").click()
-        return ""
-    }
-    """,
-    Output("export_button_drug", "data-dummy"),
-    [Input("export_button_drug", "n_clicks")]
-)
 
 app.clientside_callback(
     """
@@ -148,7 +148,28 @@ def set_options(selected_project):
     return [{'label': l, 'value': gid} for gid,l in cdr.options_drug(selected_project).items()]
 
 @app.callback(
-    Output('drug_box', 'children'),
+    Output('drug2_dd_cdr', 'options'),
+    [Input('hidden_base_df_cdr', 'children'),
+    Input('drug_dd_cdr', 'value')]
+)
+def set_options(jsonstring, selected_drug):
+    '''Drug2 dropdown menu options'''
+    temp=json.loads(jsonstring)
+    df = pd.DataFrame.from_dict(temp, orient='index')
+    list1=list(df.columns)
+    list1.remove(selected_drug)
+    return [{'label': l, 'value': gid} for gid,l in cdr.options_drug2(list1).items()]
+    
+@app.callback(
+    Output('drug2_dd_cdr', 'value'),
+    [Input('drug2_dd_cdr', 'options')]
+)
+def set_options(available_options):
+    '''Default value of drug2'''
+    return available_options[0]['value']
+    
+@app.callback(
+    Output('drug1_box', 'children'),
     [Input('drug_dd_cdr', 'value')]
 )
 def render_callback(selected_drug):
@@ -165,7 +186,25 @@ def render_callback(selected_drug):
             ]),
         color="info", inverse=True,style={'Align': 'center', 'width':'98%','fontFamily':styles['t']['type_font']})
     return fig,
-
+    
+@app.callback(
+    Output('drug2_box', 'children'),
+    [Input('drug2_dd_cdr', 'value')]
+)
+def render_callback(selected_drug):
+    q=G.query().V(selected_drug).render(['_data.synonym','_data.pubchem_id','_data.taxonomy.description'])
+    for row in q:
+        print('starting search')
+        header = row[0].upper() + ' ('+ row[1]+')'
+        descrip = row[2]
+    fig = dbc.Card(
+        dbc.CardBody(
+            [
+            html.H4(header, className="card-title",style={'fontFamily':styles['t']['type_font'],'font-size' : styles['t']['size_font_card'], 'fontWeight':'bold'}),
+            html.P(descrip,style={'fontFamily':styles['t']['type_font'],'font-size' : '12px'}) 
+            ]),
+        color="info", inverse=True,style={'Align': 'center', 'width':'98%','fontFamily':styles['t']['type_font']})
+    return fig,
 
 @app.callback(
     Output('hidden_base_df_cdr', 'children'), 
@@ -179,45 +218,32 @@ def createDF(selected_project,selected_drugResp,selected_drug,selected_disease):
     df = cdr.get_base_matrix(selected_project,selected_drugResp,selected_drug,selected_disease)
     return df.to_json(orient="index") 
 
-
 @app.callback(
-    Output("violin_plot", "children"),
+    Output("pairwise", "children"),
     [Input('hidden_base_df_cdr', 'children'),
-    Input('drug_dd_cdr', 'value')]
+    Input('drug_dd_cdr', 'value'),
+    Input('drug2_dd_cdr', 'value'),
+    Input('dresp_dd_cdr', 'value')]
 )
-def render_callback(jsonstring, selected_drug):
-    '''create violin plot'''
+def render_callback(jsonstring, selected_drug,selected_drug2,selected_dresp):
+    '''create pairwise plots '''
     temp=json.loads(jsonstring)
     df = pd.DataFrame.from_dict(temp, orient='index')
     disease_dict = cdr.line2disease(list(df.index))
-    # Preprocess:Rename drugs to drug_name
-    df=df[df.columns.drop(list(df.filter(regex='NO_ONTOLOGY')))] # TODO fix it so dont have to drop
-    cols=df.columns
-    col_remap={}
-    for row in G.query().V( list(cols) ).render(['$._gid', '$.synonym']):
-        col_remap[row[0]] = row[1]
-    drug_name = list( col_remap[i] for i in df.columns)
-    df.columns=drug_name  
-    # Create violin plots
-    fig=cdr.violins(selected_drug, cdr.get_table(df,disease_dict),'Drug Response Metric')
-    # format layout 
+    df=cdr.get_table(df)
+    fig= cdr.dresp_pairs(df,selected_drug,selected_drug2,selected_dresp) #todo add dropdown menu for section drug selection
     return dcc.Graph(figure=fig),
-    
-        
+
 
 @app.callback(
     Output("drug_char_table", "children"),
-    [Input('hidden_base_df_cdr', 'children')]
+    [Input('drug_dd_cdr', 'value'),
+    Input('drug2_dd_cdr', 'value')]
 )
-def render_callback(jsonstring):
-    '''create drug characteristics table'''
-    temp=json.loads(jsonstring)
-    df = pd.DataFrame.from_dict(temp, orient='index')
-    df2=df[df.columns.drop(list(df.filter(regex='NO_ONTOLOGY')))]
-    fig_table = cdr.drugDetails(list(df2.columns))
-    table_res = dbc.Col([
-        dbc.Row(html.Button("Download", id="export_button_drug",style={'fontFamily':styles['t']['type_font'],'fontSize':styles['t']['size_font']}), style={'padding-left':styles['b']['padding_left'],'padding-top':styles['b']['padding_top']}),
-        dash_table.DataTable(
+def render_callback(selected_drug, selected_drug2):
+    '''create drug characteristics table of 2 selected drugs'''
+    fig_table = cdr.drugDetails([selected_drug,selected_drug2])
+    table_res = dash_table.DataTable(
             id='export_drug_table',
             data = fig_table.to_dict('records'),
             columns=[{"name": i, "id": i} for i in fig_table.columns],
@@ -229,13 +255,8 @@ def render_callback(jsonstring):
             style_as_list_view=True,
             tooltip_data=[{column: {'value': str(value), 'type': 'markdown'} for column, value in row.items()} for row in fig_table.to_dict('records')],
             tooltip_duration=None,
-            export_format='xlsx',
-            export_headers='display',
-            page_size=5,
         )
-    ])
     return table_res,
-    
     
 @app.callback(
     Output("sample_char_table", "children"),
@@ -254,7 +275,7 @@ def render_callback(jsonstring):
         col_remap[row[0]] = row[1]
     drug_name = list(col_remap[i] for i in df2.columns)
     df2.columns=drug_name  
-    df3 = cdr.get_table(df2,disease_dict)
+    df3 = cdr.get_table(df2)
     fig_table = cdr.sample_table(df3)
     fig =cdr.piecharts_celllines(df3)
     fig_cluster= dbc.Row([
@@ -276,7 +297,7 @@ def render_callback(jsonstring):
                     tooltip_duration=None,
                     export_format='xlsx',
                     export_headers='display',
-                    page_size=5
+                    page_size=8
                 )
             ],width=7,align='center'
         ),

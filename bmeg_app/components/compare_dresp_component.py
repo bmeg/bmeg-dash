@@ -39,28 +39,22 @@ def get_base_matrix(project, drug_resp,selected_drug,selected_disease):
     subset_df.pop('disease')
     return subset_df
         
-def get_table(df,disease):
+def get_table(df):
     '''Melt df'''
     df['Cell Line']=df.index
     df= df.melt(id_vars=['Cell Line'])
     df.columns=['Cell Line', 'Drug', 'Drug Response']
     return df
-        
-def violins(compound,df,y_axis_label):
-    '''Violin plots'''
-    compound = G.query().V(compound).render(['$._data.synonym']).execute()[0][0]
-    fig = go.Figure()
-    drugs = list(set(df['Drug']))
-    assert compound in drugs
-    drugs.remove(compound)
-    drugs.insert(0,compound)
-    for d in drugs:
-        fig.add_trace(go.Violin(x=df['Drug'][df['Drug'] == d],y=df['Drug Response'][df['Drug'] == d],name=d,box_visible=True,meanline_visible=True))
-    fig.update_layout(margin={'t':10, 'b':10},height=400,yaxis=dict(title=y_axis_label))
-    fig.update_xaxes(tickangle=45)
-    fig.update_layout(showlegend=False)
-    return fig
 
+def dresp_pairs(df,drug1,drug2,dresp):
+    '''Pairwise drug response plots'''
+    dresp=dresp.split('.')[2].upper()
+    drug1_resp = df[df['Drug']==drug1]['Drug Response']
+    drug2_resp = df[df['Drug']==drug2]['Drug Response']
+    fig = go.Figure(data=go.Scatter(x=drug1_resp,y=drug2_resp,mode='markers'))
+    fig.update_layout(margin={'t':15, 'b':15,'r':15,'l':15},xaxis_title=drug1+' '+dresp,yaxis_title=drug2+' '+dresp)
+    return fig
+    
 def options_project():
     '''Project dropdown menu options'''
     project_label=['CCLE'] # TODO incorp CTRP and GDSC and check all downstream queries
@@ -83,13 +77,24 @@ def options_drug(selected_project):
     options={}
     if selected_project=='Project:CCLE':
         for row in G.query().V('Project:CCLE').out("cases").as_("p").out("samples").out("aliquots").out("drug_response").as_("dr").out("compounds").as_("c").render(['$._gid','$._data.synonym']):
-            if row[1] is None:
-                options[row[0]]=row[0]
-            else:
-                options[row[0]]=row[1].capitalize()
-    # TODO add elif other project...load project specific properties
+            if 'Compound:NO_ONTOLOGY' not in row[0]:
+                if row[1] is None:
+                    options[row[0]]=row[0]
+                else:
+                    options[row[0]]=row[1].capitalize()
     return options
 
+def options_drug2(drug_list):
+    '''Dictionary mapping cell line GIDs to reported primary disease'''
+    disease_dict = {}
+    for row in G.query().V(drug_list).render(["$._gid",'$._data.synonym']):
+        if 'Compound:NO_ONTOLOGY' not in row[0]:
+            if row[1] is None:
+                disease_dict[row[0]]=row[0]   
+            else: 
+                disease_dict[row[0]]=row[1].capitalize()
+    return disease_dict
+    
 def options_dresp(selected_project):
     '''Drug response dropdown menu options'''
     if 'Project:CCLE' == selected_project:
@@ -99,7 +104,6 @@ def options_dresp(selected_project):
             'EC50': '$dr._data.ec50'
              }
         return options
-    #elif other project...load project specific properties
 
 def drugDetails(drugs_list):
     '''Drug property table'''
@@ -112,16 +116,16 @@ def drugDetails(drugs_list):
     f=[]
     g=[]
     for row in q:
-        if row[0] is None: # Drug has no common name
-            a.append(row[7])
+        if row[0] is None or row[0]=='': # Drug has no common name
+            a.append(row[7].capitalize())
             b.append(row[1])
             c.append(row[2])
             d.append(row[3])
             e.append(row[4])
             f.append(row[5])
             g.append(row[6])
-        else:            
-            a.append(row[0])
+        else:    
+            a.append(row[0].capitalize())
             b.append(row[1])
             c.append(row[2])
             d.append(row[3])
@@ -152,6 +156,7 @@ def sample_table(df):
         new_col2.append(lookup.get(c)[1])
     df['Gender']=new_col1
     df['Disease Subtype']=new_col2
+    df['Drug'] = df['Drug'].str.capitalize() 
     return df
     
 def piecharts_celllines(df):
