@@ -2,12 +2,14 @@
 
 import os
 from elasticsearch import Elasticsearch
-from elasticsearch_dsl import Search
+from elasticsearch_dsl import Search, Index
 from elasticsearch_dsl.query import MultiMatch
 
 
 def gene_search(query):
-    """Query gene index, map to {label, value}."""
+    """Query gene index, map to {label, value}.
+
+    Connects to elastic search via env var ELASTICSEARCH_URL"""
 
     client = Elasticsearch(os.environ['ELASTICSEARCH_URL'])
     search = Search(using=client, index='genes')
@@ -26,3 +28,11 @@ def gene_search(query):
     #  {"label": "New York City", "value": "NYC"},
 
     return([{'label': f'{h.symbol}/{h.ensemble_id}', 'value': f'{h.symbol}/{h.ensemble_id}'} for h in search])
+
+
+def gene_index_creation_date():
+    """Fetch creation_date of gene index."""
+
+    client = Elasticsearch(os.environ['ELASTICSEARCH_URL'])
+    index = Index('genes', using=client).get()
+    return index['genes']['settings']['index']['creation_date']

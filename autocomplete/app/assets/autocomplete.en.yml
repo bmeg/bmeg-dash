@@ -2,3 +2,7 @@ en:
     instructions: Enter the gene symbol or ensembl id
     single: Single gene
     multiple: Multiple genes
+    phenotypes: Phenotypes
+    cached_cleared: Cache reset
+    clear_cache: Clear cache
+    cache_stats: Cache statistics

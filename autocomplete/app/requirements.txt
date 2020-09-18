@@ -8,3 +8,5 @@ elasticsearch-dsl>=7.0.0,<8.0.0
 Click
 # example ensembl backend
 requests[security]
+# improve backend by caching
+Flask-Caching
