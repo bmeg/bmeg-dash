@@ -1,0 +1,8 @@
+bmeg:
+    credentials: bmeg_app/secrets/bmeg_credentials.json
+    schema: rc5
+
+app:
+    host: 0.0.0.0
+    port: 80
+    dev: True

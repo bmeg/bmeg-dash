@@ -7,6 +7,8 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
 import dash_html_components as html
+import gripql
+import yaml
 
 #######
 # Prep
@@ -149,5 +151,7 @@ def toggle_collapse(n, is_open):
         return not is_open
     return is_open
 
+with open('bmeg_app/config.yaml') as f:
+    config = yaml.load(f, Loader=yaml.FullLoader)
 if __name__ == '__main__':
-    app.run_server(host='0.0.0.0', debug=True, port=80)
+    app.run_server(host=config['app']['host'], debug=config['app']['dev'], port=config['app']['port'])
