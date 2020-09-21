@@ -106,6 +106,7 @@ app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
     [Input("url", "pathname")],
 )
 def toggle_active_links(pathname):
+    '''active link for widget view'''
     if pathname == "/":
         return True, False, False, False
     return [pathname == f"/page-{i}" for i in range(1, 5)]
@@ -115,6 +116,7 @@ def toggle_active_links(pathname):
     [Input("url", "pathname")]
 )
 def render_page_content(pathname):
+    '''render selected widget view'''
     if pathname in ["/", "/page-1"]:
         return html.Div([compare_dresp_view.tab_layout]) 
     elif pathname == "/page-2":
@@ -137,6 +139,7 @@ def render_page_content(pathname):
     [State("sidebar", "className")]
 )
 def toggle_classname(n, classname):
+    '''Side menu state'''
     if n and classname == "":
         return "collapsed"
     return ""
@@ -147,6 +150,7 @@ def toggle_classname(n, classname):
     [State("collapse", "is_open")]
 )
 def toggle_collapse(n, is_open):
+    '''Side menu'''
     if n:
         return not is_open
     return is_open
