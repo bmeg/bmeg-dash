@@ -27,8 +27,7 @@ curl -X PUT $ELASTICSEARCH_URL/genes -H "Content-Type: application/json" -d'
         "type": "search_as_you_type"
       },
       "ensemble_id": {
-        "type": "search_as_you_type",
-        "analyzer":"ensembl_analyzer"
+        "type": "search_as_you_type"
       }      
     }
   }
