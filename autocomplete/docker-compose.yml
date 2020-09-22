@@ -57,7 +57,7 @@ services:
       - odfe-net
     depends_on:
       - elastic
-    command: ["./bin/wait-for-it.sh", "elastic:9200", "--", "python", "-m", "app_autocomplete"]
+    command: ["./bin/wait-for-it.sh", "elastic:9200", "--", "./bin/setup-and-launch.sh"]
       
 
 volumes:

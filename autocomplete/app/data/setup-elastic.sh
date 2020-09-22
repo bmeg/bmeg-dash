@@ -1,10 +1,10 @@
 # delete and re-create index
 echo '>dropping index'
-curl -X DELETE $ELASTICSEARCH_URL/genes
+curl -s -X DELETE $ELASTICSEARCH_URL/genes
 
 echo
 echo '>configuring index'
-curl -X PUT $ELASTICSEARCH_URL/genes -H "Content-Type: application/json" -d'
+curl -s -X PUT $ELASTICSEARCH_URL/genes -H "Content-Type: application/json" -d'
 {
   "settings": {
     "analysis": {
