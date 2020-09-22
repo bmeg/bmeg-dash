@@ -37,6 +37,8 @@ services:
       ELASTICSEARCH_HOSTS: http://elastic:9200
     networks:
       - odfe-net
+    depends_on:
+      - elastic
 
   app:
     build: ./app
@@ -53,6 +55,10 @@ services:
       ELASTICSEARCH_HOSTS: http://elastic:9200
     networks:
       - odfe-net
+    depends_on:
+      - elastic
+    command: ["./bin/wait-for-it.sh", "elastic:9200", "--", "python", "-m", "app_autocomplete"]
+      
 
 volumes:
   odfe-data1:
