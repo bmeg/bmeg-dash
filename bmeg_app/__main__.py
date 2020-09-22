@@ -1,6 +1,6 @@
 from bmeg_app.app import app
 import bmeg_app.appLayout as ly
-from bmeg_app.views import data_types_view, tumor_match_normal_view, literature_support_view, compare_dresp_view
+from bmeg_app.views import home_view, tumor_match_normal_view, literature_support_view, compare_dresp_view
 import base64
 import dash
 import dash_bootstrap_components as dbc
@@ -72,19 +72,19 @@ sidebar = html.Div(
         dbc.Collapse(
             dbc.Nav(
                 [
-                    dbc.NavLink("Home", href="/page-4", id="page-4-link",
+                    dbc.NavLink("Home", href="/page-1", id="page-1-link",
                         style={'font-size':styles['t']['size_font_card'],
                         'fontFamily':styles['t']['type_font']
                         },),
-                    dbc.NavLink("Compare Drug Responses", href="/page-1", id="page-1-link",
+                    dbc.NavLink("Compare Drug Responses", href="/page-2", id="page-2-link",
                         style={'font-size':styles['t']['size_font_card'],
                         'fontFamily':styles['t']['type_font']
                         },),
-                    dbc.NavLink("TCGA Clustering", href="/page-2", id="page-2-link",
+                    dbc.NavLink("TCGA Clustering", href="/page-3", id="page-3-link",
                         style={'font-size':styles['t']['size_font_card'],
                         'fontFamily':styles['t']['type_font']
                         },),
-                    dbc.NavLink("Literature Gene-Drug Associations", href="/page-3", id="page-3-link",
+                    dbc.NavLink("Literature Gene-Drug Associations", href="/page-4", id="page-4-link",
                         style={'font-size':styles['t']['size_font_card'],
                         'fontFamily':styles['t']['type_font']
                         },),
@@ -118,13 +118,14 @@ def toggle_active_links(pathname):
 def render_page_content(pathname):
     '''render selected widget view'''
     if pathname in ["/", "/page-1"]:
-        return html.Div([compare_dresp_view.tab_layout]) 
+        return html.Div([home_view.tab_layout])
     elif pathname == "/page-2":
-        return html.Div([tumor_match_normal_view.tab_layout])    
+        return html.Div([compare_dresp_view.tab_layout]) 
     elif pathname == "/page-3":
-        return html.Div([literature_support_view.tab_layout]) 
+        return html.Div([tumor_match_normal_view.tab_layout])    
     elif pathname == "/page-4":
-        return html.Div([data_types_view.tab_layout])
+        return html.Div([literature_support_view.tab_layout]) 
+
     return dbc.Jumbotron(
         [
             html.H1("404: Not found", className="text-danger"),

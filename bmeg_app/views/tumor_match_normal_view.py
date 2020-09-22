@@ -126,12 +126,12 @@ def render_callback(jsonstring,selected_property):
     Output('property_dd_tmn', 'options'),
     [Input('project_dd_tmn', 'value')]
 )
-def set_cities_options(selected_project):
+def render_callback(selected_project):
     return [{'label': l, 'value': query_string} for l,query_string in tmn.options_property(selected_project).items()]
     
 @app.callback(
     Output('property_dd_tmn', 'value'),
     [Input('property_dd_tmn', 'options')]
 )
-def set_cities_value(available_options):
+def render_callback(available_options):
     return available_options[14]['value']
