@@ -157,6 +157,7 @@ def sample_table(df):
     df['Gender']=new_col1
     df['Disease Subtype']=new_col2
     df['Drug'] = df['Drug'].str.capitalize() 
+    df= df.sort_values(by='Drug Response', ascending=True).reset_index(drop=True)
     return df
     
 def piecharts_celllines(df):

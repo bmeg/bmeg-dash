@@ -65,7 +65,7 @@ tab_layout = html.Div(children=[
             ),
             dbc.Col(
                 html.Div([
-                    html.Label('Drug Response Metric'),
+                    html.Label('Drug Response'),
                     dcc.Dropdown(id='dresp_dd_cdr',style={'font-size' : styles['t']['size_font']})
                 ],
                 style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']})
@@ -156,7 +156,7 @@ def set_options(jsonstring, selected_drug):
     '''Drug2 dropdown menu options'''
     temp=json.loads(jsonstring)
     df = pd.DataFrame.from_dict(temp, orient='index')
-    list1=list(df.columns)
+    list1=list(df.columns.drop(list(df.filter(regex='NO_ONTOLOGY'))))
     list1.remove(selected_drug)
     return [{'label': l, 'value': gid} for gid,l in cdr.options_drug2(list1).items()]
     
@@ -229,6 +229,7 @@ def render_callback(jsonstring, selected_drug,selected_drug2,selected_dresp):
     '''create pairwise plots '''
     temp=json.loads(jsonstring)
     df = pd.DataFrame.from_dict(temp, orient='index')
+    df=df[df.columns.drop(list(df.filter(regex='NO_ONTOLOGY')))]
     disease_dict = cdr.line2disease(list(df.index))
     df=cdr.get_table(df)
     fig= cdr.dresp_pairs(df,selected_drug,selected_drug2,selected_dresp) #todo add dropdown menu for section drug selection
@@ -267,8 +268,7 @@ def render_callback(jsonstring):
     temp=json.loads(jsonstring)
     df = pd.DataFrame.from_dict(temp, orient='index')
     disease_dict = cdr.line2disease(list(df.index))
-    # Preprocess:Rename drugs to drug_name
-    df2=df[df.columns.drop(list(df.filter(regex='NO_ONTOLOGY')))] # TODO fix it so dont have to drop
+    df2=df[df.columns.drop(list(df.filter(regex='NO_ONTOLOGY')))]
     cols=df2.columns
     col_remap={}
     for row in G.query().V(list(cols)).render(['$._gid', '$.synonym']):
