@@ -9,7 +9,7 @@ from dash.dependencies import Input, Output, State
 import dash_html_components as html
 import dash_table
 import gripql
-import json 
+import json
 import pandas as pd
 import plotly.express as px
 
@@ -20,9 +20,10 @@ main_colors= ly.main_colors
 styles=ly.styles
 
 #######
-# Page  
-####### 
-print('loading app layout')   
+# Page
+#######
+print('loading app layout')
+NAME = "Compare Drug Responses"
 tab_layout = html.Div(children=[
     dbc.Row(
         [
@@ -47,8 +48,8 @@ tab_layout = html.Div(children=[
                         centered=True,
                     ),
                 ]),
-                width=1, 
-            ),  
+                width=1,
+            ),
             dbc.Col(
                 html.Div([
                     html.Label('Dataset'),
@@ -69,13 +70,13 @@ tab_layout = html.Div(children=[
                     dcc.Dropdown(id='dresp_dd_cdr',style={'font-size' : styles['t']['size_font']})
                 ],
                 style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']})
-            ),    
+            ),
         ]
     ),
     html.Hr(),
     html.Label('All drugs in selected dataset, disease, and drug response'),
     dcc.Loading(id="sample_char_table",type="default",children=html.Div()),
-     
+
     html.Hr(),
     html.Label('Explore pairwise drug responses'),
     html.Div(id='hidden_base_df_cdr', style={'display': 'none'}),
@@ -97,7 +98,7 @@ tab_layout = html.Div(children=[
                 ],
                 style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']}
             ),
-        ],width=2), 
+        ],width=2),
     ]),
     dbc.Row([
         dbc.Col(dcc.Loading(id="pairwise",type="default",children=html.Div()),width=6 ),
@@ -125,7 +126,7 @@ app.clientside_callback(
 )
 def set_options(selected_project):
     return [{'label': k, 'value': v} for k,v in cdr.options_dresp(selected_project).items()]
-    
+
 @app.callback(
     Output('dresp_dd_cdr', 'value'),
     [Input('dresp_dd_cdr', 'options')]
@@ -159,7 +160,7 @@ def set_options(jsonstring, selected_drug):
     list1=list(df.columns)
     list1.remove(selected_drug)
     return [{'label': l, 'value': gid} for gid,l in cdr.options_drug2(list1).items()]
-    
+
 @app.callback(
     Output('drug2_dd_cdr', 'value'),
     [Input('drug2_dd_cdr', 'options')]
@@ -167,7 +168,7 @@ def set_options(jsonstring, selected_drug):
 def set_options(available_options):
     '''Default value of drug2'''
     return available_options[0]['value']
-    
+
 @app.callback(
     Output('drug1_box', 'children'),
     [Input('drug_dd_cdr', 'value')]
@@ -182,11 +183,11 @@ def render_callback(selected_drug):
         dbc.CardBody(
             [
             html.H4(header, className="card-title",style={'fontFamily':styles['t']['type_font'],'font-size' : styles['t']['size_font_card'], 'fontWeight':'bold'}),
-            html.P(descrip,style={'fontFamily':styles['t']['type_font'],'font-size' : '12px'}) 
+            html.P(descrip,style={'fontFamily':styles['t']['type_font'],'font-size' : '12px'})
             ]),
         color="info", inverse=True,style={'Align': 'center', 'width':'98%','fontFamily':styles['t']['type_font']})
     return fig,
-    
+
 @app.callback(
     Output('drug2_box', 'children'),
     [Input('drug2_dd_cdr', 'value')]
@@ -201,13 +202,13 @@ def render_callback(selected_drug):
         dbc.CardBody(
             [
             html.H4(header, className="card-title",style={'fontFamily':styles['t']['type_font'],'font-size' : styles['t']['size_font_card'], 'fontWeight':'bold'}),
-            html.P(descrip,style={'fontFamily':styles['t']['type_font'],'font-size' : '12px'}) 
+            html.P(descrip,style={'fontFamily':styles['t']['type_font'],'font-size' : '12px'})
             ]),
         color="info", inverse=True,style={'Align': 'center', 'width':'98%','fontFamily':styles['t']['type_font']})
     return fig,
 
 @app.callback(
-    Output('hidden_base_df_cdr', 'children'), 
+    Output('hidden_base_df_cdr', 'children'),
     [Input('project_dd_cdr', 'value'),
     Input('dresp_dd_cdr', 'value'),
     Input('drug_dd_cdr','value'),
@@ -216,7 +217,7 @@ def render_callback(selected_drug):
 def createDF(selected_project,selected_drugResp,selected_drug,selected_disease):
     '''Store intermediate df filtered for user selected project and drug response metric'''
     df = cdr.get_base_matrix(selected_project,selected_drugResp,selected_drug,selected_disease)
-    return df.to_json(orient="index") 
+    return df.to_json(orient="index")
 
 @app.callback(
     Output("pairwise", "children"),
@@ -257,7 +258,7 @@ def render_callback(selected_drug, selected_drug2):
             tooltip_duration=None,
         )
     return table_res,
-    
+
 @app.callback(
     Output("sample_char_table", "children"),
     [Input('hidden_base_df_cdr', 'children')]
@@ -274,7 +275,7 @@ def render_callback(jsonstring):
     for row in G.query().V(list(cols)).render(['$._gid', '$.synonym']):
         col_remap[row[0]] = row[1]
     drug_name = list(col_remap[i] for i in df2.columns)
-    df2.columns=drug_name  
+    df2.columns=drug_name
     df3 = cdr.get_table(df2)
     fig_table = cdr.sample_table(df3)
     fig =cdr.piecharts_celllines(df3)
@@ -301,7 +302,7 @@ def render_callback(jsonstring):
                 )
             ],width=7,align='center'
         ),
-    ])        
+    ])
     return fig_cluster
 
 
@@ -314,7 +315,7 @@ def toggle_popover(n, is_open):
     if n:
         return not is_open
     return is_open
-    
+
 @app.callback(
     Output("main_help1", "is_open"),
     [Input("open1", "n_clicks"), Input("close1", "n_clicks")],

@@ -23,9 +23,10 @@ styles=ly.styles
 base_df=pd.read_csv('bmeg_app/source/basedf.tsv',sep='\t') # TEMP TODO change to cached
 
 #######
-# Page  
-####### 
-print('loading app layout')   
+# Page
+#######
+print('loading app layout')
+NAME="Literature Gene-Drug Associations"
 tab_layout = html.Div(children=[
     dbc.Row(
         [
@@ -43,22 +44,22 @@ tab_layout = html.Div(children=[
                         centered=True,
                     ),
                 ]),
-                width=1, 
-            ), 
+                width=1,
+            ),
             dbc.Col(html.Div([
                 html.Label('Gene Symbol'),
                 dcc.Dropdown(id='gene_dd',
                     options=[
                         {'label': l, 'value': gid} for l,gid in lsu.gene_dd_selections(base_df,'geneID','gene').items()],
                     value='ENSG00000198793',
-                    ),     
-                ],style={'width': '100%','display': 'inline-block','font-size' : styles['t']['size_font']}), 
+                    ),
+                ],style={'width': '100%','display': 'inline-block','font-size' : styles['t']['size_font']}),
             ),
             dbc.Col(html.Div(
                 [
                     html.Label('Drug'),
-                    dcc.Dropdown(id='drug_dd'),     
-                ],style={'width': '100%','display': 'inline-block','font-size' : styles['t']['size_font']}), 
+                    dcc.Dropdown(id='drug_dd'),
+                ],style={'width': '100%','display': 'inline-block','font-size' : styles['t']['size_font']}),
             )
         ]),
     html.Hr(),
@@ -103,7 +104,7 @@ def toggle_modal(n1, n2, is_open):
     if n1 or n2:
         return not is_open
     return is_open
-    
+
 @app.callback(
     Output('drug_dd', 'options'),
     [Input('gene_dd', 'value')]
@@ -118,18 +119,18 @@ def set_options(selected_gene):
 )
 def set_options(available_options):
     '''dropdown menu - drug'''
-    return available_options[0]['value']    
+    return available_options[0]['value']
 
 @app.callback(
-    Output('hidden_base_df_lsu', 'children'), 
+    Output('hidden_base_df_lsu', 'children'),
     [Input('gene_dd', 'value'),
     Input('drug_dd', 'value')]
 )
 def createDF(selected_gene,selected_drug):
     '''Store base_df filtered for user selected gene, drug'''
     base_df_2 = lsu.reduce_df(base_df, 'geneID', selected_gene, 'drugID', selected_drug)
-    return base_df_2.to_json(orient="index") 
-        
+    return base_df_2.to_json(orient="index")
+
 @app.callback(
     Output("pie", "children"),
     [Input('hidden_base_df_lsu', 'children')]
@@ -167,7 +168,7 @@ def render_callback(jsonstring):
         export_headers='display',
         page_size=4,
     )
-    return fig,    
+    return fig,
 
 @app.callback(
     Output("bio_table", "children"),

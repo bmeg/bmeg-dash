@@ -24,9 +24,10 @@ for a,b in q:
     select_genes[a]=1
 
 #######
-# Page  
-####### 
-print('loading app layout')   
+# Page
+#######
+print('loading app layout')
+NAME="TCGA Clustering"
 tab_layout = html.Div(children=[
     dbc.Row(
         [
@@ -46,9 +47,9 @@ tab_layout = html.Div(children=[
                         centered=True,
                     ),
                 ]),
-                width=1, 
-            ),  
-            
+                width=1,
+            ),
+
             dbc.Col(dcc.Dropdown(
                 id='project_dd_tmn',
                 options=[{'label': l, 'value': gid} for gid,l in tmn.options_project().items()],
@@ -87,7 +88,7 @@ def toggle_modal(n1, n2, is_open):
     if n1 or n2:
         return not is_open
     return is_open
-    
+
 @app.callback(
     Output("info_modal", "is_open"),
     [Input("info_open_tmn", "n_clicks"), Input("info_close_tmn", "n_clicks")],
@@ -99,13 +100,13 @@ def toggle_modal(n1, n2, is_open):
     return is_open
 
 @app.callback(
-    Output('hidden_base_df_tmn', 'children'), 
+    Output('hidden_base_df_tmn', 'children'),
     [Input('project_dd_tmn', 'value')]
-)    
+)
 def createDF(selected_project):
     df = tmn.get_df(selected_project,'$c._data.gdc_attributes.diagnoses.tumor_stage')
-    return df.to_json(orient="index") 
- 
+    return df.to_json(orient="index")
+
 @app.callback(
     Output("umap_fig", "children"),
     [Input('hidden_base_df_tmn', 'children'),
@@ -121,14 +122,14 @@ def render_callback(jsonstring,selected_property):
         df2= tmn.update_umap(selected_property, df)
         fig=tmn.get_umap(df2, 'UMAP', selected_property.split('.')[-1])
         return dcc.Graph(figure=fig),
-        
+
 @app.callback(
     Output('property_dd_tmn', 'options'),
     [Input('project_dd_tmn', 'value')]
 )
 def set_cities_options(selected_project):
     return [{'label': l, 'value': query_string} for l,query_string in tmn.options_property(selected_project).items()]
-    
+
 @app.callback(
     Output('property_dd_tmn', 'value'),
     [Input('property_dd_tmn', 'options')]

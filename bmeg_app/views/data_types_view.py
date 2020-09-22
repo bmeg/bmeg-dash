@@ -18,17 +18,18 @@ main_colors= ly.main_colors
 styles=ly.styles
 
 #######
-# Page  
-####### 
+# Page
+#######
+NAME="Main"
 tab_layout = html.Div(children=[
     html.H4(children='What is stored inside the database?',style=styles['sh']),
     dcc.Loading(id="cards",
-            type="default",children=html.Div(id="cards_output")),  
+            type="default",children=html.Div(id="cards_output")),
     dcc.Loading(id="node_cts_bar",
             type="default",children=html.Div(id="node_cts_bar_output")),
 ],style={'fontFamily': styles['t']['type_font'],})
 
-                
+
 @app.callback(
     Output("cards", "children"),
     [Input('url', 'pathname')]
@@ -42,8 +43,8 @@ def render_callback(href):
     for l in nodes_interest:
         res[l] = G.query().V().hasLabel(l).count().execute()[0]['count']
     fig= dty.counts(100, res,main_colors['lightgrey'],styles['t']['type_font'])
-    return dcc.Graph(id='cards_output', figure=fig),    
-    
+    return dcc.Graph(id='cards_output', figure=fig),
+
 @app.callback(
     Output("node_cts_bar", "children"),
     [Input('url', 'pathname')]
