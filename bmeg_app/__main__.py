@@ -72,7 +72,11 @@ sidebar = html.Div(
         dbc.Collapse(
             dbc.Nav(
                 [
-                    dbc.NavLink("Compare Drug Treatments", href="/page-1", id="page-1-link",
+                    dbc.NavLink("Home", href="/page-4", id="page-4-link",
+                        style={'font-size':styles['t']['size_font_card'],
+                        'fontFamily':styles['t']['type_font']
+                        },),
+                    dbc.NavLink("Compare Drug Responses", href="/page-1", id="page-1-link",
                         style={'font-size':styles['t']['size_font_card'],
                         'fontFamily':styles['t']['type_font']
                         },),
@@ -81,10 +85,6 @@ sidebar = html.Div(
                         'fontFamily':styles['t']['type_font']
                         },),
                     dbc.NavLink("Literature Gene-Drug Associations", href="/page-3", id="page-3-link",
-                        style={'font-size':styles['t']['size_font_card'],
-                        'fontFamily':styles['t']['type_font']
-                        },),
-                    dbc.NavLink("BMEG Data Types", href="/page-4", id="page-4-link",
                         style={'font-size':styles['t']['size_font_card'],
                         'fontFamily':styles['t']['type_font']
                         },),
