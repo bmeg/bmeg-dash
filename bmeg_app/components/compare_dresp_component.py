@@ -57,31 +57,33 @@ def dresp_pairs(df,drug1,drug2,dresp):
     
 def options_project():
     '''Project dropdown menu options'''
-    project_label=['CCLE'] # TODO incorp CTRP and GDSC and check all downstream queries
-    options ={}
+    project_label=['CCLE','GDSC','CTRP'] # TODO incorp CTRP and GDSC and check all downstream queries
+    options ={} 
     for row in G.query().V().hasLabel('Project').render(['$._gid']):
-        if project_label[0] in row[0]:
-            options[row[0]]=project_label[0]
+        for a in project_label:
+            if a in row[0]:
+                options[row[0]]=a
     return options
 
 def options_disease(selected_project):
     '''Disease dropdown menu options'''
-    options={}
+    options=[]
     for row in G.query().V(selected_project).out("cases").render(['$._data.cellline_attributes.Primary Disease']):
-        if row[0] is not None and row[0]!='Unknown':
-            options[row[0]]=''
+        if row[0] is not None and row[0].lower()!='unknown' and row[0] not in options:
+            # options[row[0]]=''
+            options.append(row[0])
+    options.sort()
     return options
 
 def options_drug(selected_project):
     '''Drug dropdown menu options. If no synonym then use GID'''
     options={}
-    if selected_project=='Project:CCLE':
-        for row in G.query().V('Project:CCLE').out("cases").as_("p").out("samples").out("aliquots").out("drug_response").as_("dr").out("compounds").as_("c").render(['$._gid','$._data.synonym']):
-            if 'Compound:NO_ONTOLOGY' not in row[0]:
-                if row[1] is None:
-                    options[row[0]]=row[0]
-                else:
-                    options[row[0]]=row[1].capitalize()
+    for row in G.query().V(selected_project).out("cases").as_("p").out("samples").out("aliquots").out("drug_response").as_("dr").out("compounds").as_("c").render(['$._gid','$._data.synonym']):
+        if 'Compound:NO_ONTOLOGY' not in row[0]:
+            if row[1] is None:
+                options[row[0]]=row[0]
+            else:
+                options[row[0]]=row[1].capitalize()
     return options
 
 def options_drug2(drug_list):
@@ -103,7 +105,18 @@ def options_dresp(selected_project):
             'IC50':'$dr._data.ic50',
             'EC50': '$dr._data.ec50'
              }
-        return options
+    elif 'Project:GDSC'== selected_project:
+        options = {
+            'AAC':'$dr._data.aac',
+            'IC50':'$dr._data.ic50',
+            'EC50': '$dr._data.ec50'
+             }  
+    elif 'Project:CTRP'== selected_project:
+        options = {
+            'AAC':'$dr._data.aac',
+            'EC50': '$dr._data.ec50'
+             }    
+    return options
 
 def drugDetails(drugs_list):
     '''Drug property table'''

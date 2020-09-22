@@ -59,7 +59,7 @@ tab_layout = html.Div(children=[
             dbc.Col(
                 html.Div([
                     html.Label('Disease'),
-                    dcc.Dropdown(id='disease_dd_cdr', value='Breast Cancer', style={'font-size' : styles['t']['size_font']})
+                    dcc.Dropdown(id='disease_dd_cdr', style={'font-size' : styles['t']['size_font']})
                 ],
                 style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']})
             ),
@@ -84,7 +84,7 @@ tab_layout = html.Div(children=[
             html.Div(
                 [
                     html.Label('Drug 1'),
-                    dcc.Dropdown(id='drug_dd_cdr', value='Compound:CID36314', style={'font-size' : styles['t']['size_font']})
+                    dcc.Dropdown(id='drug_dd_cdr', style={'font-size' : styles['t']['size_font']})
                 ],
                 style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']}
             )
@@ -138,7 +138,16 @@ def set_options(available_options):
     [Input('project_dd_cdr', 'value')]
 )
 def set_options(selected_project):
-    return [{'label': k, 'value': k} for k in cdr.options_disease(selected_project).keys()]
+    return [{'label': k, 'value': k} for k in cdr.options_disease(selected_project)]
+
+@app.callback(
+    Output('disease_dd_cdr', 'value'),
+    [Input('disease_dd_cdr', 'options')]
+)
+def set_options(available_options):
+    return available_options[0]['value']
+
+
 
 @app.callback(
     Output('drug_dd_cdr', 'options'),
@@ -146,6 +155,16 @@ def set_options(selected_project):
 )
 def set_options(selected_project):
     return [{'label': l, 'value': gid} for gid,l in cdr.options_drug(selected_project).items()]
+
+@app.callback(
+    Output('drug_dd_cdr', 'value'),
+    [Input('drug_dd_cdr', 'options')]
+)
+def set_options(available_options):
+    return available_options[0]['value']
+
+
+
 
 @app.callback(
     Output('drug2_dd_cdr', 'options'),
@@ -157,7 +176,8 @@ def set_options(jsonstring, selected_drug):
     temp=json.loads(jsonstring)
     df = pd.DataFrame.from_dict(temp, orient='index')
     list1=list(df.columns.drop(list(df.filter(regex='NO_ONTOLOGY'))))
-    list1.remove(selected_drug)
+    if selected_drug in list1:
+        list1.remove(selected_drug)
     return [{'label': l, 'value': gid} for gid,l in cdr.options_drug2(list1).items()]
     
 @app.callback(
