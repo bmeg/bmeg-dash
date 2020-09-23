@@ -56,10 +56,9 @@ component = dash_bio.NeedlePlot(
 #######
 # Page
 #######
-print('loading app layout')
 NAME="OncoPrint"
 tab_layout = html.Div(children=[
-    html.Label("Gene:"), dcc.Dropdown(id='single-dropdown'),
+    html.Label("Gene:"), dcc.Dropdown(id='single-dropdown', value="TP53/ENSG00000141510"),
     component
 ])
 
@@ -73,7 +72,6 @@ def update_options(search_value):
         raise PreventUpdate
     genes = gene_search(search_value)
     return genes
-
 
 
 @app.callback(

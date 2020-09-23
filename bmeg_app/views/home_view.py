@@ -1,7 +1,7 @@
 from .. import appLayout as ly
 from ..app import app
 from ..components import home_component as dty
-from ..db import G
+from ..db import G, get_vertex_label_count
 from bmeg_app.views import home_view, tumor_match_normal_view, literature_support_view, compare_dresp_view
 import dash
 from dash.dependencies import Input, Output
@@ -81,7 +81,7 @@ def render_callback(href):
     nodes_interest = ['Allele','Gene','Transcript','Exon','Protein','DrugResponse', 'Pathway','Compound', 'Interaction','Project','Publication', 'Aliquot']
     res = {}
     for l in nodes_interest:
-        res[l] = G.query().V().hasLabel(l).count().execute()[0]['count']
+        res[l] = get_vertex_label_count(l)
     fig= dty.counts(100, res,main_colors['lightgrey'],styles['t']['type_font'])
     return dcc.Graph(id='cards_output', figure=fig),
 
@@ -98,7 +98,7 @@ def render_callback(href):
     verts = [x for x in all_v if x not in to_rm]
     res = {}
     for l in verts:
-        res[l] = G.query().V().hasLabel(l).count().execute()[0]['count']
+        res[l] = get_vertex_label_count(l)
     keys=[]
     values=[]
     for k,v in res.items():

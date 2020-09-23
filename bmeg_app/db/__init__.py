@@ -1,17 +1,34 @@
-import gripql
-import yaml
 
 import os
+import yaml
+
+import gripql
+import dash
+
+from ..app import app
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Index
 from elasticsearch_dsl.query import MultiMatch
 
+from flask_caching import Cache
 
 
 with open('bmeg_app/config.yaml') as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 conn = gripql.Connection("https://bmeg.io/api", credential_file = config['bmeg']['credentials'])
 G = conn.graph(config['bmeg']['schema'])
+
+# configure dash app
+
+# Setup cache, just use local file system for now.
+cache = Cache(app.server, config={
+    'CACHE_TYPE': 'filesystem',
+    'CACHE_DIR': '/tmp/'
+})
+# check last load of elastic every hour
+CHECK_ELASTIC_LOAD_TIMEOUT = 60*60
+# otherwise, infinite - use creation_date to invalidate cache
+TIMEOUT = 0
 
 
 def gene_search(query):
@@ -36,3 +53,7 @@ def gene_search(query):
     #  {"label": "New York City", "value": "NYC"},
 
     return([{'label': f'{h.symbol}/{h.ensemble_id}', 'value': f'{h.symbol}/{h.ensemble_id}'} for h in search])
+
+@cache.memoize(timeout=TIMEOUT)
+def get_vertex_label_count(label):
+    return G.query().V().hasLabel(label).count().execute()[0]['count']
