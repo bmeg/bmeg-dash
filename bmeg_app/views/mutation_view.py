@@ -13,6 +13,8 @@ import gripql
 import json
 import pandas as pd
 from plotly.subplots import make_subplots
+import logging
+logger = logging.getLogger(__name__)
 
 #######
 # Prep
@@ -22,15 +24,19 @@ main_colors= ly.main_colors
 styles=ly.styles
 
 def getGeneMutations(gene):
-    cds = G.query().V(gene).out("alleles").render("cds_position").execute()
+    app.logger.info("Updating mutation Track")
+    res = G.query().V(gene).out("alleles").as_("a").outE("somatic_callsets").as_("c").render(["$a.ensembl_transcript", "$a.cds_position", "$c._to"])
     o = []
-    for i in cds:
-        v = i.split("/")[0]
+    t = []
+    for transcript, cds, dst in res:
+        v = cds.split("/")[0]
         try:
             d = int(v)
             o.append(d)
         except ValueError:
             pass
+        t.append(transcript)
+    logger.info("Transcript %s" % (set(t)))
     df = pd.Series(o)
     counts = df.value_counts()
     mData = {
@@ -58,8 +64,9 @@ component = dash_bio.NeedlePlot(
 #######
 NAME="OncoPrint"
 tab_layout = html.Div(children=[
-    html.Label("Gene:"), dcc.Dropdown(id='single-dropdown', value="TP53/ENSG00000141510"),
-    component
+    html.Label("Gene:"), dcc.Dropdown(id='single-dropdown', value="TP53/ENSG00000141510", search_value="TP53/ENSG00000141510"),
+    component,
+    html.Div(id='needle-selection')
 ])
 
 @app.callback(
@@ -81,4 +88,14 @@ def process_single(value):
     if not value:
         raise PreventUpdate
     gene = value.split("/")[1]
+    app.logger.info("Getting: %s" % (gene))
     return getGeneMutations(gene)
+
+
+@app.callback(
+    Output('needle-selection', 'children'),
+    [Input('my-dashbio-needleplot', 'selectedData')])
+def display_selected_data(selectedData):
+    #This doesn't seem to respond so will probably delete
+    app.logger.info("Got selectedData")
+    return json.dumps(selectedData, indent=2)
