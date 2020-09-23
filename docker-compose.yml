@@ -5,7 +5,7 @@ services:
     container_name: bmeg-app-elastic
     environment:
       - cluster.name=bmeg-app-cluster
-      - node.name=elastic
+      - node.name=bmeg-app-elastic
       - discovery.type=single-node
     #   - cluster.initial_master_nodes=elastic,odfe-node2
       - bootstrap.memory_lock=true # along with the memlock settings below, disables swapping
@@ -33,8 +33,8 @@ services:
     expose:
       - "5601"
     environment:
-      ELASTICSEARCH_URL: http://elastic:9200
-      ELASTICSEARCH_HOSTS: http://elastic:9200
+      ELASTICSEARCH_URL: http://bmeg-app-elastic:9200
+      ELASTICSEARCH_HOSTS: http://bmeg-app-elastic:9200
     networks:
       - bmeg-app-net
     depends_on:
@@ -51,13 +51,13 @@ services:
     expose:
       - "8050"
     environment:
-      ELASTICSEARCH_URL: http://elastic:9200
-      ELASTICSEARCH_HOSTS: http://elastic:9200
+      ELASTICSEARCH_URL: http://bmeg-app-elastic:9200
+      ELASTICSEARCH_HOSTS: http://bmeg-app-elastic:9200
     networks:
       - bmeg-app-net
     depends_on:
       - elastic
-    command: ["./bin/wait-for-it.sh", "elastic:9200", "--", "./bin/setup-and-launch.sh"]
+    command: ["./bin/wait-for-it.sh", "bmeg-app-elastic:9200", "--", "./bin/setup-and-launch.sh"]
 
 
 volumes:
