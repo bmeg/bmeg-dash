@@ -60,13 +60,13 @@ tab_layout = html.Div(children=[
             dbc.Col(
                 html.Div([
                     html.Label('Disease'),
-                    dcc.Dropdown(id='disease_dd_cdr', value='Breast Cancer', style={'font-size' : styles['t']['size_font']})
+                    dcc.Dropdown(id='disease_dd_cdr', style={'font-size' : styles['t']['size_font']})
                 ],
                 style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']})
             ),
             dbc.Col(
                 html.Div([
-                    html.Label('Drug Response Metric'),
+                    html.Label('Drug Response'),
                     dcc.Dropdown(id='dresp_dd_cdr',style={'font-size' : styles['t']['size_font']})
                 ],
                 style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']})
@@ -85,7 +85,7 @@ tab_layout = html.Div(children=[
             html.Div(
                 [
                     html.Label('Drug 1'),
-                    dcc.Dropdown(id='drug_dd_cdr', value='Compound:CID36314', style={'font-size' : styles['t']['size_font']})
+                    dcc.Dropdown(id='drug_dd_cdr', style={'font-size' : styles['t']['size_font']})
                 ],
                 style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']}
             )
@@ -139,7 +139,16 @@ def set_options(available_options):
     [Input('project_dd_cdr', 'value')]
 )
 def set_options(selected_project):
-    return [{'label': k, 'value': k} for k in cdr.options_disease(selected_project).keys()]
+    return [{'label': k, 'value': k} for k in cdr.options_disease(selected_project)]
+
+@app.callback(
+    Output('disease_dd_cdr', 'value'),
+    [Input('disease_dd_cdr', 'options')]
+)
+def set_options(available_options):
+    return available_options[0]['value']
+
+
 
 @app.callback(
     Output('drug_dd_cdr', 'options'),
@@ -147,6 +156,16 @@ def set_options(selected_project):
 )
 def set_options(selected_project):
     return [{'label': l, 'value': gid} for gid,l in cdr.options_drug(selected_project).items()]
+
+@app.callback(
+    Output('drug_dd_cdr', 'value'),
+    [Input('drug_dd_cdr', 'options')]
+)
+def set_options(available_options):
+    return available_options[0]['value']
+
+
+
 
 @app.callback(
     Output('drug2_dd_cdr', 'options'),
@@ -157,8 +176,9 @@ def set_options(jsonstring, selected_drug):
     '''Drug2 dropdown menu options'''
     temp=json.loads(jsonstring)
     df = pd.DataFrame.from_dict(temp, orient='index')
-    list1=list(df.columns)
-    list1.remove(selected_drug)
+    list1=list(df.columns.drop(list(df.filter(regex='NO_ONTOLOGY'))))
+    if selected_drug in list1:
+        list1.remove(selected_drug)
     return [{'label': l, 'value': gid} for gid,l in cdr.options_drug2(list1).items()]
 
 @app.callback(
@@ -230,6 +250,7 @@ def render_callback(jsonstring, selected_drug,selected_drug2,selected_dresp):
     '''create pairwise plots '''
     temp=json.loads(jsonstring)
     df = pd.DataFrame.from_dict(temp, orient='index')
+    df=df[df.columns.drop(list(df.filter(regex='NO_ONTOLOGY')))]
     disease_dict = cdr.line2disease(list(df.index))
     df=cdr.get_table(df)
     fig= cdr.dresp_pairs(df,selected_drug,selected_drug2,selected_dresp) #todo add dropdown menu for section drug selection
@@ -268,8 +289,7 @@ def render_callback(jsonstring):
     temp=json.loads(jsonstring)
     df = pd.DataFrame.from_dict(temp, orient='index')
     disease_dict = cdr.line2disease(list(df.index))
-    # Preprocess:Rename drugs to drug_name
-    df2=df[df.columns.drop(list(df.filter(regex='NO_ONTOLOGY')))] # TODO fix it so dont have to drop
+    df2=df[df.columns.drop(list(df.filter(regex='NO_ONTOLOGY')))]
     cols=df2.columns
     col_remap={}
     for row in G.query().V(list(cols)).render(['$._gid', '$.synonym']):
