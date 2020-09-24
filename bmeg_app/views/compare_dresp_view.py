@@ -2,6 +2,7 @@ from .. import appLayout as ly
 from ..app import app
 from ..components import compare_dresp_component as cdr
 from ..db import G
+from ..components import info_button
 import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -71,14 +72,49 @@ tab_layout = html.Div(children=[
                 ],
                 style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']})
             ),
+            dbc.Col(
+                html.Div([
+                    dbc.Button('Details', id='open1',color='primary',outline=True,style={'font-size':styles['t']['size_font']}),
+                    dbc.Modal(
+                        [
+                            dbc.ModalHeader('Identify Drug Treatment Candidates from Cancer Cell Line Drug Screens'),
+
+                            dbc.ModalBody("Interrogate cell line drug screening trials from large established sources (CCLE, CTRP, GDSC). Dig into drug sensitivity trends within a particular disease and explore associated metadata."),
+                            dbc.ModalBody( 'What’s going on behind the scenes?'),
+                            dbc.ModalBody( '•	Data is queried from BMEG, filtered for relevant cell lines (breast tissue derived cell lines kept if breast cancer is selected), and analyzed in the viewer.'),
+                            dbc.ModalBody( 'Panel 1 Features'),
+                            dbc.ModalBody( '• Download a table of all cell line drug screening results based on three dropdown menus. Quickly see metadata composition of the table from the pie charts.'),
+                            dbc.ModalBody( 'Panel 2 Features'),
+                            dbc.ModalBody( '• Dive deeper to explore underlying trends between two drugs. Drug response values are plotted to quickly identify potential drug candidates that elicted similar responses from cell lines.'),
+                            dbc.ModalBody( '• Blue cards provide a summary of the selected drugs to provide insight on the molecular and/or biological realm of the selected drug.'),
+                            dbc.ModalBody( '• Examine the drug characteristics table for potential taxonomic reasons for similar and different responses from drugs.'),
+                            dbc.ModalFooter(dbc.Button('Close',id='close1',className='ml-auto')),
+                        ],
+                        id='main_help1',
+                        size='lg',
+                        centered=True,
+                    ),
+                ]),
+                width=1,
+            ),
         ]
     ),
     html.Hr(),
-    html.Label('All drugs in selected dataset, disease, and drug response'),
+    dbc.Row(
+        [
+            html.Label('Drug sensitivity results from reported drug screens'),
+            html.Div(info_button('help_pie','All results from selected dataset, disease, and drug response. Pie charts indicate the composition of metadata shown in table.')),
+        ]
+    ),
     dcc.Loading(id="sample_char_table",type="default",children=html.Div()),
 
     html.Hr(),
-    html.Label('Explore pairwise drug responses'),
+    dbc.Row(
+        [
+            html.Label('Interrogate drug screening results for drugs with similar responses'),
+            html.Div(info_button('help_pair','Select two drugs from the above table to explore drug response patterns.')),
+        ]
+    ),
     html.Div(id='hidden_base_df_cdr', style={'display': 'none'}),
     dbc.Row([
         dbc.Col([
@@ -121,6 +157,19 @@ app.clientside_callback(
 )
 
 @app.callback(
+    Output('hidden_base_df_cdr', 'children'),
+    [Input('project_dd_cdr', 'value'),
+    Input('dresp_dd_cdr', 'value'),
+    Input('drug_dd_cdr','value'),
+    Input('disease_dd_cdr','value')]
+)
+def createDF(selected_project,selected_drugResp,selected_drug,selected_disease):
+    '''Store intermediate df filtered for user selected project and drug response metric'''
+    print(selected_project,selected_drugResp,selected_drug,selected_disease)
+    df = cdr.get_base_matrix(selected_project,selected_drugResp,selected_drug,selected_disease)
+    return df.to_json(orient="index")
+
+@app.callback(
     Output('dresp_dd_cdr', 'options'),
     [Input('project_dd_cdr', 'value')]
 )
@@ -147,8 +196,6 @@ def set_options(selected_project):
 )
 def set_options(available_options):
     return available_options[0]['value']
-
-
 
 @app.callback(
     Output('drug_dd_cdr', 'options'),
@@ -226,18 +273,6 @@ def render_callback(selected_drug):
             ]),
         color="info", inverse=True,style={'Align': 'center', 'width':'98%','fontFamily':styles['t']['type_font']})
     return fig,
-
-@app.callback(
-    Output('hidden_base_df_cdr', 'children'),
-    [Input('project_dd_cdr', 'value'),
-    Input('dresp_dd_cdr', 'value'),
-    Input('drug_dd_cdr','value'),
-    Input('disease_dd_cdr','value')]
-)
-def createDF(selected_project,selected_drugResp,selected_drug,selected_disease):
-    '''Store intermediate df filtered for user selected project and drug response metric'''
-    df = cdr.get_base_matrix(selected_project,selected_drugResp,selected_drug,selected_disease)
-    return df.to_json(orient="index")
 
 @app.callback(
     Output("pairwise", "children"),

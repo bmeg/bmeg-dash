@@ -57,7 +57,7 @@ def dresp_pairs(df,drug1,drug2,dresp):
     
 def options_project():
     '''Project dropdown menu options'''
-    project_label=['CCLE','GDSC','CTRP'] # TODO incorp CTRP and GDSC and check all downstream queries
+    project_label=['CCLE'] #,'GDSC','CTRP'] # TODO incorp CTRP and GDSC and check all downstream queries
     options ={} 
     for row in G.query().V().hasLabel('Project').render(['$._gid']):
         for a in project_label:

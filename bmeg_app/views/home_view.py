@@ -29,23 +29,23 @@ tab_layout = html.Div(children=[
             type="default",children=html.Div(id="cards_output")),
     dcc.Loading(id="node_cts_bar",
             type="default",children=html.Div(id="node_cts_bar_output")),
-
     dbc.Card(
         dbc.CardBody(
             [
-                html.H5("Similar Drug Response", className="card-title"),
-                html.P("Explore large datasets of cell line drug screens and their responses. Interrogate cell line drug screening trials. For example, select a FDA drug that is widely known to treat a particular disease (Paclitaxel for breast cancer treatment) and identify other drugs that show a similar impact on cell lines."),
+                html.H4("Identify Drug Treatment Candidates from Cancer Cell Line Drug Screens"),
+                html.P("Interrogate cell line drug screening trials from large established sources (CCLE, CTRP, GDSC). Dig into drug sensitivity trends within a particular disease and explore associated metadata."),
+                html.P("For example, select a FDA drug that is widely known to prevent/treat a particular disease phenotype (ex. Paclitaxel, breast cancer treatment) and identify other drugs that show a similar impact on cell lines."),
                 dbc.Button(
-                    dbc.NavLink('Compare Drug Responses',href='/page-2',id='page2-link'),color="light"
+                    dbc.NavLink('Cancer Drug Screening',href='/page-2',id='page2-link'),color='light'
                 ),
-            ]
+            ],
         )
     ),
 
     dbc.Card(
         dbc.CardBody(
             [
-                html.H5("Tumor vs. Normal", className="card-title"),
+                html.H4("Tumor vs. Normal", className="card-title"),
                 html.P("Some descriptive text here on the purpose and use of this widget. Info on the type of data used in this widget"),
                 dbc.Button(
                     dbc.NavLink('TCGA Clustering',href='/page-3',id='page3-link'),color="light"
@@ -57,7 +57,7 @@ tab_layout = html.Div(children=[
     dbc.Card(
         dbc.CardBody(
             [
-                html.H5("Curated Literature Evidence", className="card-title"),
+                html.H4("Curated Literature Evidence", className="card-title"),
                 html.P("Some descriptive text here on the purpose and use of this widget. Info on the type of data used in this widget"),
                 dbc.Button(
                     dbc.NavLink('Literature Gene-Drug Associations',href='/page-4',id='page4-link'),color="light"

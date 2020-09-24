@@ -25,6 +25,19 @@ styles = {
         'size_font':12,
         'size_font_card':14,
     },
+    'help_button':{
+        'paddingTop':2,
+        'paddingBottom':2,
+        'paddingLeft':8,
+        'paddingRight':8,
+        'font-size':10,
+        'font-family':'Arial',
+    },
+    'help_button_text':{
+        'padding':20,
+        'font-size':12,
+        'font-family':'Arial',  
+    },
     'b': {
         'padding_left':'15px',
         'padding_top':'15px'

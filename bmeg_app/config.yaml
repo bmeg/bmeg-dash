@@ -1,6 +1,6 @@
 bmeg:
     credentials: bmeg_app/secrets/bmeg_credentials.json
-    schema: rc5
+    graph: rc5
 
 app:
     host: 0.0.0.0
