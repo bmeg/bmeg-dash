@@ -76,7 +76,7 @@ sidebar = html.Div(
                         style={'font-size':styles['t']['size_font_card'],
                         'fontFamily':styles['t']['type_font']
                         },),
-                    dbc.NavLink("Compare Drug Responses", href="/page-2", id="page-2-link",
+                    dbc.NavLink("Cancer Drug Screening", href="/page-2", id="page-2-link",
                         style={'font-size':styles['t']['size_font_card'],
                         'fontFamily':styles['t']['type_font']
                         },),
