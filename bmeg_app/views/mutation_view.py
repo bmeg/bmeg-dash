@@ -64,10 +64,10 @@ component = dash_bio.NeedlePlot(
 #######
 NAME="Gene-level Mutation View"
 LAYOUT = html.Div(children=[
-    html.Label("Gene:"), dcc.Dropdown(id='single-dropdown', value="TP53/ENSG00000141510", search_value="TP53/ENSG00000141510"),
+    html.Label("Gene:"), dcc.Dropdown(id='single-dropdown', value="TP53/ENSG00000141510", search_value="TP53/ENSG00000141510" ),
     component,
     html.Div(id='needle-selection')
-])
+], style={ 'font-size' : styles['t']['size_font']})
 
 @app.callback(
     dash.dependencies.Output('single-dropdown', 'options'),
