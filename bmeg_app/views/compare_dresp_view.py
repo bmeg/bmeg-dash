@@ -30,29 +30,6 @@ LAYOUT = html.Div(children=[
         [
             dbc.Col(
                 html.Div([
-                    dbc.Button('Info', id='open1',color='primary',style={'font-size':styles['t']['size_font']}),
-                    dbc.Modal(
-                        [
-                            dbc.ModalHeader('Identify Drugs Candidates with Similar Cell Reponses'),
-                            dbc.ModalBody('Interrogate cell line drug screening trials. For example, select a FDA drug that is widely known to treat a particular disease (Paclitaxel for breast cancer treatment) and identify other drugs that show a similar impact on cell lines.'),
-                            dbc.ModalBody( 'What’s going on behind the scenes?'),
-                            dbc.ModalBody( '•	Data is queried from BMEG, filtered for relevant cell lines (breast tissue derived cell lines kept if breast cancer is selected), and analyzed in the viewer.'),
-                            dbc.ModalBody( 'Features'),
-                            dbc.ModalBody( '• Boxed in blue is a summary of the selected drug to provide insight on the molecular and/or biological realm of the selected drug.'),
-                            dbc.ModalBody( '• Violin plots comparative overview: Identify alternative drugs by examining drug responses for similar distributions.'),
-                            dbc.ModalBody( '• Examine the drug characteristics table for taxonomic reasons for similar and different responses from drugs.'),
-                            dbc.ModalBody( '• Dive deeper to see the characteristics of the samples that generated the violin plots of particular drugs.'),
-                            dbc.ModalFooter(dbc.Button('Close',id='close1',className='ml-auto')),
-                        ],
-                        id='main_help1',
-                        size='med',
-                        centered=True,
-                    ),
-                ]),
-                width=1,
-            ),
-            dbc.Col(
-                html.Div([
                     html.Label('Dataset'),
                     dcc.Dropdown(id='project_dd_cdr',options=[{'label': l, 'value': gid} for gid,l in cdr.options_project().items()],value='Project:CCLE')
                 ],
