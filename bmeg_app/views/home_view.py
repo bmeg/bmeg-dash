@@ -36,7 +36,7 @@ LAYOUT = html.Div(children=[
                 html.P("Interrogate cell line drug screening trials from large established sources (CCLE, CTRP, GDSC). Dig into drug sensitivity trends within a particular disease and explore associated metadata."),
                 html.P("For example, select a FDA drug that is widely known to prevent/treat a particular disease phenotype (ex. Paclitaxel, breast cancer treatment) and identify other drugs that show a similar impact on cell lines."),
                 dbc.Button(
-                    dbc.NavLink('Cancer Drug Screening',href='/page-2',id='page2-link'),color='light'
+                    dbc.NavLink('Cancer Drug Screening',href='/drug_response',id='page2-link'),color='light'
                 ),
             ],
         )
@@ -48,7 +48,7 @@ LAYOUT = html.Div(children=[
                 html.H4("Tumor vs. Normal", className="card-title"),
                 html.P("Some descriptive text here on the purpose and use of this widget. Info on the type of data used in this widget"),
                 dbc.Button(
-                    dbc.NavLink('TCGA Clustering',href='/page-3',id='page3-link'),color="light"
+                    dbc.NavLink('TCGA Clustering',href='/tumors',id='page3-link'),color="light"
                 ),
             ]
         )
@@ -60,7 +60,7 @@ LAYOUT = html.Div(children=[
                 html.H4("Curated Literature Evidence", className="card-title"),
                 html.P("Some descriptive text here on the purpose and use of this widget. Info on the type of data used in this widget"),
                 dbc.Button(
-                    dbc.NavLink('Literature Gene-Drug Associations',href='/page-4',id='page4-link'),color="light"
+                    dbc.NavLink('Literature Gene-Drug Associations',href='/g2p',id='page4-link'),color="light"
                 ),
 
 
