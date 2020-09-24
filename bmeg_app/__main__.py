@@ -115,7 +115,7 @@ def render_page_content(pathname):
     if pathname == "/":
         pathname = "/" + list(view_map.keys())[0]
     if pathname[1:] in view_map:
-        return html.Div(view_map[pathname[1:]].tab_layout)
+        return html.Div(view_map[pathname[1:]].LAYOUT)
     return dbc.Jumbotron(
         [
             html.H1("404: Not found", className="text-danger"),

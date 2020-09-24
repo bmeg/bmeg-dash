@@ -62,8 +62,8 @@ component = dash_bio.NeedlePlot(
 #######
 # Page
 #######
-NAME="OncoPrint"
-tab_layout = html.Div(children=[
+NAME="Gene-level Mutation View"
+LAYOUT = html.Div(children=[
     html.Label("Gene:"), dcc.Dropdown(id='single-dropdown', value="TP53/ENSG00000141510", search_value="TP53/ENSG00000141510"),
     component,
     html.Div(id='needle-selection')

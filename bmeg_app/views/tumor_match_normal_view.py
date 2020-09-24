@@ -28,7 +28,7 @@ for a,b in q:
 #######
 print('loading app layout')
 NAME="TCGA Clustering"
-tab_layout = html.Div(children=[
+LAYOUT = html.Div(children=[
     dbc.Row(
         [
             dbc.Col(

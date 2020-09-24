@@ -23,7 +23,7 @@ styles=ly.styles
 # Page
 #######
 NAME="Main"
-tab_layout = html.Div(children=[
+LAYOUT = html.Div(children=[
     html.H4(children='What is stored inside the database?',style=styles['sh']),
     dcc.Loading(id="cards",
             type="default",children=html.Div(id="cards_output")),

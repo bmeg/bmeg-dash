@@ -41,7 +41,7 @@ element = cyto.Cytoscape(
 )
 
 NAME="Pathway View"
-tab_layout = html.Div(children=[
+LAYOUT = html.Div(children=[
     html.Label("Pathway:"), dcc.Dropdown(id='pathway-dropdown'),
     element
 ])

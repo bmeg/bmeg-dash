@@ -25,7 +25,7 @@ styles=ly.styles
 #######
 print('loading app layout')
 NAME = "Compare Drug Responses"
-tab_layout = html.Div(children=[
+LAYOUT = html.Div(children=[
     dbc.Row(
         [
             dbc.Col(

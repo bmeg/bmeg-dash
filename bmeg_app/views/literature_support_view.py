@@ -27,7 +27,7 @@ base_df=pd.read_csv('bmeg_app/source/basedf.tsv',sep='\t') # TEMP TODO change to
 #######
 print('loading app layout')
 NAME="Literature Gene-Drug Associations"
-tab_layout = html.Div(children=[
+LAYOUT = html.Div(children=[
     dbc.Row(
         [
             dbc.Col(
