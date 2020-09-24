@@ -22,7 +22,7 @@ styles=ly.styles
 #######
 # Page
 #######
-NAME="Main"
+NAME="Home"
 LAYOUT = html.Div(children=[
     html.H4(children='What is stored inside the database?',style=styles['sh']),
     dcc.Loading(id="cards",
