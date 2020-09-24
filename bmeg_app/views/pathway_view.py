@@ -29,15 +29,28 @@ pathwayList = []
 for row in G.query().V().hasLabel("Pathway").render([ "$._gid", "$.name"]):
     pathwayList.append( [row[0], row[1].lower()] )
 
+
+def getPathwayGraph(pathway):
+    q = G.query().V(pathway).out("interactions").as_("i")
+    q = q.in_("interaction_input").as_("in").select("i")
+    q = q.out("interaction_output").as_("out").select("o")
+    q = q.render(["$in._gid", "$i._gid", "$out._gid"])
+
+    nodes = set()
+    data = []
+    for src, inter, dst in q:
+        if src not in nodes:
+            data.append( { "data" : {"id" : src, "label" : src} } )
+        if dst not in nodes:
+            data.append( { "data" : {"id" : dst, "label" : dst} } )
+        data.append( { "data" : { "source" : src, "target" : dst} } )
+    return data
+
 element = cyto.Cytoscape(
     id='bmeg-cytoscape',
     layout={'name': 'cose'},
     style={'width': '100%', 'height': '400px', 'arrow-scale': 2, 'target-arrow-shape': 'vee'},
-    elements=[
-        {'data': {'id': 'one', 'label': 'Node 1'} },
-        {'data': {'id': 'two', 'label': 'Node 2'} },
-        {'data': {'source': 'one', 'target': 'two'}}
-    ]
+    elements=[]
 )
 
 NAME="Pathway View"
@@ -60,3 +73,13 @@ def update_options(search_value):
         if search_value in n:
             hits.append( {"label" : n, "value" : g} )
     return hits
+
+@app.callback(
+    dash.dependencies.Output('bmeg-cytoscape', 'elements'),
+    [dash.dependencies.Input('pathway-dropdown', 'value')]
+)
+def update_pathway(value):
+    app.logger.info("Getting pathway: %s" % (value))
+    out = getPathwayGraph(value)
+    app.logger.info("%s has %d elements" % (value, len(out)))
+    return out
