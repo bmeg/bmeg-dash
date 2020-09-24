@@ -24,7 +24,7 @@ styles=ly.styles
 # Page
 #######
 print('loading app layout')
-NAME = "Compare Drug Responses"
+NAME = "Cancer Drug Screening"
 LAYOUT = html.Div(children=[
     dbc.Row(
         [
