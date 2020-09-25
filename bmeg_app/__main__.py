@@ -24,29 +24,40 @@ navlink_cancer_screen=dbc.NavLink(
     "Cancer Drug Screening", href="/page-2", id="page-2-link",
     style={'font-size':styles['t']['size_font_card'],'fontFamily':styles['t']['type_font']}
 )
+
+from bmeg_app.utils import help_button
+
+help_cancer_screen=help_button.sidebar_button(
+    'open1',
+    'main_help1',
+    'close1',
+    '?',
+    'Identify Drug Treatment Candidates from Cancer Cell Line Drug Screens',
+    ['Interrogate cell line drug screening trials from large established sources (CCLE, CTRP, GDSC). Dig into drug sensitivity trends within a particular disease and explore associated metadata.','What’s going on behind the scenes?']
+)
  
-help_cancer_screen= html.Div([
-    dbc.Button('?', id='open1',color='link',style=styles['tab_help_button']),
-    dbc.Modal(
-        [
-            dbc.ModalHeader('Identify Drug Treatment Candidates from Cancer Cell Line Drug Screens'),
-            
-            dbc.ModalBody("Interrogate cell line drug screening trials from large established sources (CCLE, CTRP, GDSC). Dig into drug sensitivity trends within a particular disease and explore associated metadata."),
-            dbc.ModalBody( 'What’s going on behind the scenes?'),
-            dbc.ModalBody( '•	Data is queried from BMEG, filtered for relevant cell lines (breast tissue derived cell lines kept if breast cancer is selected), and analyzed in the viewer.'),
-            dbc.ModalBody( 'Panel 1 Features'),
-            dbc.ModalBody( '• Download a table of all cell line drug screening results based on three dropdown menus. Quickly see metadata composition of the table from the pie charts.'),
-            dbc.ModalBody( 'Panel 2 Features'),
-            dbc.ModalBody( '• Dive deeper to explore underlying trends between two drugs. Drug response values are plotted to quickly identify potential drug candidates that elicted similar responses from cell lines.'),
-            dbc.ModalBody( '• Blue cards provide a summary of the selected drugs to provide insight on the molecular and/or biological realm of the selected drug.'),
-            dbc.ModalBody( '• Examine the drug characteristics table for potential taxonomic reasons for similar and different responses from drugs.'),
-            dbc.ModalFooter(dbc.Button('Close',id='close1',className='ml-auto')),
-        ],
-        id='main_help1',
-        size='lg',
-        centered=True,
-    ),
-])
+# help_cancer_screen= html.Div([
+#     dbc.Button('?', id='open1',color='link',style=styles['tab_help_button']),
+#     dbc.Modal(
+#         [
+#             dbc.ModalHeader('Identify Drug Treatment Candidates from Cancer Cell Line Drug Screens'),
+# 
+#             dbc.ModalBody("Interrogate cell line drug screening trials from large established sources (CCLE, CTRP, GDSC). Dig into drug sensitivity trends within a particular disease and explore associated metadata."),
+#             dbc.ModalBody( 'What’s going on behind the scenes?'),
+#             dbc.ModalBody( '•	Data is queried from BMEG, filtered for relevant cell lines (breast tissue derived cell lines kept if breast cancer is selected), and analyzed in the viewer.'),
+#             dbc.ModalBody( 'Panel 1 Features'),
+#             dbc.ModalBody( '• Download a table of all cell line drug screening results based on three dropdown menus. Quickly see metadata composition of the table from the pie charts.'),
+#             dbc.ModalBody( 'Panel 2 Features'),
+#             dbc.ModalBody( '• Dive deeper to explore underlying trends between two drugs. Drug response values are plotted to quickly identify potential drug candidates that elicted similar responses from cell lines.'),
+#             dbc.ModalBody( '• Blue cards provide a summary of the selected drugs to provide insight on the molecular and/or biological realm of the selected drug.'),
+#             dbc.ModalBody( '• Examine the drug characteristics table for potential taxonomic reasons for similar and different responses from drugs.'),
+#             dbc.ModalFooter(dbc.Button('Close',id='close1',className='ml-auto')),
+#         ],
+#         id='main_help1',
+#         size='lg',
+#         centered=True,
+#     ),
+# ])
 
 sidebar_header = dbc.Row(
     [
