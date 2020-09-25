@@ -69,17 +69,6 @@ LAYOUT = html.Div(children=[
     dcc.Loading(type="default",children=html.Div(id="umap_fig")),
 ],style={'fontFamily': styles['t']['type_font']})
 
-# 
-# @app.callback(
-#     Output("main_help2", "is_open"),
-#     [Input("open2", "n_clicks"), Input("close2", "n_clicks")],
-#     [State("main_help2", "is_open")],
-# )
-# def toggle_modal(n1, n2, is_open):
-#     if n1 or n2:
-#         return not is_open
-#     return is_open
-
 @app.callback(
     Output("info_modal", "is_open"),
     [Input("info_open_tmn", "n_clicks"), Input("info_close_tmn", "n_clicks")],
