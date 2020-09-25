@@ -48,31 +48,6 @@ tab_layout = html.Div(children=[
                 ],
                 style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']})
             ),    
-            dbc.Col(
-                html.Div([
-                    dbc.Button('Details', id='open1',color='primary',outline=True,style={'font-size':styles['t']['size_font']}),
-                    dbc.Modal(
-                        [
-                            dbc.ModalHeader('Identify Drug Treatment Candidates from Cancer Cell Line Drug Screens'),
-                            
-                            dbc.ModalBody("Interrogate cell line drug screening trials from large established sources (CCLE, CTRP, GDSC). Dig into drug sensitivity trends within a particular disease and explore associated metadata."),
-                            dbc.ModalBody( 'What’s going on behind the scenes?'),
-                            dbc.ModalBody( '•	Data is queried from BMEG, filtered for relevant cell lines (breast tissue derived cell lines kept if breast cancer is selected), and analyzed in the viewer.'),
-                            dbc.ModalBody( 'Panel 1 Features'),
-                            dbc.ModalBody( '• Download a table of all cell line drug screening results based on three dropdown menus. Quickly see metadata composition of the table from the pie charts.'),
-                            dbc.ModalBody( 'Panel 2 Features'),
-                            dbc.ModalBody( '• Dive deeper to explore underlying trends between two drugs. Drug response values are plotted to quickly identify potential drug candidates that elicted similar responses from cell lines.'),
-                            dbc.ModalBody( '• Blue cards provide a summary of the selected drugs to provide insight on the molecular and/or biological realm of the selected drug.'),
-                            dbc.ModalBody( '• Examine the drug characteristics table for potential taxonomic reasons for similar and different responses from drugs.'),
-                            dbc.ModalFooter(dbc.Button('Close',id='close1',className='ml-auto')),
-                        ],
-                        id='main_help1',
-                        size='lg',
-                        centered=True,
-                    ),
-                ]),
-                width=1, 
-            ),
         ]
     ),
     html.Hr(),
@@ -349,12 +324,12 @@ def toggle_popover(n, is_open):
         return not is_open
     return is_open
     
-@app.callback(
-    Output("main_help1", "is_open"),
-    [Input("open1", "n_clicks"), Input("close1", "n_clicks")],
-    [State("main_help1", "is_open")],
-)
-def toggle_modal(n1, n2, is_open):
-    if n1 or n2:
-        return not is_open
-    return is_open
+# @app.callback(
+#     Output("main_help1", "is_open"),
+#     [Input("open1", "n_clicks"), Input("close1", "n_clicks")],
+#     [State("main_help1", "is_open")],
+# )
+# def toggle_modal(n1, n2, is_open):
+#     if n1 or n2:
+#         return not is_open
+#     return is_open

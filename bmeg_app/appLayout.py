@@ -25,6 +25,16 @@ styles = {
         'size_font':12,
         'size_font_card':14,
     },
+    'tab_help_button':{
+        'paddingTop':2,
+        'paddingBottom':2,
+        'paddingLeft':8,
+        'paddingRight':8,
+        'font-size':14,    
+        'font-family':'Arial',
+        'textAlign':'middle',
+        'margin':'bottom'
+    },
     'help_button':{
         'paddingTop':2,
         'paddingBottom':2,
