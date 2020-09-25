@@ -1,4 +1,3 @@
-
 from collections import OrderedDict
 from . import home_view, tumor_match_normal_view, literature_support_view, compare_dresp_view, mutation_view, pathway_view
 
