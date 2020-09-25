@@ -1,7 +1,7 @@
 from .. import appLayout as ly
 from ..app import app
 from ..components import home_component as dty
-from ..db import G
+from ..db import G, get_vertex_label_count
 from bmeg_app.views import home_view, tumor_match_normal_view, literature_support_view, compare_dresp_view
 import dash
 from dash.dependencies import Input, Output
@@ -20,26 +20,27 @@ main_colors= ly.main_colors
 styles=ly.styles
 
 #######
-# Page  
-####### 
-tab_layout = html.Div(children=[
+# Page
+#######
+NAME="Home"
+LAYOUT = html.Div(children=[
     html.H4(children='What is stored inside the database?',style=styles['sh']),
     dcc.Loading(id="cards",
-            type="default",children=html.Div(id="cards_output")),  
+            type="default",children=html.Div(id="cards_output")),
     dcc.Loading(id="node_cts_bar",
             type="default",children=html.Div(id="node_cts_bar_output")),
     dbc.Card(
         dbc.CardBody(
             [
-                html.H4("Identify Drug Treatment Candidates from Cancer Cell Line Drug Screens"),
-                html.P("Interrogate cell line drug screening trials from large established sources (CCLE, CTRP, GDSC). Dig into drug sensitivity trends within a particular disease and explore associated metadata."),
-                html.P("For example, select a FDA drug that is widely known to prevent/treat a particular disease phenotype (ex. Paclitaxel, breast cancer treatment) and identify other drugs that show a similar impact on cell lines."),
+                html.H4("Identify Compound Treatment Candidates from Cancer Cell Line Compound Screens"),
+                html.P("Interrogate cell line compound screening trials from large established sources (CCLE, CTRP, GDSC). Dig into compound sensitivity trends within a particular disease and explore associated metadata."),
+                html.P("For example, select a FDA compound that is widely known to prevent/treat a particular disease phenotype (ex. Paclitaxel, breast cancer treatment) and identify other compounds that show a similar impact on cell lines."),
                 dbc.Button(
-                    dbc.NavLink('Cancer Drug Screening',href='/page-2',id='page2-link'),color='light'
+                    dbc.NavLink('Cancer Compound Screening',href='/drug_response',id='page2-link'),color='light'
                 ),
             ],
         )
-    ),  
+    ),
 
     dbc.Card(
         dbc.CardBody(
@@ -47,28 +48,28 @@ tab_layout = html.Div(children=[
                 html.H4("Tumor vs. Normal", className="card-title"),
                 html.P("Some descriptive text here on the purpose and use of this widget. Info on the type of data used in this widget"),
                 dbc.Button(
-                    dbc.NavLink('TCGA Clustering',href='/page-3',id='page3-link'),color="light"
+                    dbc.NavLink('TCGA Clustering',href='/tumors',id='page3-link'),color="light"
                 ),
             ]
         )
-    ),  
-    
+    ),
+
     dbc.Card(
         dbc.CardBody(
             [
                 html.H4("Curated Literature Evidence", className="card-title"),
-                html.P("Some descriptive text here on the purpose and use of this widget. Info on the type of data used in this widget"),
+                html.P("Explore your list of top genes from differential gene expression analysis for trends reported in literature. Quickly identify aspects about your results that align and deviate from literature curated for strength by the Variant Interpretation for Cancer Consortium."),
                 dbc.Button(
-                    dbc.NavLink('Literature Gene-Drug Associations',href='/page-4',id='page4-link'),color="light"
+                    dbc.NavLink('Literature Gene-Compound Associations',href='/g2p',id='page4-link'),color="light"
                 ),
-                
-                
+
+
             ]
         )
-    ), 
+    ),
 ],style={'fontFamily': styles['t']['type_font'],})
 
-    
+
 @app.callback(
     Output("cards", "children"),
     [Input('url', 'pathname')]
@@ -80,10 +81,10 @@ def render_callback(href):
     nodes_interest = ['Allele','Gene','Transcript','Exon','Protein','DrugResponse', 'Pathway','Compound', 'Interaction','Project','Publication', 'Aliquot']
     res = {}
     for l in nodes_interest:
-        res[l] = G.query().V().hasLabel(l).count().execute()[0]['count']
+        res[l] = get_vertex_label_count(l)
     fig= dty.counts(100, res,main_colors['lightgrey'],styles['t']['type_font'])
-    return dcc.Graph(id='cards_output', figure=fig),    
-    
+    return dcc.Graph(id='cards_output', figure=fig),
+
 @app.callback(
     Output("node_cts_bar", "children"),
     [Input('url', 'pathname')]
@@ -97,7 +98,7 @@ def render_callback(href):
     verts = [x for x in all_v if x not in to_rm]
     res = {}
     for l in verts:
-        res[l] = G.query().V().hasLabel(l).count().execute()[0]['count']
+        res[l] = get_vertex_label_count(l)
     keys=[]
     values=[]
     for k,v in res.items():

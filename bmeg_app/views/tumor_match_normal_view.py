@@ -24,37 +24,29 @@ for a,b in q:
     select_genes[a]=1
 
 #######
-# Page  
-####### 
-print('loading app layout')   
-tab_layout = html.Div(children=[
+# Page
+#######
+print('loading app layout')
+NAME="TCGA Clustering"
+LAYOUT = html.Div(children=[
     dbc.Row(
         [
             dbc.Col(
-                html.Div([
-                    dbc.Button('Info', id='open2',color='primary',style={'font-size':styles['t']['size_font']}),
-                    dbc.Modal(
-                        [
-                            dbc.ModalHeader('Header for TCGA'),
-                            dbc.ModalBody('Info on \
-                                TCGA. \
-                                Stuff 2'),
-                            dbc.ModalFooter(dbc.Button('Close',id='close2',className='ml-auto')),
-                        ],
-                        id='main_help2',
-                        size='sm',
-                        centered=True,
-                    ),
-                ]),
-                width=1, 
-            ),  
-            
-            dbc.Col(dcc.Dropdown(
-                id='project_dd_tmn',
-                options=[{'label': l, 'value': gid} for gid,l in tmn.options_project().items()],
-                value='Project:TCGA-CHOL',
-                ),style={'font-size' : styles['t']['size_font']} ),
-            dbc.Col(dcc.Dropdown(id='property_dd_tmn'), style={'font-size' : styles['t']['size_font']}),
+                [
+                    html.Label('Cancer cohort'),
+                    dcc.Dropdown(id='project_dd_tmn',
+                        options=[{'label': l, 'value': gid} for gid,l in tmn.options_project().items()],value='Project:TCGA-CHOL',
+                    )
+                ],
+                style={'font-size' : styles['t']['size_font']}
+            ),
+            dbc.Col(
+                [
+                    html.Label('Property'),
+                    dcc.Dropdown(id='property_dd_tmn')
+                ],
+                style={'font-size' : styles['t']['size_font']}
+            ),
     ]),
     html.Hr(),
     dbc.Button('?', id='info_open_tmn'),
@@ -77,17 +69,6 @@ tab_layout = html.Div(children=[
     dcc.Loading(type="default",children=html.Div(id="umap_fig")),
 ],style={'fontFamily': styles['t']['type_font']})
 
-
-@app.callback(
-    Output("main_help2", "is_open"),
-    [Input("open2", "n_clicks"), Input("close2", "n_clicks")],
-    [State("main_help2", "is_open")],
-)
-def toggle_modal(n1, n2, is_open):
-    if n1 or n2:
-        return not is_open
-    return is_open
-    
 @app.callback(
     Output("info_modal", "is_open"),
     [Input("info_open_tmn", "n_clicks"), Input("info_close_tmn", "n_clicks")],
@@ -99,13 +80,13 @@ def toggle_modal(n1, n2, is_open):
     return is_open
 
 @app.callback(
-    Output('hidden_base_df_tmn', 'children'), 
+    Output('hidden_base_df_tmn', 'children'),
     [Input('project_dd_tmn', 'value')]
-)    
+)
 def createDF(selected_project):
     df = tmn.get_df(selected_project,'$c._data.gdc_attributes.diagnoses.tumor_stage')
-    return df.to_json(orient="index") 
- 
+    return df.to_json(orient="index")
+
 @app.callback(
     Output("umap_fig", "children"),
     [Input('hidden_base_df_tmn', 'children'),
@@ -121,14 +102,14 @@ def render_callback(jsonstring,selected_property):
         df2= tmn.update_umap(selected_property, df)
         fig=tmn.get_umap(df2, 'UMAP', selected_property.split('.')[-1])
         return dcc.Graph(figure=fig),
-        
+
 @app.callback(
     Output('property_dd_tmn', 'options'),
     [Input('project_dd_tmn', 'value')]
 )
 def render_callback(selected_project):
     return [{'label': l, 'value': query_string} for l,query_string in tmn.options_property(selected_project).items()]
-    
+
 @app.callback(
     Output('property_dd_tmn', 'value'),
     [Input('property_dd_tmn', 'options')]

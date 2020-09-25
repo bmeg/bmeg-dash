@@ -1,6 +1,6 @@
 from bmeg_app.app import app
 import bmeg_app.appLayout as ly
-from bmeg_app.views import home_view, tumor_match_normal_view, literature_support_view, compare_dresp_view
+from bmeg_app.views import view_map
 import base64
 import dash
 import dash_bootstrap_components as dbc
@@ -14,23 +14,23 @@ import yaml
 # Prep
 #######
 styles=ly.styles
-image_filename = 'bmeg_app/images/bmeg_logo.png' 
+image_filename = 'bmeg_app/images/bmeg_logo.png'
 encoded_image3 = base64.b64encode(open(image_filename, 'rb').read())
 
 #######
-# Page  
+# Page
 #######
 navlink_cancer_screen=dbc.NavLink(
     "Cancer Drug Screening", href="/page-2", id="page-2-link",
     style={'font-size':styles['t']['size_font_card'],'fontFamily':styles['t']['type_font']}
 )
- 
+
 help_cancer_screen= html.Div([
     dbc.Button('?', id='open1',color='link',style=styles['tab_help_button']),
     dbc.Modal(
         [
             dbc.ModalHeader('Identify Drug Treatment Candidates from Cancer Cell Line Drug Screens'),
-            
+
             dbc.ModalBody("Interrogate cell line drug screening trials from large established sources (CCLE, CTRP, GDSC). Dig into drug sensitivity trends within a particular disease and explore associated metadata."),
             dbc.ModalBody( 'What’s going on behind the scenes?'),
             dbc.ModalBody( '•	Data is queried from BMEG, filtered for relevant cell lines (breast tissue derived cell lines kept if breast cancer is selected), and analyzed in the viewer.'),
@@ -82,6 +82,18 @@ sidebar_header = dbc.Row(
     ]
 )
 
+def genNavBarList():
+    i = 1
+    out = []
+    for k, v in view_map.items():
+        e = dbc.NavLink(v.NAME, href="/%s" % (k), id="page-%d-link" % (i),
+            style={'font-size':styles['t']['size_font_card'],
+            'fontFamily':styles['t']['type_font']
+            },)
+        out.append(e)
+        i += 1
+    return out
+
 sidebar = html.Div(
     [
         sidebar_header,
@@ -99,26 +111,7 @@ sidebar = html.Div(
         ),
         dbc.Collapse(
             dbc.Nav(
-                [
-                    dbc.NavLink("Home", href="/page-1", id="page-1-link",
-                        style={'font-size':styles['t']['size_font_card'],
-                        'fontFamily':styles['t']['type_font']
-                        },),
-                    dbc.Row(
-                        [
-                            dbc.Col(navlink_cancer_screen,width=10),
-                            dbc.Col(help_cancer_screen,width=2),
-                        ]
-                    ),
-                    dbc.NavLink("TCGA Clustering", href="/page-3", id="page-3-link",
-                        style={'font-size':styles['t']['size_font_card'],
-                        'fontFamily':styles['t']['type_font']
-                        },),
-                    dbc.NavLink("Literature Gene-Drug Associations", href="/page-4", id="page-4-link",
-                        style={'font-size':styles['t']['size_font_card'],
-                        'fontFamily':styles['t']['type_font']
-                        },),
-                ],
+                genNavBarList(),
                 vertical=True,
                 pills=True,
             ),
@@ -132,30 +125,25 @@ app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
 
 
 @app.callback(
-    [Output(f"page-{i}-link", "active") for i in range(1, 5)],
+    [Output(f"page-{i}-link", "active") for i in enumerate(view_map)],
     [Input("url", "pathname")],
 )
 def toggle_active_links(pathname):
     '''active link for widget view'''
     if pathname == "/":
-        return True, False, False, False
-    return [pathname == f"/page-{i}" for i in range(1, 5)]
+        return [True] + [False] * (len(view_map))
+    return [pathname == f"/" for i in view_map.keys()]
 
 @app.callback(
-    Output("page-content", "children"), 
+    Output("page-content", "children"),
     [Input("url", "pathname")]
 )
 def render_page_content(pathname):
     '''render selected widget view'''
-    if pathname in ["/", "/page-1"]:
-        return html.Div([home_view.tab_layout])
-    elif pathname == "/page-2":
-        return html.Div([compare_dresp_view.tab_layout]) 
-    elif pathname == "/page-3":
-        return html.Div([tumor_match_normal_view.tab_layout])    
-    elif pathname == "/page-4":
-        return html.Div([literature_support_view.tab_layout]) 
-
+    if pathname == "/":
+        pathname = "/" + list(view_map.keys())[0]
+    if pathname[1:] in view_map:
+        return html.Div(view_map[pathname[1:]].LAYOUT)
     return dbc.Jumbotron(
         [
             html.H1("404: Not found", className="text-danger"),
@@ -186,6 +174,7 @@ def toggle_collapse(n, is_open):
         return not is_open
     return is_open
 
+"""
 @app.callback(
     Output("main_help1", "is_open"),
     [Input("open1", "n_clicks"), Input("close1", "n_clicks")],
@@ -195,7 +184,8 @@ def toggle_modal(n1, n2, is_open):
     if n1 or n2:
         return not is_open
     return is_open
-    
+"""
+
 with open('bmeg_app/config.yaml') as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 if __name__ == '__main__':

@@ -1,23 +1,18 @@
-import dash_bootstrap_components as dbc
-from .. import appLayout as ly
+from collections import OrderedDict
+from . import home_view, tumor_match_normal_view, literature_support_view, compare_dresp_view, mutation_view, pathway_view
 
-styles=ly.styles
+## Each submodule is imported an a single entity and mapped into 'view_map'
+## The view_map key is the url page (with "/" defaulting to the first element)
+## Every view module is expected to define the following variables
 
-def info_button(id,text):
-    return [get_icon(id), icon_hovertext(id,text)]
-    
-def get_icon(out_id):
-    return dbc.Button(
-        '?',
-        id=f"icon_target_{out_id}",
-        style=styles['help_button'],
-        className="mx-2",
-    )
+## - NAME : string name that is displayed in the menu
+## - LAYOUT : a Dash component for the view
 
-def icon_hovertext(in_id,text):
-    return dbc.Tooltip(
-        text,
-        target=f"icon_target_{in_id}",
-        style=styles['help_button_text'],
-        placement='right',
-    )
+view_map = OrderedDict([
+    ("home", home_view),
+    ("tumors", tumor_match_normal_view),
+    ("g2p", literature_support_view),
+    ("drug_response", compare_dresp_view),
+    ("oncoprint", mutation_view),
+    ("pathway", pathway_view)
+])

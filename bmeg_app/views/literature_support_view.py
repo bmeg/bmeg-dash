@@ -23,42 +23,27 @@ styles=ly.styles
 base_df=pd.read_csv('bmeg_app/source/basedf.tsv',sep='\t') # TEMP TODO change to cached
 
 #######
-# Page  
-####### 
-print('loading app layout')   
-tab_layout = html.Div(children=[
+# Page
+#######
+print('loading app layout')
+NAME="Literature Gene-Compound Associations"
+LAYOUT = html.Div(children=[
     dbc.Row(
         [
-            dbc.Col(
-                html.Div([
-                    dbc.Button('Info', id='open3',color='primary',style={'font-size':styles['t']['size_font']}),
-                    dbc.Modal(
-                        [
-                            dbc.ModalHeader('Curated Published Literature for Gene-Drug Associations'),
-                            dbc.ModalBody('Explore your list of top genes from differential gene expression analysis for trends reported in literature. Quickly identify aspects about your results that align and deviate from literature curated for strength by the Variant Interpretation for Cancer Consortium.'),
-                            dbc.ModalFooter(dbc.Button('Close',id='close3',className='ml-auto')),
-                        ],
-                        id='main_help3',
-                        size='med',
-                        centered=True,
-                    ),
-                ]),
-                width=1, 
-            ), 
             dbc.Col(html.Div([
                 html.Label('Gene Symbol'),
                 dcc.Dropdown(id='gene_dd',
                     options=[
                         {'label': l, 'value': gid} for l,gid in lsu.gene_dd_selections(base_df,'geneID','gene').items()],
                     value='ENSG00000198793',
-                    ),     
-                ],style={'width': '100%','display': 'inline-block','font-size' : styles['t']['size_font']}), 
+                    ),
+                ],style={'width': '100%','display': 'inline-block','font-size' : styles['t']['size_font']}),
             ),
             dbc.Col(html.Div(
                 [
                     html.Label('Drug'),
-                    dcc.Dropdown(id='drug_dd'),     
-                ],style={'width': '100%','display': 'inline-block','font-size' : styles['t']['size_font']}), 
+                    dcc.Dropdown(id='drug_dd'),
+                ],style={'width': '100%','display': 'inline-block','font-size' : styles['t']['size_font']}),
             )
         ]),
     html.Hr(),
@@ -95,15 +80,6 @@ app.clientside_callback(
     [Input("export_button_bio", "n_clicks")]
 )
 
-@app.callback(Output("main_help3", "is_open"),
-    [Input("open3", "n_clicks"), Input("close3", "n_clicks")],
-    [State("main_help3", "is_open")])
-def toggle_modal(n1, n2, is_open):
-    '''main help button'''
-    if n1 or n2:
-        return not is_open
-    return is_open
-    
 @app.callback(
     Output('drug_dd', 'options'),
     [Input('gene_dd', 'value')]
@@ -118,18 +94,18 @@ def set_options(selected_gene):
 )
 def set_options(available_options):
     '''dropdown menu - drug'''
-    return available_options[0]['value']    
+    return available_options[0]['value']
 
 @app.callback(
-    Output('hidden_base_df_lsu', 'children'), 
+    Output('hidden_base_df_lsu', 'children'),
     [Input('gene_dd', 'value'),
     Input('drug_dd', 'value')]
 )
 def createDF(selected_gene,selected_drug):
     '''Store base_df filtered for user selected gene, drug'''
     base_df_2 = lsu.reduce_df(base_df, 'geneID', selected_gene, 'drugID', selected_drug)
-    return base_df_2.to_json(orient="index") 
-        
+    return base_df_2.to_json(orient="index")
+
 @app.callback(
     Output("pie", "children"),
     [Input('hidden_base_df_lsu', 'children')]
@@ -167,7 +143,7 @@ def render_callback(jsonstring):
         export_headers='display',
         page_size=4,
     )
-    return fig,    
+    return fig,
 
 @app.callback(
     Output("bio_table", "children"),
