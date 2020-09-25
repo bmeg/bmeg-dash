@@ -1,10 +1,10 @@
 from ..db import G
 from collections import Counter
-import gripql 
-import pandas as pd 
+import gripql
+import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-    
+
 def line2disease(lines_list):
     '''Dictionary mapping cell line GIDs to reported primary disease'''
     disease_dict = {}
@@ -14,15 +14,15 @@ def line2disease(lines_list):
     return disease_dict
 
 def get_base_matrix(project, drug_resp,selected_drug,selected_disease):
-    '''Get row col matrix of cell line vs drug for a specific project'''   
+    '''Get row col matrix of cell line vs drug for a specific project'''
     q = G.query().V(project).out("cases").as_("ca").out("samples").out("aliquots").out("drug_response").as_("dr").out("compounds").as_("c")
     q = q.render(["$ca._gid", "$c._gid", drug_resp])
     data = {}
     for row in q:
-        if row[0] not in data: 
-            data[row[0]] = { row[1] :  row[2] } 
-        else: 
-            data[row[0]][row[1]] = row[2]  
+        if row[0] not in data:
+            data[row[0]] = { row[1] :  row[2] }
+        else:
+            data[row[0]][row[1]] = row[2]
     df = pd.DataFrame(data).transpose()
     df = df.sort_index().sort_index(axis=1) #sort by rows, cols
     # create disease mapping dict
@@ -38,7 +38,7 @@ def get_base_matrix(project, drug_resp,selected_drug,selected_disease):
     subset_df.insert(0, selected_drug, new_col)
     subset_df.pop('disease')
     return subset_df
-        
+
 def get_table(df):
     '''Melt df'''
     df['Cell Line']=df.index
@@ -54,19 +54,9 @@ def dresp_pairs(df,drug1,drug2,dresp):
     fig = go.Figure(data=go.Scatter(x=drug1_resp,y=drug2_resp,mode='markers'))
     fig.update_layout(margin={'t':15, 'b':15,'r':15,'l':15},xaxis_title=drug1+' '+dresp,yaxis_title=drug2+' '+dresp)
     return fig
-    
-def options_project():
-    '''Project dropdown menu options'''
-    project_label=['CCLE'] #,'GDSC','CTRP'] # TODO incorp CTRP and GDSC and check all downstream queries
-    options ={} 
-    for row in G.query().V().hasLabel('Project').render(['$._gid']):
-        for a in project_label:
-            if a in row[0]:
-                options[row[0]]=a
-    return options
 
 def options_disease(selected_project):
-    '''Disease dropdown menu options'''
+    '''Get all diseases for a project'''
     options=[]
     for row in G.query().V(selected_project).out("cases").render(['$._data.cellline_attributes.Primary Disease']):
         if row[0] is not None and row[0].lower()!='unknown' and row[0] not in options:
@@ -75,10 +65,10 @@ def options_disease(selected_project):
     options.sort()
     return options
 
-def options_drug(selected_project):
+def get_project_drugs(selected_project):
     '''Drug dropdown menu options. If no synonym then use GID'''
     options={}
-    for row in G.query().V(selected_project).out("cases").as_("p").out("samples").out("aliquots").out("drug_response").as_("dr").out("compounds").as_("c").render(['$._gid','$._data.synonym']):
+    for row in G.query().V(selected_project).out("compounds").render(['$._gid','$._data.synonym']):
         if 'Compound:NO_ONTOLOGY' not in row[0]:
             if row[1] is None:
                 options[row[0]]=row[0]
@@ -86,66 +76,45 @@ def options_drug(selected_project):
                 options[row[0]]=row[1].capitalize()
     return options
 
+def get_project_aliquot_disease(project):
+    q = G.query().V("Project:CCLE").out("cases").as_("case").out("samples").out("aliquots").as_("al").render(["$al._gid", "$case.cellline_attributes.Primary Disease"])
+    return dict(list(q))
+
 def options_drug2(drug_list):
     '''Dictionary mapping cell line GIDs to reported primary disease'''
     disease_dict = {}
     for row in G.query().V(drug_list).render(["$._gid",'$._data.synonym']):
         if 'Compound:NO_ONTOLOGY' not in row[0]:
             if row[1] is None:
-                disease_dict[row[0]]=row[0]   
-            else: 
+                disease_dict[row[0]]=row[0]
+            else:
                 disease_dict[row[0]]=row[1].capitalize()
     return disease_dict
-    
-def options_dresp(selected_project):
-    '''Drug response dropdown menu options'''
-    if 'Project:CCLE' == selected_project:
-        options = {
-            'AAC':'$dr._data.aac',
-            'IC50':'$dr._data.ic50',
-            'EC50': '$dr._data.ec50'
-             }
-    elif 'Project:GDSC'== selected_project:
-        options = {
-            'AAC':'$dr._data.aac',
-            'IC50':'$dr._data.ic50',
-            'EC50': '$dr._data.ec50'
-             }  
-    elif 'Project:CTRP'== selected_project:
-        options = {
-            'AAC':'$dr._data.aac',
-            'EC50': '$dr._data.ec50'
-             }    
-    return options
+
+def get_project_compound_dr(project, compound, dr):
+    q = G.query().V(compound).out("drug_responses")
+    q = q.has(gripql.eq("project_id", "Project:CCLE")).as_("dr")
+    q = q.out("aliquot").as_("a").render(["$a._gid", "$dr." + dr])
+    return dict(q)
 
 def drugDetails(drugs_list):
     '''Drug property table'''
-    q=G.query().V(drugs_list).render(['$._data.synonym','$._data.pubchem_id','$._data.taxonomy.direct-parent','$._data.taxonomy.kingdom','$._data.taxonomy.superclass','$._data.taxonomy.class','$._data.taxonomy.subclass','$._data.taxonomy.description','$._gid'])
-    a=[]
-    b=[]
-    c=[]
-    d=[]
-    e=[]
-    f=[]
-    g=[]
+    mapping = {
+        "Drug" : '$.synonym',
+        "PubChem ID" : '$.pubchem_id',
+        'Direct Parent' : '$.taxonomy.direct-parent',
+        'Kingdom' : '$.taxonomy.kingdom',
+        'Superclass' : '$.taxonomy.superclass',
+        'Class' : '$.taxonomy.class',
+        'Subclass' : '$.taxonomy.subclass',
+        "Description" : '$.taxonomy.description',
+        "gid" : '$._gid'
+    }
+    q=G.query().V(drugs_list).render(mapping)
+    data = []
     for row in q:
-        if row[0] is None or row[0]=='': # Drug has no common name
-            a.append(row[7].capitalize())
-            b.append(row[1])
-            c.append(row[2])
-            d.append(row[3])
-            e.append(row[4])
-            f.append(row[5])
-            g.append(row[6])
-        else:    
-            a.append(row[0].capitalize())
-            b.append(row[1])
-            c.append(row[2])
-            d.append(row[3])
-            e.append(row[4])
-            f.append(row[5])
-            g.append(row[6])
-    df = pd.DataFrame(list(zip(a,b,c,d,e,f,g)),columns=['Drug','PubChem ID','Direct Parent','Kingdom','Superclass','Class','Subclass'])
+        data.append(row)
+    df = pd.DataFrame(data)
     return df
 
 def counting(vals_list):
@@ -169,10 +138,10 @@ def sample_table(df):
         new_col2.append(lookup.get(c)[1])
     df['Gender']=new_col1
     df['Disease Subtype']=new_col2
-    df['Drug'] = df['Drug'].str.capitalize() 
+    df['Drug'] = df['Drug'].str.capitalize()
     df= df.sort_values(by='Drug Response', ascending=True).reset_index(drop=True)
     return df
-    
+
 def piecharts_celllines(df):
     '''Pie chart'''
     fig = make_subplots(rows=1, cols=2, specs=[[{'type':'domain'}, {'type':'domain'}]])
@@ -182,4 +151,4 @@ def piecharts_celllines(df):
     fig.add_trace(go.Pie(labels=lab, values=cts,textinfo='label+percent', name="Gender",legendgroup='group2',showlegend=True),1, 2)
     fig.update_traces(textposition='inside', textinfo='percent+label')
     fig.update_layout(showlegend=False,margin={'t':0, 'b':0,'r':0,'l':0})
-    return fig    
+    return fig
