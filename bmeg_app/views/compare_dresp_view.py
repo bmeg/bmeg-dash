@@ -30,7 +30,7 @@ drug_response_projects = {
 # Page
 #######
 print('loading app layout')
-NAME = "Drug Response Comparison"
+NAME = "Cancer Compound Screening"
 LAYOUT = html.Div(children=[
     dbc.Row(
         [
@@ -48,21 +48,6 @@ LAYOUT = html.Div(children=[
                 ],
                 style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']})
             ),
-            dbc.Col(
-                html.Div([
-                    dbc.Button('Details', id='open1',color='primary',outline=True,style={'font-size':styles['t']['size_font']}),
-                    dbc.Modal(
-                        [
-                            dbc.ModalHeader('Compare dose/response of compounds on cell lines'),
-                            dbc.ModalFooter(dbc.Button('Close',id='close1',className='ml-auto')),
-                        ],
-                        id='main_help1',
-                        size='lg',
-                        centered=True,
-                    ),
-                ]),
-                width=1,
-            ),
         ]
     ),
 
@@ -78,7 +63,7 @@ LAYOUT = html.Div(children=[
         dbc.Col([
             html.Div(
                 [
-                    html.Label('Drug 1'),
+                    html.Label('Compound 1'),
                     dcc.Dropdown(id='drug_dd_cdr', style={'font-size' : styles['t']['size_font']})
                 ],
                 style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']}
@@ -87,7 +72,7 @@ LAYOUT = html.Div(children=[
         dbc.Col([
             html.Div(
                 [
-                    html.Label('Drug 2'),
+                    html.Label('Compound 2'),
                     dcc.Dropdown(id='drug2_dd_cdr',style={'font-size' : styles['t']['size_font']})
                 ],
                 style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']}

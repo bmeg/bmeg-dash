@@ -26,26 +26,10 @@ base_df=pd.read_csv('bmeg_app/source/basedf.tsv',sep='\t') # TEMP TODO change to
 # Page
 #######
 print('loading app layout')
-NAME="Literature Gene-Drug Associations"
+NAME="Literature Gene-Compound Associations"
 LAYOUT = html.Div(children=[
     dbc.Row(
         [
-            dbc.Col(
-                html.Div([
-                    dbc.Button('Info', id='open3',color='primary',style={'font-size':styles['t']['size_font']}),
-                    dbc.Modal(
-                        [
-                            dbc.ModalHeader('Curated Published Literature for Gene-Drug Associations'),
-                            dbc.ModalBody('Explore your list of top genes from differential gene expression analysis for trends reported in literature. Quickly identify aspects about your results that align and deviate from literature curated for strength by the Variant Interpretation for Cancer Consortium.'),
-                            dbc.ModalFooter(dbc.Button('Close',id='close3',className='ml-auto')),
-                        ],
-                        id='main_help3',
-                        size='med',
-                        centered=True,
-                    ),
-                ]),
-                width=1,
-            ),
             dbc.Col(html.Div([
                 html.Label('Gene Symbol'),
                 dcc.Dropdown(id='gene_dd',
@@ -95,15 +79,6 @@ app.clientside_callback(
     Output("export_button_bio", "data-dummy"),
     [Input("export_button_bio", "n_clicks")]
 )
-
-@app.callback(Output("main_help3", "is_open"),
-    [Input("open3", "n_clicks"), Input("close3", "n_clicks")],
-    [State("main_help3", "is_open")])
-def toggle_modal(n1, n2, is_open):
-    '''main help button'''
-    if n1 or n2:
-        return not is_open
-    return is_open
 
 @app.callback(
     Output('drug_dd', 'options'),
