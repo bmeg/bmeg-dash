@@ -171,7 +171,7 @@ def set_options(available_options):
 )
 def set_options(selected_project):
     return [{'label': l, 'value': gid} for gid,l in cdr.options_drug(selected_project).items()]
- 
+
 @app.callback(
     Output('drug_dd_cdr', 'value'),
     [Input('drug_dd_cdr', 'options')]
