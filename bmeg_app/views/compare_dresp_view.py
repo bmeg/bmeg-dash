@@ -1,7 +1,7 @@
 from .. import appLayout as ly
 from ..app import app
 from ..components import compare_dresp_component as cdr
-from ..db import G
+from ..db import G, get_base_matrix
 from ..components import info_button
 import dash
 import dash_bootstrap_components as dbc
@@ -28,29 +28,6 @@ NAME = "Compare Drug Responses"
 LAYOUT = html.Div(children=[
     dbc.Row(
         [
-            dbc.Col(
-                html.Div([
-                    dbc.Button('Info', id='open1',color='primary',style={'font-size':styles['t']['size_font']}),
-                    dbc.Modal(
-                        [
-                            dbc.ModalHeader('Identify Drugs Candidates with Similar Cell Reponses'),
-                            dbc.ModalBody('Interrogate cell line drug screening trials. For example, select a FDA drug that is widely known to treat a particular disease (Paclitaxel for breast cancer treatment) and identify other drugs that show a similar impact on cell lines.'),
-                            dbc.ModalBody( 'What’s going on behind the scenes?'),
-                            dbc.ModalBody( '•	Data is queried from BMEG, filtered for relevant cell lines (breast tissue derived cell lines kept if breast cancer is selected), and analyzed in the viewer.'),
-                            dbc.ModalBody( 'Features'),
-                            dbc.ModalBody( '• Boxed in blue is a summary of the selected drug to provide insight on the molecular and/or biological realm of the selected drug.'),
-                            dbc.ModalBody( '• Violin plots comparative overview: Identify alternative drugs by examining drug responses for similar distributions.'),
-                            dbc.ModalBody( '• Examine the drug characteristics table for taxonomic reasons for similar and different responses from drugs.'),
-                            dbc.ModalBody( '• Dive deeper to see the characteristics of the samples that generated the violin plots of particular drugs.'),
-                            dbc.ModalFooter(dbc.Button('Close',id='close1',className='ml-auto')),
-                        ],
-                        id='main_help1',
-                        size='med',
-                        centered=True,
-                    ),
-                ]),
-                width=1,
-            ),
             dbc.Col(
                 html.Div([
                     html.Label('Dataset'),
@@ -115,7 +92,6 @@ LAYOUT = html.Div(children=[
             html.Div(info_button('help_pair','Select two drugs from the above table to explore drug response patterns.')),
         ]
     ),
-    html.Div(id='hidden_base_df_cdr', style={'display': 'none'}),
     dbc.Row([
         dbc.Col([
             html.Div(
@@ -157,19 +133,6 @@ app.clientside_callback(
 )
 
 @app.callback(
-    Output('hidden_base_df_cdr', 'children'),
-    [Input('project_dd_cdr', 'value'),
-    Input('dresp_dd_cdr', 'value'),
-    Input('drug_dd_cdr','value'),
-    Input('disease_dd_cdr','value')]
-)
-def createDF(selected_project,selected_drugResp,selected_drug,selected_disease):
-    '''Store intermediate df filtered for user selected project and drug response metric'''
-    print(selected_project,selected_drugResp,selected_drug,selected_disease)
-    df = cdr.get_base_matrix(selected_project,selected_drugResp,selected_drug,selected_disease)
-    return df.to_json(orient="index")
-
-@app.callback(
     Output('dresp_dd_cdr', 'options'),
     [Input('project_dd_cdr', 'value')]
 )
@@ -188,8 +151,13 @@ def set_options(available_options):
     [Input('project_dd_cdr', 'value')]
 )
 def set_options(selected_project):
-    return [{'label': k, 'value': k} for k in cdr.options_disease(selected_project)]
-
+    # remove certain options
+    remov = ['Adrenal Cancer','Cervical Cancer','Embryonal Cancer','Eye Cancer','Gallbladder Cancer','Liposarcoma','Fibroblast','fibroblast','Primary Cells','Immortalized']
+    options_all = cdr.options_disease(selected_project)
+    options = [i for i in options_all if i not in remov] 
+    print(options)
+    return [{'label': k, 'value': k} for k in options]
+    
 @app.callback(
     Output('disease_dd_cdr', 'value'),
     [Input('disease_dd_cdr', 'options')]
@@ -203,7 +171,7 @@ def set_options(available_options):
 )
 def set_options(selected_project):
     return [{'label': l, 'value': gid} for gid,l in cdr.options_drug(selected_project).items()]
-
+ 
 @app.callback(
     Output('drug_dd_cdr', 'value'),
     [Input('drug_dd_cdr', 'options')]
@@ -216,13 +184,16 @@ def set_options(available_options):
 
 @app.callback(
     Output('drug2_dd_cdr', 'options'),
-    [Input('hidden_base_df_cdr', 'children'),
-    Input('drug_dd_cdr', 'value')]
+    [Input('project_dd_cdr', 'value'),
+    Input('dresp_dd_cdr', 'value'),
+    Input('drug_dd_cdr','value'),
+    Input('disease_dd_cdr','value')]
 )
-def set_options(jsonstring, selected_drug):
+def set_options(selected_project,selected_drugResp,selected_drug,selected_disease):
     '''Drug2 dropdown menu options'''
-    temp=json.loads(jsonstring)
-    df = pd.DataFrame.from_dict(temp, orient='index')
+    print('user selected: ',selected_project,selected_drugResp,selected_drug,selected_disease)
+    df = get_base_matrix(selected_project,selected_drugResp,selected_drug,selected_disease)
+    print('check1: ', df.iloc[:10,:2])
     list1=list(df.columns.drop(list(df.filter(regex='NO_ONTOLOGY'))))
     if selected_drug in list1:
         list1.remove(selected_drug)
@@ -276,19 +247,20 @@ def render_callback(selected_drug):
 
 @app.callback(
     Output("pairwise", "children"),
-    [Input('hidden_base_df_cdr', 'children'),
-    Input('drug_dd_cdr', 'value'),
-    Input('drug2_dd_cdr', 'value'),
-    Input('dresp_dd_cdr', 'value')]
+    [Input('project_dd_cdr', 'value'),
+    Input('dresp_dd_cdr', 'value'),
+    Input('drug_dd_cdr','value'),
+    Input('drug2_dd_cdr','value'),
+    Input('disease_dd_cdr','value')]
 )
-def render_callback(jsonstring, selected_drug,selected_drug2,selected_dresp):
+def render_callback(selected_project,selected_drugResp,selected_drug,selected_drug2,selected_disease):
     '''create pairwise plots '''
-    temp=json.loads(jsonstring)
-    df = pd.DataFrame.from_dict(temp, orient='index')
+    df = get_base_matrix(selected_project,selected_drugResp,selected_drug,selected_disease)
+    print('check3:', df.iloc[:10,:2])
     df=df[df.columns.drop(list(df.filter(regex='NO_ONTOLOGY')))]
     disease_dict = cdr.line2disease(list(df.index))
     df=cdr.get_table(df)
-    fig= cdr.dresp_pairs(df,selected_drug,selected_drug2,selected_dresp) #todo add dropdown menu for section drug selection
+    fig= cdr.dresp_pairs(df,selected_drug,selected_drug2,selected_drugResp) #todo add dropdown menu for section drug selection
     return dcc.Graph(figure=fig),
 
 
@@ -317,12 +289,14 @@ def render_callback(selected_drug, selected_drug2):
 
 @app.callback(
     Output("sample_char_table", "children"),
-    [Input('hidden_base_df_cdr', 'children')]
+    [Input('project_dd_cdr', 'value'),
+    Input('dresp_dd_cdr', 'value'),
+    Input('drug_dd_cdr','value'),
+    Input('disease_dd_cdr','value')]
 )
-def render_callback(jsonstring):
+def render_callback(selected_project,selected_drugResp,selected_drug,selected_disease):
     '''create pie charts'''
-    temp=json.loads(jsonstring)
-    df = pd.DataFrame.from_dict(temp, orient='index')
+    df = get_base_matrix(selected_project,selected_drugResp,selected_drug,selected_disease)
     disease_dict = cdr.line2disease(list(df.index))
     df2=df[df.columns.drop(list(df.filter(regex='NO_ONTOLOGY')))]
     cols=df2.columns

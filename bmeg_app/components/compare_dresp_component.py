@@ -12,32 +12,6 @@ def line2disease(lines_list):
     for row in q:
         disease_dict[row[0]]=row[1] # some vals are None
     return disease_dict
-
-def get_base_matrix(project, drug_resp,selected_drug,selected_disease):
-    '''Get row col matrix of cell line vs drug for a specific project'''   
-    q = G.query().V(project).out("cases").as_("ca").out("samples").out("aliquots").out("drug_response").as_("dr").out("compounds").as_("c")
-    q = q.render(["$ca._gid", "$c._gid", drug_resp])
-    data = {}
-    for row in q:
-        if row[0] not in data: 
-            data[row[0]] = { row[1] :  row[2] } 
-        else: 
-            data[row[0]][row[1]] = row[2]  
-    df = pd.DataFrame(data).transpose()
-    df = df.sort_index().sort_index(axis=1) #sort by rows, cols
-    # create disease mapping dict
-    disease =line2disease(list(df.index))
-    # exclude non disease related derived cell lines
-    new_col=[]
-    for a in list(df.index):
-        new_col.append(disease.get(a))
-    df['disease']=new_col
-    subset_df=df[df['disease']==selected_disease]
-    # set established drug to first col and rm disease col
-    new_col=subset_df.pop(selected_drug)
-    subset_df.insert(0, selected_drug, new_col)
-    subset_df.pop('disease')
-    return subset_df
         
 def get_table(df):
     '''Melt df'''
