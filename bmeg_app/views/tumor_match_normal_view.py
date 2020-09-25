@@ -32,30 +32,21 @@ LAYOUT = html.Div(children=[
     dbc.Row(
         [
             dbc.Col(
-                html.Div([
-                    dbc.Button('Info', id='open2',color='primary',style={'font-size':styles['t']['size_font']}),
-                    dbc.Modal(
-                        [
-                            dbc.ModalHeader('Header for TCGA'),
-                            dbc.ModalBody('Info on \
-                                TCGA. \
-                                Stuff 2'),
-                            dbc.ModalFooter(dbc.Button('Close',id='close2',className='ml-auto')),
-                        ],
-                        id='main_help2',
-                        size='sm',
-                        centered=True,
-                    ),
-                ]),
-                width=1,
+                [
+                    html.Label('Cancer cohort'),
+                    dcc.Dropdown(id='project_dd_tmn',
+                        options=[{'label': l, 'value': gid} for gid,l in tmn.options_project().items()],value='Project:TCGA-CHOL',
+                    )
+                ],
+                style={'font-size' : styles['t']['size_font']}
             ),
-
-            dbc.Col(dcc.Dropdown(
-                id='project_dd_tmn',
-                options=[{'label': l, 'value': gid} for gid,l in tmn.options_project().items()],
-                value='Project:TCGA-CHOL',
-                ),style={'font-size' : styles['t']['size_font']} ),
-            dbc.Col(dcc.Dropdown(id='property_dd_tmn'), style={'font-size' : styles['t']['size_font']}),
+            dbc.Col(
+                [
+                    html.Label('Property'),
+                    dcc.Dropdown(id='property_dd_tmn')
+                ],
+                style={'font-size' : styles['t']['size_font']}
+            ),
     ]),
     html.Hr(),
     dbc.Button('?', id='info_open_tmn'),
@@ -77,17 +68,6 @@ LAYOUT = html.Div(children=[
     html.Div(id='hidden_base_df_tmn', style={'display': 'none'}),
     dcc.Loading(type="default",children=html.Div(id="umap_fig")),
 ],style={'fontFamily': styles['t']['type_font']})
-
-
-@app.callback(
-    Output("main_help2", "is_open"),
-    [Input("open2", "n_clicks"), Input("close2", "n_clicks")],
-    [State("main_help2", "is_open")],
-)
-def toggle_modal(n1, n2, is_open):
-    if n1 or n2:
-        return not is_open
-    return is_open
 
 @app.callback(
     Output("info_modal", "is_open"),

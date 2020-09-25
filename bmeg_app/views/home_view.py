@@ -32,11 +32,11 @@ LAYOUT = html.Div(children=[
     dbc.Card(
         dbc.CardBody(
             [
-                html.H4("Identify Drug Treatment Candidates from Cancer Cell Line Drug Screens"),
-                html.P("Interrogate cell line drug screening trials from large established sources (CCLE, CTRP, GDSC). Dig into drug sensitivity trends within a particular disease and explore associated metadata."),
-                html.P("For example, select a FDA drug that is widely known to prevent/treat a particular disease phenotype (ex. Paclitaxel, breast cancer treatment) and identify other drugs that show a similar impact on cell lines."),
+                html.H4("Identify Compound Treatment Candidates from Cancer Cell Line Compound Screens"),
+                html.P("Interrogate cell line compound screening trials from large established sources (CCLE, CTRP, GDSC). Dig into compound sensitivity trends within a particular disease and explore associated metadata."),
+                html.P("For example, select a FDA compound that is widely known to prevent/treat a particular disease phenotype (ex. Paclitaxel, breast cancer treatment) and identify other compounds that show a similar impact on cell lines."),
                 dbc.Button(
-                    dbc.NavLink('Cancer Drug Screening',href='/drug_response',id='page2-link'),color='light'
+                    dbc.NavLink('Cancer Compound Screening',href='/drug_response',id='page2-link'),color='light'
                 ),
             ],
         )
@@ -58,9 +58,9 @@ LAYOUT = html.Div(children=[
         dbc.CardBody(
             [
                 html.H4("Curated Literature Evidence", className="card-title"),
-                html.P("Some descriptive text here on the purpose and use of this widget. Info on the type of data used in this widget"),
+                html.P("Explore your list of top genes from differential gene expression analysis for trends reported in literature. Quickly identify aspects about your results that align and deviate from literature curated for strength by the Variant Interpretation for Cancer Consortium."),
                 dbc.Button(
-                    dbc.NavLink('Literature Gene-Drug Associations',href='/g2p',id='page4-link'),color="light"
+                    dbc.NavLink('Literature Gene-Compound Associations',href='/g2p',id='page4-link'),color="light"
                 ),
 
 
