@@ -31,7 +31,7 @@ LAYOUT = html.Div(children=[
             dbc.Col(
                 html.Div([
                     html.Label('Dataset'),
-                    dcc.Dropdown(id='project_dd_cdr',options=[{'label': l, 'value': gid} for gid,l in cdr.options_project().items()],value='Project:CCLE')
+                    dcc.Dropdown(id='project_dd_cdr',options=[{'label': l, 'value': gid} for gid,l in sorted(cdr.options_project().items(), key=lambda a: a[1])],value='Project:CCLE')
                 ],
                 style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']})
             ),
@@ -137,7 +137,7 @@ app.clientside_callback(
     [Input('project_dd_cdr', 'value')]
 )
 def set_options(selected_project):
-    return [{'label': k, 'value': v} for k,v in cdr.options_dresp(selected_project).items()]
+    return [{'label': k, 'value': v} for k,v in sorted(cdr.options_dresp(selected_project).items(), key=lambda a: a[1])]
 
 @app.callback(
     Output('dresp_dd_cdr', 'value'),
@@ -170,7 +170,7 @@ def set_options(available_options):
     [Input('project_dd_cdr', 'value')]
 )
 def set_options(selected_project):
-    return [{'label': l, 'value': gid} for gid,l in cdr.options_drug(selected_project).items()]
+    return [{'label': l, 'value': gid} for gid,l in sorted(cdr.options_drug(selected_project).items(), key=lambda a: a[1])]
 
 @app.callback(
     Output('drug_dd_cdr', 'value'),
@@ -178,9 +178,6 @@ def set_options(selected_project):
 )
 def set_options(available_options):
     return available_options[0]['value']
-
-
-
 
 @app.callback(
     Output('drug2_dd_cdr', 'options'),
@@ -197,7 +194,8 @@ def set_options(selected_project,selected_drugResp,selected_drug,selected_diseas
     list1=list(df.columns.drop(list(df.filter(regex='NO_ONTOLOGY'))))
     if selected_drug in list1:
         list1.remove(selected_drug)
-    return [{'label': l, 'value': gid} for gid,l in cdr.options_drug2(list1).items()]
+    # return [{'label': l, 'value': gid} for gid,l in cdr.options_drug2(list1).items()]
+    return [{'label': l, 'value': gid} for gid,l in sorted(cdr.options_drug2(list1).items(), key=lambda a: a[1])]
 
 @app.callback(
     Output('drug2_dd_cdr', 'value'),
