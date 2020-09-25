@@ -157,7 +157,7 @@ def set_options(selected_project):
     options = [i for i in options_all if i not in remov] 
     print(options)
     return [{'label': k, 'value': k} for k in options]
-    
+
 @app.callback(
     Output('disease_dd_cdr', 'value'),
     [Input('disease_dd_cdr', 'options')]
