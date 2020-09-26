@@ -20,10 +20,27 @@ import plotly.express as px
 main_colors= ly.main_colors
 styles=ly.styles
 
+project_dresp = {
+    'Project:CCLE' : {
+        'AAC':'aac',
+        'EC50': 'ec50',
+        'IC50': 'ic50'
+    },
+    'Project:GDSC' : {
+        'AAC':'aac',
+        'EC50': 'ec50',
+        'IC50':'ic50'
+    },
+    'Project:CTRP' : {
+        'AAC':'aac',
+        'EC50': 'ec50'
+     }
+}
+
 drug_response_projects = {
     "Project:CCLE" : "CCLE",
-    "Project:GDSC" : "GDSC",
-    "Project:CTRP" : "CTRP"
+    "Project:CTRP" : "CTRP",
+    "Project:GDSC" : "GDSC"
 }
 
 #######
@@ -100,23 +117,6 @@ app.clientside_callback(
     [Input("export_button_sample", "n_clicks")]
 )
 
-project_dresp = {
-    'Project:CCLE' : {
-        'AAC':'aac',
-        'IC50': 'ic50',
-        'EC50': 'ec50'
-    },
-    'Project:GDSC' : {
-        'AAC':'aac',
-        'IC50':'ic50',
-        'EC50': 'ec50'
-    },
-    'Project:CTRP' : {
-        'AAC':'aac',
-        'EC50': 'ec50'
-     }
-}
-
 @app.callback(
     [Output('dresp_dd_cdr', 'options'), Output('dresp_dd_cdr', 'value')],
     [Input('project_dd_cdr', 'value')]
@@ -130,7 +130,7 @@ def set_project_dresp_selector(selected_project):
     [Input('project_dd_cdr', 'value')]
 )
 def set_project_compound1_selector(selected_project):
-    out = [{'label': l, 'value': gid} for gid,l in cdr.get_project_drugs(selected_project).items()]
+    out = [{'label': l, 'value': gid} for gid,l in sorted(cdr.get_project_drugs(selected_project).items(), key=lambda a: a[1])]
     return out, out[0]['value']
 
 @app.callback(
@@ -138,7 +138,7 @@ def set_project_compound1_selector(selected_project):
     [Input('project_dd_cdr', 'value')]
 )
 def set_project_compound2_selector(selected_project):
-    out = [{'label': l, 'value': gid} for gid,l in cdr.get_project_drugs(selected_project).items()]
+    out = [{'label': l, 'value': gid} for gid,l in sorted(cdr.get_project_drugs(selected_project).items(), key=lambda a: a[1])]
     i = 1 if len(out) > 1 else 0
     return out, out[i]['value']
 

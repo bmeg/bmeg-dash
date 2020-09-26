@@ -2,7 +2,7 @@
 
 ## Setup 
 
-Python 3 and pip are assumed to be already set up on your machine. The gripql config file `bmeg_app/db/__init__.py` **must be saved as** `bmeg_app/secrets/bmeg_credentials.json`. Instructions on generating the BMEG credential file can be found at [Installing gripql and Getting Started](https://bmegio.ohsu.edu/analyze/getting_started/)
+Python 3, pip, and docker are assumed to be already set up on your machine. The gripql config file `bmeg_app/db/__init__.py` **must be saved as** `bmeg_app/secrets/bmeg_credentials.json`. Instructions on generating the BMEG credential file can be found at [Installing gripql and Getting Started](https://bmegio.ohsu.edu/analyze/getting_started/)
 
 Install an environment module and app dependencies. Here the **virtualenv** module is used.
 
@@ -22,7 +22,7 @@ pip install -r requirements.txt
 ## Run BMEG Viewer
 
 ```
-python -m bmeg_app
+docker-compose up
 ```
 
 ## Helpful Links
