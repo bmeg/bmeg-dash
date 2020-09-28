@@ -49,36 +49,10 @@ LAYOUT = html.Div(children=[
     html.Hr(),
     html.Div(id='hidden_base_df_lsu', style={'display': 'none'}),
     dcc.Loading(id='pie', type="default",children=html.Div()),
-    dbc.Row(html.Button("Download", id="export_button_pub",style={'fontFamily':styles['t']['type_font'],'fontSize':styles['t']['size_font']}), style={'padding-left':styles['b']['padding_left'],'padding-top':styles['b']['padding_top']}),
     dcc.Loading(id='pub_table', type="default",children=html.Div()),
-    dbc.Row(html.Button("Download", id="export_button_bio",style={'fontFamily':styles['t']['type_font'],'fontSize':styles['t']['size_font']}), style={'padding-left':styles['b']['padding_left'],'padding-top':styles['b']['padding_top']} ),
     dcc.Loading(id='bio_table', type="default",children=html.Div()),
 ],style={'fontFamily': styles['t']['type_font']})
 
-
-app.clientside_callback(
-    """
-    function(n_clicks) {
-        if (n_clicks > 0)
-            document.querySelector("#export_pub_table button.export").click()
-        return ""
-    }
-    """,
-    Output("export_button_pub", "data-dummy"),
-    [Input("export_button_pub", "n_clicks")]
-)
-
-app.clientside_callback(
-    """
-    function(n_clicks) {
-        if (n_clicks > 0)
-            document.querySelector("#export_bio_table button.export").click()
-        return ""
-    }
-    """,
-    Output("export_button_bio", "data-dummy"),
-    [Input("export_button_bio", "n_clicks")]
-)
 
 @app.callback(
     Output('drug_dd', 'options'),
@@ -139,8 +113,6 @@ def render_callback(jsonstring):
         style_as_list_view=True,
         tooltip_data=[{column: {'value': str(value), 'type': 'markdown'} for column, value in row.items()} for row in df2.to_dict('records')],
         tooltip_duration=None,
-        export_format='xlsx',
-        export_headers='display',
         page_size=4,
     )
     return fig,
@@ -167,8 +139,6 @@ def render_callback(jsonstring):
         style_as_list_view=True,
         tooltip_data=[{column: {'value': str(value), 'type': 'markdown'} for column, value in row.items()} for row in df2.to_dict('records')],
         tooltip_duration=None,
-        export_format='xlsx',
-        export_headers='display',
         page_size=3,
     )
     return fig,
