@@ -16,12 +16,6 @@ import pandas as pd
 #######
 main_colors= ly.main_colors
 styles=ly.styles
-print('querying initial data 1') # TODO: cache select_genes list so can remove (below) .limit()
-q= G.query().V().hasLabel('Gene').limit(150).as_('gene').out('g2p_associations').as_('lit').out('compounds').as_('comp').out('drug_responses')
-q= q.render(['$gene._gid','$lit._data.response_type'])
-select_genes={}
-for a,b in q:
-    select_genes[a]=1
 
 #######
 # Page
