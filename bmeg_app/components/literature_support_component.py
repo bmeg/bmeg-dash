@@ -54,27 +54,6 @@ def card(k,v,graph_font,h):
         number = {'suffix': " {}".format(label)},
             domain = {'x': [0, 1], 'y': [0, 1]}))
     return fig 
-    
-def source_document_info(df, colname):
-    '''Info stored in source doc property. Hardcoded col name'''
-    new_entry =[]
-    body_string = []
-    for i in range(0, len(df['litETC'])):
-        info = df[colname][i]
-        doc_dict = json.loads(info) 
-        # TODO change this for alltypes
-        if 'clinical' in doc_dict:
-            data = doc_dict['clinical']
-            for k,v in data.items():
-                if k != 'drugAbstracts':
-                    new_entry.append(str(k)+':'+str(v))
-            assert 'drugAbstracts' in data, 'no link provided'
-            url_link = data['drugAbstracts'][0]['link']
-            new_entry.append(url_link)
-            body_string.append('\n'.join(new_entry)+'\n' )
-        else:
-            pass
-    return body_string
         
 def get_baseDF():
     '''Get base df of all gene drug combos that user can select from'''
@@ -102,7 +81,7 @@ def get_baseDF():
     return pd.DataFrame(list(zip(a,b,c,d,e,f,g,h)),columns=['geneID','gene','drugID','drug', 'evidence label','response','source','litETC'])
 
 def get_resultsDict(df,colname):
-    '''Dictionary of source information'''
+    '''Info stored in source doc property. Hardcoded col name'''
     # TODO update this to handle other keys too (non-clinical)
     res_dict = {}
     for i in range(0, len(df[colname])):
@@ -122,7 +101,7 @@ def get_resultsDict(df,colname):
                     else:
                         res_dict[k].append(v)
     return res_dict
-
+    
 def build_publication_table(res_dict):
     '''Build publication table ['Cancer Studied', 'Evidence Level','Evidence Meaning','Study']'''
     if 'cancerType' in res_dict:
