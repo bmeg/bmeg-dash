@@ -133,3 +133,104 @@ def build_bio_table(res_dict):
         return pd.DataFrame(list(zip(iso,alia,nm,og,tsupg,alter,alter_term,desp)),columns=['Curated Isoform','Gene Alias','Gene Info','Oncogene','TS Gene','Gene Alteration', 'Alteration Type','Alteration Description'])
     else:
         return pd.DataFrame((['-','-','-','-','-','-','-','-'],['-','-','-','-','-','-','-','-'],['-','-','-','-','-','-','-','-']),columns=['Curated Isoform','Gene Alias','Gene Info','Oncogene','Tumor Suppressor Gene','Gene Alteration', 'Alteration Type','Alteration Description'])
+
+
+##
+
+def occurances_table(input_df, colname, out_cols):
+    '''base df and colname that want to count, list of output cols'''
+    from collections import Counter
+    col1=[]
+    col2=[]
+    for k,v in Counter(input_df[colname]).items():
+        col1.append(k)
+        col2.append(v)
+    df = pd.DataFrame(list(zip(col1,col2)),columns=out_cols)
+    return df
+
+def count_taxonomy(df):
+    '''Create conversion of compoundID to taxonomy and count'''
+    from collections import Counter
+    comp2sclass={}
+    for gid,tax in G.query().V(list(df['drugID'])).render(['$._gid','$._data.taxonomy.superclass']):
+        if tax is None:
+            tax='None Listed'
+        comp2sclass[gid]=tax
+    tax_list=[]
+    for c in df['drugID']:
+        tax_list.append(comp2sclass.get(c))
+    return Counter(tax_list)
+    
+def pie_from_dict(dictionary,legend):
+    '''Dictionary k,v are label and total counts. Legend True or False to show'''
+    import plotly.graph_objects as go
+    l=[]
+    ct=[]
+    for k,v in dictionary.items():
+        l.append(k)
+        ct.append(v)
+    fig_data=go.Pie(labels=l, values=ct,textinfo='label+percent',legendgroup='group1',showlegend=legend)
+    fig_layout=go.Layout(margin={'t':0, 'b':0,'r':0,'l':0})
+    fig = go.Figure(data=fig_data,layout=fig_layout)
+    return fig
+
+def get_histogram_side(data,box_color):
+    '''
+    input values to plot. can be pandas df['col']
+     returns go figure
+    '''
+    import pandas as pd
+    import plotly.graph_objects as go
+    fig = go.Figure(data=[go.Histogram(y=data,marker=dict(color=box_color))]).update_yaxes(categoryorder="total ascending")
+    fig.update_layout(margin={'t':0, 'b':0},
+        yaxis=dict(tickmode='linear'),
+        plot_bgcolor='white',
+        paper_bgcolor='white')
+    fig.update_xaxes(showline=True,linewidth=1,ticks='outside',linecolor='black')
+    fig.update_yaxes(showline=True,linewidth=1,ticks='outside',linecolor='black')
+    return fig    
+
+def parse_src_doc(df,colname,keys_to_extract):
+    '''Parse source document to record selected info and drug/response
+    keys to extract should be keys of data.source_document that want'''
+    import json
+    # TODO update this to handle other keys too (non-clinical, non-allele_registry)
+    output={}
+    for i in range(0, len(df[colname])):
+        info = df[colname][i]
+        doc_dict = json.loads(info) 
+
+        if 'clinical' in doc_dict:
+            # Add all non src_doc to output
+            output[i]={'gene':df['gene'][i],'drug':df['drug'][i],'response':df['response'][i]}
+            # Add src_doc to output
+            data = doc_dict['clinical']
+            drug=df['drug'][i]
+            response=df['response'][i]
+            for k,v in data.items():
+                if k in keys_to_extract:
+                    if k == 'drugAbstracts':
+                        url=v[0]['link']
+                        output[i][k]=url
+                    else:
+                        output[i][k]=v
+    
+        elif 'allele_registry_id' in info:
+            # Add all non src_doc to output
+            output[i]={'gene':df['gene'][i],'drug':df['drug'][i],'response':df['response'][i]}
+            cancerType = doc_dict['evidence_items'][0]['disease']['name']
+            output[i]['cancerType']=cancerType
+            evidenceStrength = doc_dict['evidence_items'][0]['rating']
+            output[i]['level']=evidenceStrength
+            abstract= doc_dict['evidence_items'][0]['source']['source_url']
+            output[i]['drugAbstracts']=abstract
+    return output
+
+def build_publication_table(input_dictionary):
+    '''Build publication table ['Cancer Studied', 'Evidence Level','Evidence Meaning','Study']'''
+    if len(input_dictionary)>1:
+        df = pd.DataFrame(input_dictionary.values())
+        df = df[['gene','drug','response','cancerType','level','drugAbstracts']]
+        return df.rename(columns={'gene':"Gene",'drug':'Drug','response':'Response','cancerType':'Sample','level':'Evidence Strength','drugAbstracts':'Abstract'})
+    else:
+        return pd.DataFrame((['-','-','-','-'],['-','-','-','-'],['-','-','-','-'],['-','-','-','-'],['-','-','-','-'],['-','-','-','-']),columns=['Drug','Response','Cancer Studied', 'Evidence Level','Evidence Meaning','Study'])
