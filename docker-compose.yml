@@ -1,0 +1,68 @@
+version: '3'
+services:
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.9.1
+    container_name: bmeg-app-elastic
+    environment:
+      - cluster.name=bmeg-app-cluster
+      - node.name=bmeg-app-elastic
+      - discovery.type=single-node
+    #   - cluster.initial_master_nodes=elastic,odfe-node2
+      - bootstrap.memory_lock=true # along with the memlock settings below, disables swapping
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536 # maximum number of open files for the Elasticsearch user, set to at least 65536 on modern systems
+        hard: 65536
+    volumes:
+      - bmeg-app-data1:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+      - 9600:9600 # required for Performance Analyzer
+    networks:
+      - bmeg-app-net
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana-oss:7.9.1
+    container_name: bmeg-app-kibana
+    ports:
+      - 5601:5601
+    expose:
+      - "5601"
+    environment:
+      ELASTICSEARCH_URL: http://bmeg-app-elastic:9200
+      ELASTICSEARCH_HOSTS: http://bmeg-app-elastic:9200
+    networks:
+      - bmeg-app-net
+    depends_on:
+      - elastic
+
+  app:
+    build: ./
+    container_name: bmeg-app
+    # for development: map host directory to container's /app directory
+    volumes:
+    - ./bmeg_app:/app/bmeg_app
+    ports:
+      - 8050:8050
+    expose:
+      - "8050"
+    environment:
+      ELASTICSEARCH_URL: http://bmeg-app-elastic:9200
+      ELASTICSEARCH_HOSTS: http://bmeg-app-elastic:9200
+    networks:
+      - bmeg-app-net
+    depends_on:
+      - elastic
+    command: ["./bin/wait-for-it.sh", "bmeg-app-elastic:9200", "--", "./bin/setup-and-launch.sh"]
+
+
+volumes:
+  bmeg-app-data1:
+  bmeg-app-data2:
+
+networks:
+  bmeg-app-net:
