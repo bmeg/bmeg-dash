@@ -1,0 +1,2 @@
+# fetch gene symbol, ensembl_id  from genenames.org
+curl "https://www.genenames.org/cgi-bin/download/custom?col=gd_app_sym&col=md_ensembl_id&status=Approved&hgnc_dbtag=on&order_by=gd_app_sym_sort&format=text&submit=submit" > gene-names.tsv
