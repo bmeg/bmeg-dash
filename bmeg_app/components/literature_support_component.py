@@ -200,9 +200,9 @@ def parse_src_doc(df,colname,keys_to_extract):
         info = df[colname][i]
         doc_dict = json.loads(info) 
 
-        if 'clinical' in doc_dict:
+        if info.startswith('{"clinical"'):
             # Add all non src_doc to output
-            output[i]={'gene':df['gene'][i],'drug':df['drug'][i],'response':df['response'][i]}
+            output[i]={'gene':df['gene'][i],'drug':df['drug'][i],'response':df['response'][i],'level':df['evidence label'][i]}
             # Add src_doc to output
             data = doc_dict['clinical']
             drug=df['drug'][i]
@@ -215,15 +215,22 @@ def parse_src_doc(df,colname,keys_to_extract):
                     else:
                         output[i][k]=v
     
-        elif 'allele_registry_id' in info:
+        elif info.startswith('{"allele_registry_id"'):
             # Add all non src_doc to output
-            output[i]={'gene':df['gene'][i],'drug':df['drug'][i],'response':df['response'][i]}
-            cancerType = doc_dict['evidence_items'][0]['disease']['name']
-            output[i]['cancerType']=cancerType
-            evidenceStrength = doc_dict['evidence_items'][0]['rating']
-            output[i]['level']=evidenceStrength
-            abstract= doc_dict['evidence_items'][0]['source']['source_url']
-            output[i]['drugAbstracts']=abstract
+            output[i]={'gene':df['gene'][i],'drug':df['drug'][i],'response':df['response'][i],'level':df['evidence label'][i]}
+            # Add src_doc to output
+            output[i]['cancerType']=doc_dict['evidence_items'][0]['disease']['name']
+            output[i]['drugAbstracts']=doc_dict['evidence_items'][0]['source']['source_url']
+
+        elif info.startswith('{"Alteration"'):
+            # Add all non src_doc to output
+            output[i]={'gene':df['gene'][i],'drug':df['drug'][i],'response':df['response'][i],'level':df['evidence label'][i]}
+            # Add src_doc to output
+            output[i]['sample']=doc_dict['Primary Tumor type']
+            output[i]['drugAbstracts']='N/A'
+            
+        elif info.startswith('{"_score":'):
+            continue
     return output
 
 def build_publication_table(input_dictionary):

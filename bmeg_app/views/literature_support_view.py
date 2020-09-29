@@ -46,7 +46,7 @@ LAYOUT = html.Div(children=[
     html.Hr(),
     dbc.Row(
         [
-            dbc.Col(dcc.Loading(id='occr', type="default",children=html.Div()),width=3,style={"height":"100%"}),
+            dbc.Col(dcc.Loading(id='occr', type="default",children=html.Div()),width=3,style={"c":"100%"}),
             dbc.Col(dcc.Loading(id='resp_histo', type="default",children=html.Div()),width=4,style={"height":"100%"}),        
             dbc.Col(dcc.Loading(id='pie_taxon', type="default",children=html.Div()),width=5,style={"height":"100%"}),     
   
@@ -66,7 +66,7 @@ def render_callback(selected_gene):
     # Filter for gene
     df = base_df[base_df['geneID']==selected_gene].reset_index(drop=True)
     # Generate table
-    dictionary = lsu.parse_src_doc(df, 'litETC',['cancerType','level','drugAbstracts'])
+    dictionary = lsu.parse_src_doc(df, 'litETC',['cancerType','drugAbstracts'])
     df = lsu.build_publication_table(dictionary)
     dashtable = dash_table.DataTable(
         id='export_pub_table',
