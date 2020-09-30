@@ -22,29 +22,13 @@ i18n.load_path.append('bmeg_app/locales/')
 main_colors= ly.main_colors
 styles=ly.styles
 
-project_dresp = {
-    'Project:CCLE' : {
-        'AAC':'aac',
-        'EC50': 'ec50',
-        'IC50': 'ic50'
-    },
-    'Project:GDSC' : {
-        'AAC':'aac',
-        'EC50': 'ec50',
-        'IC50':'ic50'
-    },
-    'Project:CTRP' : {
-        'AAC':'aac',
-        'EC50': 'ec50'
-     }
-}
 
+with open('bmeg_app/locales/data.json', 'r') as fh:
+    menu_options = json.load(fh)
+print(menu_options['projects'])
+projects_options= menu_options['projects']
+project_dresp = menu_options['drug_responses']
 
-drug_response_projects = {
-    "Project:CCLE" : "CCLE",
-    "Project:CTRP" : "CTRP",
-    "Project:GDSC" : "GDSC"
-}
 #######
 # Page
 #######
@@ -56,7 +40,7 @@ LAYOUT = html.Div(children=[
             dbc.Col(
                 html.Div([
                     html.Label(i18n.t('app.widget_dresp.menu1')),
-                    dcc.Dropdown(id='project_dd_cdr',options=[{'label': l, 'value': gid} for gid,l in drug_response_projects.items()],value='Project:CCLE')
+                    dcc.Dropdown(id='project_dd_cdr',options=[{'label': l, 'value': gid} for gid,l in projects_options.items()],value='Project:CCLE')
                 ],
                 style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']})
             ),
