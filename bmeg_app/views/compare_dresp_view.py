@@ -13,6 +13,8 @@ import gripql
 import json
 import pandas as pd
 import plotly.express as px
+import i18n
+i18n.load_path.append('bmeg_app/locales/')
 
 #######
 # Prep
@@ -37,30 +39,30 @@ project_dresp = {
      }
 }
 
+
 drug_response_projects = {
     "Project:CCLE" : "CCLE",
     "Project:CTRP" : "CTRP",
     "Project:GDSC" : "GDSC"
 }
-
 #######
 # Page
 #######
 print('loading app layout')
-NAME = "Cancer Compound Screening"
+NAME = i18n.t('app.config.tabname_widget_dresp')
 LAYOUT = html.Div(children=[
     dbc.Row(
         [
             dbc.Col(
                 html.Div([
-                    html.Label('Dataset'),
+                    html.Label(i18n.t('app.widget_dresp.menu1')),
                     dcc.Dropdown(id='project_dd_cdr',options=[{'label': l, 'value': gid} for gid,l in drug_response_projects.items()],value='Project:CCLE')
                 ],
                 style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']})
             ),
             dbc.Col(
                 html.Div([
-                    html.Label('Drug Response'),
+                    html.Label(i18n.t('app.widget_dresp.menu2')),
                     dcc.Dropdown(id='dresp_dd_cdr',style={'font-size' : styles['t']['size_font']})
                 ],
                 style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']})
@@ -71,8 +73,8 @@ LAYOUT = html.Div(children=[
     html.Hr(),
     dbc.Row(
         [
-            html.Label('Compare dose/response of two componds on same cell lines'),
-            html.Div(info_button('help_pair','Select two drugs from the above table to explore drug response patterns.')),
+            html.Label(i18n.t('app.widget_dresp.display')),
+            html.Div(info_button('help_pair',i18n.t('app.widget_dresp.button_body'))),
         ]
     ),
     # html.Div(id='hidden_base_df_cdr', style={'display': 'none'}),
@@ -80,7 +82,7 @@ LAYOUT = html.Div(children=[
         dbc.Col([
             html.Div(
                 [
-                    html.Label('Compound 1'),
+                    html.Label(i18n.t('app.widget_dresp.menu2')),
                     dcc.Dropdown(id='drug_dd_cdr', style={'font-size' : styles['t']['size_font']})
                 ],
                 style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']}
@@ -89,7 +91,7 @@ LAYOUT = html.Div(children=[
         dbc.Col([
             html.Div(
                 [
-                    html.Label('Compound 2'),
+                    html.Label(i18n.t('app.widget_dresp.menu4')),
                     dcc.Dropdown(id='drug2_dd_cdr',style={'font-size' : styles['t']['size_font']})
                 ],
                 style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']}

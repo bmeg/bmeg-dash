@@ -24,7 +24,7 @@ styles=ly.styles
 #######
 # Page
 #######
-NAME="Home"
+NAME=i18n.t('app.config.tabname_widget_home')
 LAYOUT = html.Div(children=[
     dcc.Loading(id="cards",
             type="default",children=html.Div(id="cards_output")),
@@ -33,10 +33,10 @@ LAYOUT = html.Div(children=[
     dbc.Card(
         dbc.CardBody(
             [
-                html.H4(i18n.t('txt.cluster.header'), className="card-title"),
-                html.P(i18n.t('txt.cluster.body')),
+                html.H4(i18n.t('app.widget_home.cluster.header'), className="card-title"),
+                html.P(i18n.t('app.widget_home.cluster.body')),
                 dbc.Button(
-                    dbc.NavLink(i18n.t('txt.cluster.button'),href=i18n.t('txt.cluster.href')),color="light"
+                    dbc.NavLink(i18n.t('app.widget_home.cluster.button'),href=i18n.t('app.widget_home.cluster.href')),color="light"
                 ),
             ]
         )
@@ -44,10 +44,10 @@ LAYOUT = html.Div(children=[
     dbc.Card(
         dbc.CardBody(
             [
-                html.H4(i18n.t('txt.lit.header'), className="card-title"),
-                html.P(i18n.t('txt.lit.body')),
+                html.H4(i18n.t('app.widget_home.lit.header'), className="card-title"),
+                html.P(i18n.t('app.widget_home.lit.body')),
                 dbc.Button(
-                    dbc.NavLink(i18n.t('txt.lit.button'),href=i18n.t('txt.lit.href')),color="light"
+                    dbc.NavLink(i18n.t('app.widget_home.lit.button'),href=i18n.t('app.widget_home.lit.href')),color="light"
                 ),
 
 
@@ -57,11 +57,11 @@ LAYOUT = html.Div(children=[
     dbc.Card(
         dbc.CardBody(
             [
-                html.H4(i18n.t('txt.dresp.header')),
-                html.P(i18n.t('txt.dresp.body')),
-                html.P(i18n.t('txt.dresp.body2')),
+                html.H4(i18n.t('app.widget_home.dresp.header')),
+                html.P(i18n.t('app.widget_home.dresp.body')),
+                html.P(i18n.t('app.widget_home.dresp.body2')),
                 dbc.Button(
-                    dbc.NavLink(i18n.t('txt.dresp.button'),href=i18n.t('txt.dresp.href')),color='light'
+                    dbc.NavLink(i18n.t('app.widget_home.dresp.button'),href=i18n.t('app.widget_home.dresp.href')),color='light'
                 ),
             ],
         )
@@ -69,10 +69,10 @@ LAYOUT = html.Div(children=[
     dbc.Card(
         dbc.CardBody(
             [
-                html.H4(i18n.t('txt.gmut.header')),
-                html.P(i18n.t('txt.gmut.body')),
+                html.H4(i18n.t('app.widget_home.gmut.header')),
+                html.P(i18n.t('app.widget_home.gmut.body')),
                 dbc.Button(
-                    dbc.NavLink(i18n.t('txt.gmut.button'),href=i18n.t('txt.gmut.href')),color='light'
+                    dbc.NavLink(i18n.t('app.widget_home.gmut.button'),href=i18n.t('app.widget_home.gmut.href')),color='light'
                 ),
             ],
         )
@@ -80,10 +80,10 @@ LAYOUT = html.Div(children=[
     dbc.Card(
         dbc.CardBody(
             [
-                html.H4(i18n.t('txt.pathway.header')),
-                html.P(i18n.t('txt.pathway.body')),
+                html.H4(i18n.t('app.widget_home.pathway.header')),
+                html.P(i18n.t('app.widget_home.pathway.body')),
                 dbc.Button(
-                    dbc.NavLink(i18n.t('txt.pathway.button'),href=i18n.t('txt.pathway.href')),color='light'
+                    dbc.NavLink(i18n.t('app.widget_home.pathway.button'),href=i18n.t('app.widget_home.pathway.href')),color='light'
                 ),
             ],
         )
