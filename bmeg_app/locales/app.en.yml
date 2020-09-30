@@ -5,6 +5,7 @@ en:
         tabname_gmut: Gene-level Mutation View
         tabname_lit: Literature Gene-Compound Associations
         tabname_pathway: Pathway View
+
     widget_home:
         cluster:
             header: Tumor vs. Normal

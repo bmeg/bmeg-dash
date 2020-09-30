@@ -49,13 +49,13 @@ LAYOUT = html.Div(children=[
     dbc.Row(
         [
             dbc.Col(dcc.Loading(id='occr', type="default",children=html.Div()),width=3,style={"c":"100%"}),
-            dbc.Col(dcc.Loading(id='resp_histo', type="default",children=html.Div()),width=4,style={"height":"100%"}),        
-            dbc.Col(dcc.Loading(id='pie_taxon', type="default",children=html.Div()),width=5,style={"height":"100%"}),     
+            dbc.Col(dcc.Loading(id='resp_histo', type="default",children=html.Div()),width=4,style={"height":"100%"}),
+            dbc.Col(dcc.Loading(id='pie_taxon', type="default",children=html.Div()),width=5,style={"height":"100%"}),
   
         ],
     ),
     html.Hr(),
-    dcc.Loading(id='evd', type="default",children=html.Div()),     
+    dcc.Loading(id='evd', type="default",children=html.Div()),
 ],style={'fontFamily': styles['t']['type_font']})
 
 
