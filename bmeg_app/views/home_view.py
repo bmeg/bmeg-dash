@@ -12,6 +12,8 @@ import dash_html_components as html
 import gripql
 import pandas as pd
 import plotly.express as px
+import i18n
+i18n.load_path.append('bmeg_app/locales/')
 
 #######
 # Prep
@@ -31,10 +33,10 @@ LAYOUT = html.Div(children=[
     dbc.Card(
         dbc.CardBody(
             [
-                html.H4("Tumor vs. Normal", className="card-title"),
-                html.P("Some descriptive text here on the purpose and use of this widget. Info on the type of data used in this widget"),
+                html.H4(i18n.t('txt.cluster.header'), className="card-title"),
+                html.P(i18n.t('txt.cluster.body')),
                 dbc.Button(
-                    dbc.NavLink('TCGA Clustering',href='/tumors'),color="light"
+                    dbc.NavLink(i18n.t('txt.cluster.button'),href=i18n.t('txt.cluster.href')),color="light"
                 ),
             ]
         )
@@ -42,10 +44,10 @@ LAYOUT = html.Div(children=[
     dbc.Card(
         dbc.CardBody(
             [
-                html.H4("Curated Literature Evidence", className="card-title"),
-                html.P("Explore your list of top genes from differential gene expression analysis for trends reported in literature. Quickly identify aspects about your results that align and deviate from literature curated for strength by the Variant Interpretation for Cancer Consortium."),
+                html.H4(i18n.t('txt.lit.header'), className="card-title"),
+                html.P(i18n.t('txt.lit.body')),
                 dbc.Button(
-                    dbc.NavLink('Literature Gene-Compound Associations',href='/g2p'),color="light"
+                    dbc.NavLink(i18n.t('txt.lit.button'),href=i18n.t('txt.lit.href')),color="light"
                 ),
 
 
@@ -55,11 +57,11 @@ LAYOUT = html.Div(children=[
     dbc.Card(
         dbc.CardBody(
             [
-                html.H4("Identify Compound Treatment Candidates from Cancer Cell Line Compound Screens"),
-                html.P("Interrogate cell line compound screening trials from large established sources (CCLE, CTRP, GDSC). Dig into compound sensitivity trends within a particular disease and explore associated metadata."),
-                html.P("For example, select a FDA compound that is widely known to prevent/treat a particular disease phenotype (ex. Paclitaxel, breast cancer treatment) and identify other compounds that show a similar impact on cell lines."),
+                html.H4(i18n.t('txt.dresp.header')),
+                html.P(i18n.t('txt.dresp.body')),
+                html.P(i18n.t('txt.dresp.body2')),
                 dbc.Button(
-                    dbc.NavLink('Cancer Compound Screening',href='/drug_response'),color='light'
+                    dbc.NavLink(i18n.t('txt.dresp.button'),href=i18n.t('txt.dresp.href')),color='light'
                 ),
             ],
         )
@@ -67,10 +69,10 @@ LAYOUT = html.Div(children=[
     dbc.Card(
         dbc.CardBody(
             [
-                html.H4("Explore Mutations"),
-                html.P("Description here."),
+                html.H4(i18n.t('txt.gmut.header')),
+                html.P(i18n.t('txt.gmut.body')),
                 dbc.Button(
-                    dbc.NavLink('Gene-level Mutation View',href='/oncoprint'),color='light'
+                    dbc.NavLink(i18n.t('txt.gmut.button'),href=i18n.t('txt.gmut.href')),color='light'
                 ),
             ],
         )
@@ -78,10 +80,10 @@ LAYOUT = html.Div(children=[
     dbc.Card(
         dbc.CardBody(
             [
-                html.H4("Pathways"),
-                html.P("Description here."),
+                html.H4(i18n.t('txt.pathway.header')),
+                html.P(i18n.t('txt.pathway.body')),
                 dbc.Button(
-                    dbc.NavLink('Pathway View',href='/pathway'),color='light'
+                    dbc.NavLink(i18n.t('txt.pathway.button'),href=i18n.t('txt.pathway.href')),color='light'
                 ),
             ],
         )
