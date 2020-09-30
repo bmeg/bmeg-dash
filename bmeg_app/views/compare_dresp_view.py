@@ -22,12 +22,10 @@ i18n.load_path.append('bmeg_app/locales/')
 main_colors= ly.main_colors
 styles=ly.styles
 
-
 with open('bmeg_app/locales/data.json', 'r') as fh:
     menu_options = json.load(fh)
-print(menu_options['projects'])
 projects_options= menu_options['projects']
-project_dresp = menu_options['drug_responses']
+dresp_options = menu_options['drug_responses']
 
 #######
 # Page
@@ -108,7 +106,7 @@ app.clientside_callback(
     [Input('project_dd_cdr', 'value')]
 )
 def set_project_dresp_selector(selected_project):
-    out = [{'label': k, 'value': v} for k,v in project_dresp[selected_project].items()]
+    out = [{'label': k, 'value': v} for k,v in dresp_options[selected_project].items()]
     return out, out[0]['value']
 
 @app.callback(
