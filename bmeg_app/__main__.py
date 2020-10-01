@@ -24,13 +24,13 @@ encoded_image3 = base64.b64encode(open(image_filename, 'rb').read())
 #     "Cancer Drug Screening", href="/page-2", id="page-2-link",
 #     style={'font-size':styles['t']['size_font_card'],'fontFamily':styles['t']['type_font']}
 # )
-# 
+#
 # help_cancer_screen= html.Div([
 #     dbc.Button('?', id='open1',color='link',style=styles['tab_help_button']),
 #     dbc.Modal(
 #         [
 #             dbc.ModalHeader('Identify Drug Treatment Candidates from Cancer Cell Line Drug Screens'),
-# 
+#
 #             dbc.ModalBody("Interrogate cell line drug screening trials from large established sources (CCLE, CTRP, GDSC). Dig into drug sensitivity trends within a particular disease and explore associated metadata."),
 #             dbc.ModalBody( 'What’s going on behind the scenes?'),
 #             dbc.ModalBody( '•	Data is queried from BMEG, filtered for relevant cell lines (breast tissue derived cell lines kept if breast cancer is selected), and analyzed in the viewer.'),
@@ -83,7 +83,7 @@ sidebar_header = dbc.Row(
 )
 
 def genNavBarList():
-    i = 1
+    i = 0
     out = []
     for k, v in view_map.items():
         e = dbc.NavLink(v.NAME, href="/%s" % (k), id="page-%d-link" % (i),
@@ -125,14 +125,14 @@ app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
 
 
 @app.callback(
-    [Output(f"page-{i}-link", "active") for i in enumerate(view_map)],
+    [Output(f"page-{i[0]}-link", "active") for i in enumerate(view_map)],
     [Input("url", "pathname")],
 )
 def toggle_active_links(pathname):
     '''active link for widget view'''
-    if pathname == "/":
-        return [True] + [False] * (len(view_map))
-    return [pathname == f"/" for i in view_map.keys()]
+    if pathname is None:
+        return [True] + [False] * (len(view_map)-1)
+    return [pathname == f"/{i}" for i in view_map.keys()]
 
 @app.callback(
     Output("page-content", "children"),
