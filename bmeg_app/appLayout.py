@@ -11,6 +11,28 @@ main_colors = {
     'tab_darkblue':'#026670'}
 
 styles = {
+    'banner': {
+        'textAlign': 'center',
+        'color':main_colors['tab_darkblue'],
+        'type-font':'Arial',
+        'font-size':50,
+        'font-style':'italic',
+        'font-weight':'bold',
+        'padding':10,
+    },
+    'subbanner': {
+        'backgroundColor': main_colors['tab_lightblue'],
+        'textAlign': 'center',
+        'color':'white',
+        'type_font':'Arial',
+        'padding':10,
+    },
+    'card_header':{
+        'height':'10%'
+    },
+    'card_body':{
+        'height':'25%'
+    },
     'sh': {
         'backgroundColor': main_colors['tab_lightblue'],
         'textAlign': 'center',
@@ -30,7 +52,7 @@ styles = {
         'paddingBottom':2,
         'paddingLeft':8,
         'paddingRight':8,
-        'font-size':14,    
+        'font-size':14,
         'font-family':'Arial',
         'textAlign':'middle',
         'margin':'bottom'
@@ -46,7 +68,7 @@ styles = {
     'help_button_text':{
         'padding':20,
         'font-size':12,
-        'font-family':'Arial',  
+        'font-family':'Arial',
     },
     'b': {
         'padding_left':'15px',

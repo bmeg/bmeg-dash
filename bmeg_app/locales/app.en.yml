@@ -13,7 +13,7 @@ en:
             button: TCGA Clustering
             href: /tumors
         dresp:
-            header: Identify Compound Treatment Candidates from Cancer Cell Line Compound Screens
+            header: Identify Compound Candidates from Cancer Cell Line Screens
             body: Interrogate cell line compound screening trials from large established sources (CCLE, CTRP, GDSC). Dig into compound sensitivity trends within a particular disease and explore associated metadata.
             body2: For example, select a FDA compound that is widely known to prevent/treat a particular disease phenotype (ex. Paclitaxel, breast cancer treatment) and identify other compounds that show a similar impact on cell lines.
             button: Cancer Compound Screening
@@ -33,7 +33,7 @@ en:
             body: Description here.
             button: Pathway View
             href: /pathway
-            
+
     widget_dresp:
         menu1: Dataset
         menu2: Drug Response
@@ -41,12 +41,12 @@ en:
         menu4: Compound 2
         display: Compare dose/response of two componds on same cell lines
         button_body: Select two drugs from the above table to explore drug response patterns.
-        
+
     widget_gmut:
         menu1: Gene
 
     widget_lit:
         menu1: Gene
-        
+
     widget_pathway:
         menu1: Pathway
