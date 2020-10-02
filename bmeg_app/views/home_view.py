@@ -26,62 +26,38 @@ styles=ly.styles
 #######
 NAME=i18n.t('app.config.tabname_widget_home')
 
-cluster_card = dbc.Card(
-    dbc.CardBody(
-        [
-            html.H4(i18n.t('app.widget_home.cluster.header'), className="card-title"),
-            html.P(i18n.t('app.widget_home.cluster.body')),
-            dbc.Button(
-                dbc.NavLink(i18n.t('app.widget_home.cluster.button'),href=i18n.t('app.widget_home.cluster.href')),color="light"
-            ),
-        ]
-    ),
-),
-lit_card = dbc.Card(
-    dbc.CardBody(
-        [
-            html.H4(i18n.t('app.widget_home.lit.header'), className="card-title",style=styles['card_header']),
-            html.Div(html.P(i18n.t('app.widget_home.lit.body')),style=styles['card_body']),
-            dbc.Button(
-                dbc.NavLink(i18n.t('app.widget_home.lit.button'),href=i18n.t('app.widget_home.lit.href')),color="light"
-            ),
-        ],
-    ),
-),
-dresp_card=dbc.Card(
-    dbc.CardBody(
-        [
-            html.H4(i18n.t('app.widget_home.dresp.header'), className="card-title",style=styles['card_header']),
-            html.P(i18n.t('app.widget_home.dresp.body'),style=styles['card_body']),
-                    # html.P(i18n.t('app.widget_home.dresp.body2')),
-            dbc.Button(
-                dbc.NavLink(i18n.t('app.widget_home.dresp.button'),href=i18n.t('app.widget_home.dresp.href')),color='light'
-            ),
-        ],
-    )
-),
-gene_mut_card=dbc.Card(
-    dbc.CardBody(
-        [
-            html.H4(i18n.t('app.widget_home.gmut.header'), className="card-title",style=styles['card_header']),
-            html.P(i18n.t('app.widget_home.gmut.body'),style=styles['card_body']),
-            dbc.Button(
-                dbc.NavLink(i18n.t('app.widget_home.gmut.button'),href=i18n.t('app.widget_home.gmut.href')),color='light'
-            ),
-        ],
-    ),
-),
-pathway_card=dbc.Card(
-    dbc.CardBody(
-        [
-            html.H4(i18n.t('app.widget_home.pathway.header'), className="card-title",style=styles['card_header']),
-            html.P(i18n.t('app.widget_home.pathway.body'),style=styles['card_body']),
-            dbc.Button(
-                dbc.NavLink(i18n.t('app.widget_home.pathway.button'),href=i18n.t('app.widget_home.pathway.href')),color='light'
-            ),
-        ],
-    )
-),
+cluster_card=dty.build_card(
+    i18n.t('app.widget_home.cluster.header'),
+    [i18n.t('app.widget_home.cluster.body')],
+    i18n.t('app.widget_home.cluster.button'),
+    i18n.t('app.widget_home.cluster.href')
+)
+lit_card=dty.build_card(
+    i18n.t('app.widget_home.lit.header'),
+    [i18n.t('app.widget_home.lit.body')],
+    i18n.t('app.widget_home.lit.button'),
+    i18n.t('app.widget_home.lit.href')
+)
+# dresp_card=dty.build_card(i18n.t('app.widget_home.dresp.header'),[i18n.t('app.widget_home.dresp.body'),i18n.t('app.widget_home.dresp.body2')],i18n.t('app.widget_home.dresp.button'),i18n.t('app.widget_home.dresp.href') )
+dresp_card=dty.build_card(
+    i18n.t('app.widget_home.dresp.header'),
+    [i18n.t('app.widget_home.dresp.body')],
+    i18n.t('app.widget_home.dresp.button'),
+    i18n.t('app.widget_home.dresp.href')
+)
+gene_mut_card=dty.build_card(
+    i18n.t('app.widget_home.gmut.header'),
+    [i18n.t('app.widget_home.gmut.body')],
+    i18n.t('app.widget_home.gmut.button'),
+    i18n.t('app.widget_home.gmut.href')
+)
+pathway_card=dty.build_card(
+    i18n.t('app.widget_home.pathway.header'),
+    [i18n.t('app.widget_home.pathway.body')],
+    i18n.t('app.widget_home.pathway.button'),
+    i18n.t('app.widget_home.pathway.href')
+)
+
 LAYOUT = html.Div(children=[
     html.H1('Bio Medical Evidence Graph (BMEG)',style=styles['banner']),
     dcc.Loading(id="cards",

@@ -1,16 +1,27 @@
+import dash_bootstrap_components as dbc
+import dash_html_components as html
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+
+def build_card(header,body,button,button_href):
+    '''Create dbc cards, Input strings of each card section. Card body can be a list of paragraph strings'''
+    contents=[]
+    contents.append(html.H4((header), className="card-title"))
+    for b in body:
+        contents.append(html.P(b))
+    contents.append(dbc.Button(dbc.NavLink(button),href=button_href,color="info"))
+    return dbc.Card(dbc.CardBody(contents),color='light')
 
 def bar(fig_title, infotext, xvals, yvals, plot_color,height,xlabel,ylabel):
     '''Bar chart'''
     assert len(xvals) ==len(yvals)
-    layout = go.Layout(hovermode='x unified',title=fig_title,height=height,margin={'t':5, 'b':0},legend_orientation="h",font=dict(family="sans-serif",size=10,color='black'),plot_bgcolor='white',paper_bgcolor='white')  
+    layout = go.Layout(hovermode='x unified',title=fig_title,height=height,margin={'t':5, 'b':0},legend_orientation="h",font=dict(family="sans-serif",size=10,color='black'),plot_bgcolor='white',paper_bgcolor='white')
     fig = go.Figure(layout=layout)
     fig.add_trace(go.Bar(x=xvals, y=yvals,marker=dict(color=plot_color),textposition='auto'))
     fig.update_yaxes(showline=False, title=ylabel)
     fig.update_xaxes(showline=True,title =xlabel,linewidth=1,linecolor='black')
     return fig
-    
+
 def card(k,v,graph_col,graph_font,h):
     '''Count card'''
     mod_plural = {'Publication':'PubLit Article','DrugResponse': 'Drug Response'}
