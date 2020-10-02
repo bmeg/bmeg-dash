@@ -15,6 +15,8 @@ import pandas as pd
 from plotly.subplots import make_subplots
 import logging
 logger = logging.getLogger(__name__)
+import i18n
+i18n.load_path.append('bmeg_app/locales/')
 
 #######
 # Prep
@@ -62,12 +64,12 @@ component = dash_bio.NeedlePlot(
 #######
 # Page
 #######
-NAME="Gene-level Mutation View"
+NAME=i18n.t('app.config.tabname_gmut')
 LAYOUT = html.Div(children=[
-    html.Label("Gene:"), dcc.Dropdown(id='single-dropdown', value="TP53/ENSG00000141510", search_value="TP53/ENSG00000141510" ),
+    html.Label(i18n.t('app.widget_gmut.menu1')), dcc.Dropdown(id='single-dropdown', value="TP53/ENSG00000141510", search_value="TP53/ENSG00000141510" ),
     component,
     html.Div(id='needle-selection')
-], style={ 'font-size' : styles['t']['size_font']})
+], style={'font-size' : styles['t']['size_font'],'fontFamily': styles['t']['type_font']})
 
 @app.callback(
     dash.dependencies.Output('single-dropdown', 'options'),

@@ -13,6 +13,8 @@ import gripql
 import json
 import pandas as pd
 import plotly.express as px
+import i18n
+i18n.load_path.append('bmeg_app/locales/')
 
 #######
 # Prep
@@ -24,14 +26,14 @@ styles=ly.styles
 # Page
 #######
 print('loading app layout')
-NAME="Literature Gene-Compound Associations"
+NAME= i18n.t('app.config.tabname_lit')
 LAYOUT = html.Div(children=[
     dbc.Row(
         [
             dbc.Col(
                 html.Div(
                     [
-                        html.Label('Gene Symbol'),
+                        html.Label(i18n.t('app.widget_lit.menu1')),
                         dcc.Dropdown(id='gene_dd',
                             value="MTOR/ENSG00000198793", search_value="MTOR/ENSG00000198793"
                         ),

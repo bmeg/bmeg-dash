@@ -16,6 +16,8 @@ import pandas as pd
 from plotly.subplots import make_subplots
 import logging
 logger = logging.getLogger(__name__)
+import i18n
+i18n.load_path.append('bmeg_app/locales/')
 
 #######
 # Prep
@@ -53,11 +55,11 @@ element = cyto.Cytoscape(
     elements=[]
 )
 
-NAME="Pathway View"
+NAME=i18n.t('app.config.tabname_pathway')
 LAYOUT = html.Div(children=[
-    html.Label("Pathway:"), dcc.Dropdown(id='pathway-dropdown'),
+    html.Label(i18n.t('app.widget_pathway.menu1')), dcc.Dropdown(id='pathway-dropdown'),
     element
-])
+], style={'font-size' : styles['t']['size_font'],'fontFamily': styles['t']['type_font']})
 
 
 @app.callback(

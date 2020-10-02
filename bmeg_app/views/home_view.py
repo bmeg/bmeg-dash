@@ -12,6 +12,8 @@ import dash_html_components as html
 import gripql
 import pandas as pd
 import plotly.express as px
+import i18n
+i18n.load_path.append('bmeg_app/locales/')
 
 #######
 # Prep
@@ -22,69 +24,90 @@ styles=ly.styles
 #######
 # Page
 #######
-NAME="Home"
+NAME=i18n.t('app.config.tabname_widget_home')
+
+cluster_card = dbc.Card(
+    dbc.CardBody(
+        [
+            html.H4(i18n.t('app.widget_home.cluster.header'), className="card-title"),
+            html.P(i18n.t('app.widget_home.cluster.body')),
+            dbc.Button(
+                dbc.NavLink(i18n.t('app.widget_home.cluster.button'),href=i18n.t('app.widget_home.cluster.href')),color="light"
+            ),
+        ]
+    ),
+),
+lit_card = dbc.Card(
+    dbc.CardBody(
+        [
+            html.H4(i18n.t('app.widget_home.lit.header'), className="card-title",style=styles['card_header']),
+            html.Div(html.P(i18n.t('app.widget_home.lit.body')),style=styles['card_body']),
+            dbc.Button(
+                dbc.NavLink(i18n.t('app.widget_home.lit.button'),href=i18n.t('app.widget_home.lit.href')),color="light"
+            ),
+        ],
+    ),
+),
+dresp_card=dbc.Card(
+    dbc.CardBody(
+        [
+            html.H4(i18n.t('app.widget_home.dresp.header'), className="card-title",style=styles['card_header']),
+            html.P(i18n.t('app.widget_home.dresp.body'),style=styles['card_body']),
+                    # html.P(i18n.t('app.widget_home.dresp.body2')),
+            dbc.Button(
+                dbc.NavLink(i18n.t('app.widget_home.dresp.button'),href=i18n.t('app.widget_home.dresp.href')),color='light'
+            ),
+        ],
+    )
+),
+gene_mut_card=dbc.Card(
+    dbc.CardBody(
+        [
+            html.H4(i18n.t('app.widget_home.gmut.header'), className="card-title",style=styles['card_header']),
+            html.P(i18n.t('app.widget_home.gmut.body'),style=styles['card_body']),
+            dbc.Button(
+                dbc.NavLink(i18n.t('app.widget_home.gmut.button'),href=i18n.t('app.widget_home.gmut.href')),color='light'
+            ),
+        ],
+    ),
+),
+pathway_card=dbc.Card(
+    dbc.CardBody(
+        [
+            html.H4(i18n.t('app.widget_home.pathway.header'), className="card-title",style=styles['card_header']),
+            html.P(i18n.t('app.widget_home.pathway.body'),style=styles['card_body']),
+            dbc.Button(
+                dbc.NavLink(i18n.t('app.widget_home.pathway.button'),href=i18n.t('app.widget_home.pathway.href')),color='light'
+            ),
+        ],
+    )
+),
 LAYOUT = html.Div(children=[
+    html.H1('Bio Medical Evidence Graph (BMEG)',style=styles['banner']),
     dcc.Loading(id="cards",
             type="default",children=html.Div(id="cards_output")),
+    html.Br(),
     dcc.Loading(id="node_cts_bar",
             type="default",children=html.Div(id="node_cts_bar_output")),
-    dbc.Card(
-        dbc.CardBody(
-            [
-                html.H4("Tumor vs. Normal", className="card-title"),
-                html.P("Some descriptive text here on the purpose and use of this widget. Info on the type of data used in this widget"),
-                dbc.Button(
-                    dbc.NavLink('TCGA Clustering',href='/tumors'),color="light"
-                ),
-            ]
-        )
+    html.H3('Analysis Widgets',style=styles['subbanner']),
+    dbc.Row(
+        [
+            dbc.Col(lit_card),
+            dbc.Col(dresp_card),
+        ]
     ),
-    dbc.Card(
-        dbc.CardBody(
-            [
-                html.H4("Curated Literature Evidence", className="card-title"),
-                html.P("Explore your list of top genes from differential gene expression analysis for trends reported in literature. Quickly identify aspects about your results that align and deviate from literature curated for strength by the Variant Interpretation for Cancer Consortium."),
-                dbc.Button(
-                    dbc.NavLink('Literature Gene-Compound Associations',href='/g2p'),color="light"
-                ),
-
-
-            ]
-        )
+    html.Br(),
+    dbc.Row(
+        [
+            dbc.Col(gene_mut_card),
+            dbc.Col(pathway_card),
+        ]
     ),
-    dbc.Card(
-        dbc.CardBody(
-            [
-                html.H4("Identify Compound Treatment Candidates from Cancer Cell Line Compound Screens"),
-                html.P("Interrogate cell line compound screening trials from large established sources (CCLE, CTRP, GDSC). Dig into compound sensitivity trends within a particular disease and explore associated metadata."),
-                html.P("For example, select a FDA compound that is widely known to prevent/treat a particular disease phenotype (ex. Paclitaxel, breast cancer treatment) and identify other compounds that show a similar impact on cell lines."),
-                dbc.Button(
-                    dbc.NavLink('Cancer Compound Screening',href='/drug_response'),color='light'
-                ),
-            ],
-        )
-    ),
-    dbc.Card(
-        dbc.CardBody(
-            [
-                html.H4("Explore Mutations"),
-                html.P("Description here."),
-                dbc.Button(
-                    dbc.NavLink('Gene-level Mutation View',href='/oncoprint'),color='light'
-                ),
-            ],
-        )
-    ),
-    dbc.Card(
-        dbc.CardBody(
-            [
-                html.H4("Pathways"),
-                html.P("Description here."),
-                dbc.Button(
-                    dbc.NavLink('Pathway View',href='/pathway'),color='light'
-                ),
-            ],
-        )
+    html.Br(),
+    dbc.Row(
+        [
+            dbc.Col(cluster_card),
+        ]
     ),
 ],style={'fontFamily': styles['t']['type_font'],})
 
@@ -123,5 +146,5 @@ def render_callback(href):
     for k,v in res.items():
         keys.append(k)
         values.append(v)
-    fig = dty.bar('','Node', keys, values, main_colors['pale_yellow'], 250, '', '')
+    fig = dty.bar('','Node', keys, values, main_colors['lightgreen_borderfill'], 250, '', '')
     return dcc.Graph(id='node_cts_bar_output', figure=fig),

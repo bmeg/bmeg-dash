@@ -1,0 +1,23 @@
+{
+    "cell_line_projects":{
+        "Project:CCLE" : "CCLE",
+        "Project:CTRP" : "CTRP",
+        "Project:GDSC" : "GDSC"
+    },
+    "drug_responses":{
+        "Project:CCLE" : {
+            "AAC":"aac",
+            "EC50": "ec50",
+            "IC50": "ic50"
+        },
+        "Project:GDSC" : {
+            "AAC":"aac",
+            "EC50": "ec50",
+            "IC50":"ic50"
+        },
+        "Project:CTRP" : {
+            "AAC":"aac",
+            "EC50": "ec50"
+         }
+    }
+}
