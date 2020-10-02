@@ -1,5 +1,5 @@
 {
-    "projects":{
+    "cell_line_projects":{
         "Project:CCLE" : "CCLE",
         "Project:CTRP" : "CTRP",
         "Project:GDSC" : "GDSC"
