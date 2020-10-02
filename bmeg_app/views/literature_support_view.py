@@ -12,6 +12,8 @@ import gripql
 import json
 import pandas as pd
 from plotly.subplots import make_subplots
+import i18n
+i18n.load_path.append('bmeg_app/locales/')
 
 #######
 # Prep
@@ -26,14 +28,14 @@ base_df=pd.read_csv('bmeg_app/source/basedf.tsv',sep='\t') # TEMP TODO change to
 # Page
 #######
 print('loading app layout')
-NAME="Literature Gene-Compound Associations"
+NAME= i18n.t('app.config.tabname_lit')
 LAYOUT = html.Div(children=[
     dbc.Row(
         [
             dbc.Col(
                 html.Div(
                     [
-                        html.Label('Gene Symbol'),
+                        html.Label(i18n.t('app.widget_lit.menu1')),
                         dcc.Dropdown(id='gene_dd',
                             options=[{'label': l, 'value': gid} for l,gid in lsu.gene_dd_selections(base_df,'geneID','gene').items()],
                             value=[{'label': l, 'value': gid} for l,gid in lsu.gene_dd_selections(base_df,'geneID','gene').items()][0]['value'],
@@ -47,13 +49,13 @@ LAYOUT = html.Div(children=[
     dbc.Row(
         [
             dbc.Col(dcc.Loading(id='occr', type="default",children=html.Div()),width=3,style={"c":"100%"}),
-            dbc.Col(dcc.Loading(id='resp_histo', type="default",children=html.Div()),width=4,style={"height":"100%"}),        
-            dbc.Col(dcc.Loading(id='pie_taxon', type="default",children=html.Div()),width=5,style={"height":"100%"}),     
+            dbc.Col(dcc.Loading(id='resp_histo', type="default",children=html.Div()),width=4,style={"height":"100%"}),
+            dbc.Col(dcc.Loading(id='pie_taxon', type="default",children=html.Div()),width=5,style={"height":"100%"}),
   
         ],
     ),
     html.Hr(),
-    dcc.Loading(id='evd', type="default",children=html.Div()),     
+    dcc.Loading(id='evd', type="default",children=html.Div()),
 ],style={'fontFamily': styles['t']['type_font']})
 
 

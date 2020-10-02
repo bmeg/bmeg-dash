@@ -1,0 +1,52 @@
+en:
+    config:
+        tabname_widget_home: Home
+        tabname_widget_dresp: Cancer Compound Screening
+        tabname_gmut: Gene-level Mutation View
+        tabname_lit: Literature Gene-Compound Associations
+        tabname_pathway: Pathway View
+
+    widget_home:
+        cluster:
+            header: Tumor vs. Normal
+            body: Some descriptive text here on the purpose and use of this widget. Info on the type of data used in this widget
+            button: TCGA Clustering
+            href: /tumors
+        dresp:
+            header: Identify Compound Treatment Candidates from Cancer Cell Line Compound Screens
+            body: Interrogate cell line compound screening trials from large established sources (CCLE, CTRP, GDSC). Dig into compound sensitivity trends within a particular disease and explore associated metadata.
+            body2: For example, select a FDA compound that is widely known to prevent/treat a particular disease phenotype (ex. Paclitaxel, breast cancer treatment) and identify other compounds that show a similar impact on cell lines.
+            button: Cancer Compound Screening
+            href: /drug_response
+        gmut:
+            header: Explore Mutations
+            body: Description here.
+            button: Gene-level Mutation View
+            href: /oncoprint
+        lit:
+            header: Curated Literature Evidence
+            body: Explore your list of top genes from differential gene expression analysis for trends reported in literature. Quickly identify aspects about your results that align and deviate from literature curated for strength by the Variant Interpretation for Cancer Consortium.
+            button: Literature Gene-Compound Associations
+            href: /g2p
+        pathway:
+            header: Pathways
+            body: Description here.
+            button: Pathway View
+            href: /pathway
+            
+    widget_dresp:
+        menu1: Dataset
+        menu2: Drug Response
+        menu3: Compound 1
+        menu4: Compound 2
+        display: Compare dose/response of two componds on same cell lines
+        button_body: Select two drugs from the above table to explore drug response patterns.
+        
+    widget_gmut:
+        menu1: Gene
+
+    widget_lit:
+        menu1: Gene
+        
+    widget_pathway:
+        menu1: Pathway
