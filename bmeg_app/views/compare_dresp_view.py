@@ -64,7 +64,7 @@ LAYOUT = html.Div(children=[
         dbc.Col([
             html.Div(
                 [
-                    html.Label(i18n.t('app.widget_dresp.menu2')),
+                    html.Label(i18n.t('app.widget_dresp.menu3')),
                     dcc.Dropdown(id='drug_dd_cdr', style={'font-size' : styles['t']['size_font']})
                 ],
                 style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']}
@@ -115,7 +115,7 @@ def set_project_dresp_selector(selected_project):
 )
 def set_project_compound1_selector(selected_project):
     out = [{'label': l, 'value': gid} for gid,l in sorted(cdr.get_project_drugs(selected_project).items(), key=lambda a: a[1])]
-    return out, out[0]['value']
+    return out, out[cdr.find_index(out)]['value']
 
 @app.callback(
     [Output('drug2_dd_cdr', 'options'), Output('drug2_dd_cdr', 'value')],
@@ -123,8 +123,7 @@ def set_project_compound1_selector(selected_project):
 )
 def set_project_compound2_selector(selected_project):
     out = [{'label': l, 'value': gid} for gid,l in sorted(cdr.get_project_drugs(selected_project).items(), key=lambda a: a[1])]
-    i = 1 if len(out) > 1 else 0
-    return out, out[i]['value']
+    return out, out[cdr.find_index(out)+1]['value']
 
 @app.callback(
     Output('drug1_box', 'children'),
@@ -183,6 +182,7 @@ def render_comparison_graph(project, compound1, compound2, selected_dresp):
     a = pd.Series(aliquot_disease).rename("disease")
     df = pd.DataFrame({compound1:cmpd1, compound2:cmpd2, "disease":a}).dropna()
     fig = px.scatter(x=df[compound1], y=df[compound2], color=df["disease"])
+    fig.update_layout(xaxis_title='Compound 1', yaxis_title='Compound 2')
     return dcc.Graph(figure=fig)
 
 @app.callback(

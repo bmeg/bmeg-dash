@@ -5,6 +5,13 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+def find_index(list_dictionary):
+    '''Input list of dictionaries (keys='label','value') and return index of first occurance that label is not numeric'''
+    for i in range(0,len(list_dictionary)):
+        l = list_dictionary[i]['label']
+        if l.isnumeric()==False:
+            return i
+
 def line2disease(lines_list):
     '''Dictionary mapping cell line GIDs to reported primary disease'''
     disease_dict = {}
