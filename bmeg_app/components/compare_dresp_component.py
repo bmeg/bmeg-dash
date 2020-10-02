@@ -77,7 +77,7 @@ def get_project_drugs(selected_project):
     return options
 
 def get_project_aliquot_disease(project):
-    q = G.query().V("Project:CCLE").out("cases").as_("case").out("samples").out("aliquots").as_("al").render(["$al._gid", "$case.cellline_attributes.Primary Disease"])
+    q = G.query().V(project).out("cases").as_("case").out("samples").out("aliquots").as_("al").render(["$al._gid", "$case.cellline_attributes.Primary Disease"])
     return dict(list(q))
 
 def options_drug2(drug_list):
@@ -93,7 +93,7 @@ def options_drug2(drug_list):
 
 def get_project_compound_dr(project, compound, dr):
     q = G.query().V(compound).out("drug_responses")
-    q = q.has(gripql.eq("project_id", "Project:CCLE")).as_("dr")
+    q = q.has(gripql.eq("project_id", project)).as_("dr")
     q = q.out("aliquot").as_("a").render(["$a._gid", "$dr." + dr])
     return dict(q)
 
