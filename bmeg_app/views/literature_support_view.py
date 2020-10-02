@@ -20,9 +20,13 @@ i18n.load_path.append('bmeg_app/locales/')
 #######
 main_colors= ly.main_colors
 styles=ly.styles
+
+with open('bmeg_app/locales/data.json', 'r') as fh:
+    bins_dict = json.load(fh)["response_bins"]
 # base_df = lsu.get_baseDF() # commented out for ONLY dev to speed up loading
-# base_df.to_csv('bmeg_app/source/basedf.tsv',sep='\t',index=False) # commented out for ONLY dev to speed up loading
-base_df=pd.read_csv('bmeg_app/source/basedf.tsv',sep='\t') # TEMP TODO change to cached
+# base_df.to_csv('bmeg_app/source/basedf2.tsv',sep='\t',index=False) # commented out for ONLY dev to speed up loading
+base_df=pd.read_csv('bmeg_app/source/basedf2.tsv',sep='\t') # TEMP TODO change to cached
+base_df=lsu.bin_df(base_df,'response',bins_dict)
 
 #######
 # Page
@@ -51,7 +55,7 @@ LAYOUT = html.Div(children=[
             dbc.Col(dcc.Loading(id='occr', type="default",children=html.Div()),width=3,style={"c":"100%"}),
             dbc.Col(dcc.Loading(id='resp_histo', type="default",children=html.Div()),width=4,style={"height":"100%"}),
             dbc.Col(dcc.Loading(id='pie_taxon', type="default",children=html.Div()),width=5,style={"height":"100%"}),
-  
+
         ],
     ),
     html.Hr(),
