@@ -24,7 +24,7 @@ styles=ly.styles
 
 with open('bmeg_app/locales/data.json', 'r') as fh:
     menu_options = json.load(fh)
-projects_options= menu_options['projects']
+projects_options= menu_options['cell_line_projects']
 dresp_options = menu_options['drug_responses']
 
 #######
