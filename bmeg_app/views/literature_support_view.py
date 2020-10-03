@@ -21,8 +21,8 @@ i18n.load_path.append('bmeg_app/locales/')
 main_colors= ly.main_colors
 styles=ly.styles
 # base_df = lsu.get_baseDF() # commented out for ONLY dev to speed up loading
-# base_df.to_csv('bmeg_app/source/basedf.tsv',sep='\t',index=False) # commented out for ONLY dev to speed up loading
-base_df=pd.read_csv('bmeg_app/source/basedf.tsv',sep='\t') # TEMP TODO change to cached
+# base_df.to_csv('bmeg_app/source/base.tsv',sep='\t',index=False) # commented out for ONLY dev to speed up loading
+base_df=pd.read_csv('bmeg_app/source/base.tsv',sep='\t') # TEMP TODO change to cached
 
 #######
 # Page
@@ -37,8 +37,9 @@ LAYOUT = html.Div(children=[
                     [
                         html.Label(i18n.t('app.widget_lit.menu1')),
                         dcc.Dropdown(id='gene_dd',
-                            options=[{'label': l, 'value': gid} for l,gid in lsu.gene_dd_selections(base_df,'geneID','gene').items()],
-                            value=[{'label': l, 'value': gid} for l,gid in lsu.gene_dd_selections(base_df,'geneID','gene').items()][0]['value'],
+                            options=[{'label': l, 'value': gid} for l,gid in sorted(lsu.gene_dd_selections(base_df,'geneID','gene').items(), key=lambda a: a[0])],
+                            # options=[{'label': l, 'value': gid} for l,gid in lsu.gene_dd_selections(base_df,'geneID','gene').items()],
+                            value=[{'label': l, 'value': gid} for l,gid in sorted(lsu.gene_dd_selections(base_df,'geneID','gene').items(), key=lambda a: a[0])][0]['value'],
                         ),
                     ],style={'width': '100%','display': 'inline-block','font-size' : styles['t']['size_font']}
                 ),
@@ -51,7 +52,7 @@ LAYOUT = html.Div(children=[
             dbc.Col(dcc.Loading(id='occr', type="default",children=html.Div()),width=3,style={"c":"100%"}),
             dbc.Col(dcc.Loading(id='resp_histo', type="default",children=html.Div()),width=4,style={"height":"100%"}),
             dbc.Col(dcc.Loading(id='pie_taxon', type="default",children=html.Div()),width=5,style={"height":"100%"}),
-  
+
         ],
     ),
     html.Hr(),
@@ -64,12 +65,12 @@ LAYOUT = html.Div(children=[
     [Input('gene_dd', 'value')]
 )
 def render_callback(selected_gene):
-    '''Occurance table'''
+    '''Main'''
     # Filter for gene
     df = base_df[base_df['geneID']==selected_gene].reset_index(drop=True)
     # Generate table
-    dictionary = lsu.parse_src_doc(df, 'litETC',['cancerType','drugAbstracts'])
-    df = lsu.build_publication_table(dictionary)
+    df = df[['gene','drug','response','author','date','url']]
+    df.columns=['Gene','Drug','Response','Author','Date','Published Paper']
     dashtable = dash_table.DataTable(
         id='export_pub_table',
         data = df.to_dict('records'),
@@ -91,7 +92,7 @@ def render_callback(selected_gene):
     [Input('gene_dd', 'value')]
 )
 def render_callback(selected_gene):
-    '''pie chart taxonomy'''
+    '''Histogram'''
     # Filter for gene
     df = base_df[base_df['geneID']==selected_gene].reset_index(drop=True)
     # Generate figure
