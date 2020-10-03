@@ -1,6 +1,5 @@
 from .. import appLayout as ly
 from ..app import app
-from ..components import literature_support_component as lsu
 from ..db import G, gene_search
 import dash
 import dash_bootstrap_components as dbc
@@ -74,6 +73,7 @@ def update_options(search_value):
 def build_evidence_table(search_value):
     gene = search_value.split("/")[1]
     '''Occurance table'''
+    ## associations
     mapping = {
         "id" : "$._gid",
         "evidence_label" : "evidence_label",
@@ -86,12 +86,45 @@ def build_evidence_table(search_value):
     for row in G.query().V(gene).out("g2p_associations").render(mapping):
         g2p.append(row.to_dict())
         response.append(row['response_type'])
+    g2p_chem = {}
+    for row in G.query().V(gene).out("g2p_associations").as_("a").out("compounds").as_("c").render(["$a._gid", "$c._gid", "$c.synonym"]).execute():
+        if row[0] in g2p_chem:
+            g2p_chem[row[0]].append(row[2])
+        else:
+            g2p_chem[row[0]] = [row[2]]
+    g2p_cite = {}
+    for row in G.query().V(gene).out("g2p_associations").as_("a").out("publications").as_("c").render(["$a._gid", "$c.url", "$c.title"]).execute():
+        if row[0] in g2p_cite:
+            g2p_cite[row[0]].append( (row[1], row[2]) )
+        else:
+            g2p_cite[row[0]] = [(row[1], row[2])]
+
+
+    rows = []
+    for g in g2p:
+        if g["id"] in g2p_cite:
+            for c in g2p_cite[g["id"]]:
+                row = dict(**g)
+                if row["id"] in g2p_chem:
+                    row['compound'] = ",".join(list(i for i in g2p_chem[row["id"]] if i))
+                row['title'] = "[%s](%s)" % (c[1] if c[1] else c[0], c[0])
+                rows.append(row)
 
     '''Occurance table'''
+
+    table_columns = [
+        {"name": "Title", "id": "title", 'presentation':'markdown'},
+        {"name": "Compounds", "id": "compound"},
+        {"name": "Source", "id": "source"},
+        {"name": "Oncogenic", "id": "oncogenic"},
+        {"name": "Response", "id": "response_type"},
+        {"name": "Evidence Level", "id": "evidence_label"}
+    ]
+
     evidence_table = dash_table.DataTable(
         id='export_g2p_table',
-        data = g2p,
-        columns=[{"name": i, "id": i} for i in ["evidence_label", "oncogenic", "response_type", "source"]],
+        data = rows,
+        columns=table_columns,
         style_header={'text-align':'center','backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['t']['size_font'],'fontWeight': 'bold','fontFamily':styles['t']['type_font']},
         style_cell={'maxWidth':'100px','padding-left': '20px','padding-right': '20px'},
         style_data={'whiteSpace':'normal','height':'auto','text-align':'left','fontFamily':styles['t']['type_font'],'fontSize':styles['t']['size_font']},
