@@ -13,7 +13,7 @@ docker-compose up
 
 ## App Structure
 
-Learn more about the repo organization [app-structure.md](app-structure.md)
+Learn more about the organization of this app at [app-structure.md](app-structure.md)
 
 ## Helpful Links
 
