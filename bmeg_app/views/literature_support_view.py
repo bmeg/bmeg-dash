@@ -88,6 +88,11 @@ def build_evidence_table(search_value):
     for row in G.query().V(gene).out("g2p_associations").render(mapping):
         g2p.append(row.to_dict())
         response.append(row['response_type'])
+    print('this is response ', len(response))
+    print(response)
+    # If no responses found exit
+    if len(response)==0:
+        return html.Label('No Responses Found'),html.Label('No Responses Found'),html.Label('No Responses Found'),html.Label('No Responses Found')
     g2p_chem = {}
     for row in G.query().V(gene).out("g2p_associations").as_("a").out("compounds").as_("c").render(["$a._gid", "$c._gid", "$c.synonym"]).execute():
         if row[0] in g2p_chem:
