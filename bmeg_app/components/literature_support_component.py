@@ -57,16 +57,8 @@ def card(k,v,graph_font,h):
 
 def get_baseDF():
     '''Get base df of all gene drug combos that user can select from'''
-    q=G.query().V().hasLabel('G2PAssociation').as_('lit') \
-        .out('compounds').as_('c') \
-        .select('lit').out('genes').as_('g') \
-        .select('lit').out('publications').as_('publ')
-    q=q.render([
-        '$g._gid','$g._data.symbol',
-        '$c._gid','$c._data.synonym',
-        '$lit._data.evidence_label','$lit._data.response_type', '$lit._data.source',
-        '$publ._data.author','$publ._data.date','$publ._data.url'
-    ])
+    q=G.query().V().hasLabel('Gene').as_('g').limit(1000).out('g2p_associations').as_('lit').out('compounds').as_('c')
+    q=q.render(['$g._gid','$g._data.symbol','$c._gid','$c._data.synonym','$lit._data.evidence_label','$lit._data.response_type', '$lit._data.source', '$lit._data.source_document'])
     a=[]
     b=[]
     c=[]
@@ -75,11 +67,9 @@ def get_baseDF():
     f=[]
     g=[]
     h=[]
-    i=[]
-    j=[]
     for row in q:
-        gene_id, gene, drug_id, drug, lit_evid, lit_resp, src, author, date, url= row
-        if lit_resp is not None and url is not None and drug is not None and lit_evid is not None and src is not None:
+        gene_id, gene, drug_id, drug, lit_evid, lit_resp, src, lit_etc= row
+        if drug is not None and lit_evid is not None and lit_resp is not None and src is not None:
             a.append(gene_id)
             b.append(gene)
             c.append(drug_id)
@@ -87,10 +77,47 @@ def get_baseDF():
             e.append(lit_evid)
             f.append(lit_resp)
             g.append(src)
-            h.append(author)
-            i.append(date)
-            j.append(url)
-    return pd.DataFrame(list(zip(a,b,c,d,e,f,g,h,i,j)),columns=['geneID','gene','drugID','drug', 'evidence label','response','source','author','date','url'])
+            h.append(lit_etc)
+    return pd.DataFrame(list(zip(a,b,c,d,e,f,g,h)),columns=['geneID','gene','drugID','drug', 'evidence label','response','source','litETC'])
+
+def get_resultsDict(df,colname):
+    '''Info stored in source doc property. Hardcoded col name'''
+    # TODO update this to handle other keys too (non-clinical)
+    res_dict = {}
+    for i in range(0, len(df[colname])):
+        info = df[colname][i]
+        doc_dict = json.loads(info)
+        if 'clinical' in doc_dict:
+            data = doc_dict['clinical']
+            for k,v in data.items():
+                if k not in res_dict:
+                    if k =='drugAbstracts':
+                        res_dict[k]=[v[0]['link']]
+                    else:
+                        res_dict[k]=[v]
+                else:
+                    if k =='drugAbstracts':
+                        res_dict[k].append(v[0]['link'])
+                    else:
+                        res_dict[k].append(v)
+    return res_dict
+
+def build_publication_table(res_dict):
+    '''Build publication table ['Cancer Studied', 'Evidence Level','Evidence Meaning','Study']'''
+    if 'cancerType' in res_dict:
+        return pd.DataFrame(list(zip(res_dict['cancerType'],res_dict['level'],res_dict['level_label'],res_dict['drugAbstracts'])),columns=['Cancer Studied', 'Evidence Level','Evidence Meaning','Study'])
+    else:
+        return pd.DataFrame((['-','-','-','-'],['-','-','-','-'],['-','-','-','-'],['-','-','-','-']),columns=['Cancer Studied', 'Evidence Level','Evidence Meaning','Study'])
+
+def pull_data(res_dict,variant_key1,variant_key2, level):
+    '''Pull variant information'''
+    if 'variant' in res_dict:
+        if level == 2:
+            return [res_dict['variant'][i][variant_key1][variant_key2] for i in range(0,len(res_dict['variant']))]
+        else:
+            return [res_dict['variant'][i][variant_key1] for i in range(0,len(res_dict['variant']))]
+    else:
+        return {}
 
 def build_bio_table(res_dict):
     '''Build biological relevance table ['Curated Isoform','Gene Alias','Gene Info','Oncogene','TS Gene','Gene Alteration', 'Alteration Type','Alteration Description']'''
@@ -106,6 +133,9 @@ def build_bio_table(res_dict):
         return pd.DataFrame(list(zip(iso,alia,nm,og,tsupg,alter,alter_term,desp)),columns=['Curated Isoform','Gene Alias','Gene Info','Oncogene','TS Gene','Gene Alteration', 'Alteration Type','Alteration Description'])
     else:
         return pd.DataFrame((['-','-','-','-','-','-','-','-'],['-','-','-','-','-','-','-','-'],['-','-','-','-','-','-','-','-']),columns=['Curated Isoform','Gene Alias','Gene Info','Oncogene','Tumor Suppressor Gene','Gene Alteration', 'Alteration Type','Alteration Description'])
+
+
+##
 
 def occurances_table(input_df, colname, out_cols):
     '''base df and colname that want to count, list of output cols'''
@@ -133,7 +163,6 @@ def count_taxonomy(df):
 
 def pie_from_dict(dictionary,legend):
     '''Dictionary k,v are label and total counts. Legend True or False to show'''
-    import plotly.graph_objects as go
     l=[]
     ct=[]
     for k,v in dictionary.items():
@@ -149,8 +178,6 @@ def get_histogram_side(data,box_color):
     input values to plot. can be pandas df['col']
      returns go figure
     '''
-    import pandas as pd
-    import plotly.graph_objects as go
     fig = go.Figure(data=[go.Histogram(y=data,marker=dict(color=box_color))]).update_yaxes(categoryorder="total ascending")
     fig.update_layout(margin={'t':0, 'b':0},
         yaxis=dict(tickmode='linear'),
@@ -159,3 +186,55 @@ def get_histogram_side(data,box_color):
     fig.update_xaxes(showline=True,linewidth=1,ticks='outside',linecolor='black')
     fig.update_yaxes(showline=True,linewidth=1,ticks='outside',linecolor='black')
     return fig
+
+def parse_src_doc(df,colname,keys_to_extract):
+    '''Parse source document to record selected info and drug/response
+    keys to extract should be keys of data.source_document that want'''
+    import json
+    # TODO update this to handle other keys too (non-clinical, non-allele_registry)
+    output={}
+    for i in range(0, len(df[colname])):
+        info = df[colname][i]
+        doc_dict = json.loads(info)
+
+        if info.startswith('{"clinical"'):
+            # Add all non src_doc to output
+            output[i]={'gene':df['gene'][i],'drug':df['drug'][i],'response':df['response'][i],'level':df['evidence label'][i]}
+            # Add src_doc to output
+            data = doc_dict['clinical']
+            drug=df['drug'][i]
+            response=df['response'][i]
+            for k,v in data.items():
+                if k in keys_to_extract:
+                    if k == 'drugAbstracts':
+                        url=v[0]['link']
+                        output[i][k]=url
+                    else:
+                        output[i][k]=v
+
+        elif info.startswith('{"allele_registry_id"'):
+            # Add all non src_doc to output
+            output[i]={'gene':df['gene'][i],'drug':df['drug'][i],'response':df['response'][i],'level':df['evidence label'][i]}
+            # Add src_doc to output
+            output[i]['cancerType']=doc_dict['evidence_items'][0]['disease']['name']
+            output[i]['drugAbstracts']=doc_dict['evidence_items'][0]['source']['source_url']
+
+        elif info.startswith('{"Alteration"'):
+            # Add all non src_doc to output
+            output[i]={'gene':df['gene'][i],'drug':df['drug'][i],'response':df['response'][i],'level':df['evidence label'][i]}
+            # Add src_doc to output
+            output[i]['sample']=doc_dict['Primary Tumor type']
+            output[i]['drugAbstracts']='N/A'
+
+        elif info.startswith('{"_score":'):
+            continue
+    return output
+
+def build_publication_table(input_dictionary):
+    '''Build publication table ['Cancer Studied', 'Evidence Level','Evidence Meaning','Study']'''
+    if len(input_dictionary)>1:
+        df = pd.DataFrame(input_dictionary.values())
+        df = df[['gene','drug','response','cancerType','level','drugAbstracts']]
+        return df.rename(columns={'gene':"Gene",'drug':'Drug','response':'Response','cancerType':'Sample','level':'Evidence Strength','drugAbstracts':'Abstract'})
+    else:
+        return pd.DataFrame((['-','-','-','-'],['-','-','-','-'],['-','-','-','-'],['-','-','-','-'],['-','-','-','-'],['-','-','-','-']),columns=['Drug','Response','Cancer Studied', 'Evidence Level','Evidence Meaning','Study'])
