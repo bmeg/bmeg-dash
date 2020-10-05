@@ -30,6 +30,10 @@ Each widget has a stand alone python script in `bmeg_app/views/` that contains `
 
 Although some functions are defined within a widget's `views/` file, most functions are defined in `bmeg_app/components/`.
 
+## Navbar
+
+Navigation bar is defined in `bmeg_app/__main__.py` that contains `styles`, `app.layout`, and a series of callbacks. This is a similar format as a widget `views/` file.
+
 ## `Locales`
 
 All hardcoded widget text is in `bmeg_app/locales/app.en.yaml` and data in `bmeg_app/locales/data.json`
@@ -37,10 +41,6 @@ All hardcoded widget text is in `bmeg_app/locales/app.en.yaml` and data in `bmeg
 ## `Assets`
 
 Contents of `bmeg_app/assets/` are loaded at app start up. This file may contain `.css` files that allow for more customization and flexibility than standard Dash python framework.
-
-## Navbar
-
-Navigation bar is defined in `bmeg_app/__main__.py` that contains `styles`, `app.layout`, and a series of callbacks. This is a similar format as a widget `views/` file.
 
 ## `cypress`
 
