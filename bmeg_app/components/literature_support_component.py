@@ -10,13 +10,13 @@ def gene_dd_selections(df, val_col, key_col):
     '''Gene dropdown menu options. Input gene symbol or ensembl id'''
     options = dict(zip(df[key_col],df[val_col]))
     return options
-    
+
 def drug_dd_selections(selected_gene, key_col, val_col, df):
     '''Get drug selections avail for the user selected gene'''
     df2= df[df['geneID']==selected_gene].reset_index(drop=True)
     options = dict(zip(df2[key_col],df2[val_col]))
     return options
-    
+
 def reduce_df(df, col, col_value, col2, col2_value):
     '''Reduce df to include only rows that contain a certain value'''
     reduced = df[df[col]==col_value].reset_index(drop=True)
@@ -43,7 +43,7 @@ def piecharts(df):
     fig.update_traces(textposition='inside', textinfo='percent+label')
     fig.update_layout(height=150,showlegend=False,margin={'t':0, 'b':0,'r':0,'l':0})
     return fig
-    
+
 def card(k,v,graph_font,h):
     '''Input text to display (k), numeric value (v), and plot height'''
     label = k
@@ -53,8 +53,8 @@ def card(k,v,graph_font,h):
         value = v,
         number = {'suffix': " {}".format(label)},
             domain = {'x': [0, 1], 'y': [0, 1]}))
-    return fig 
-        
+    return fig
+
 def get_baseDF():
     '''Get base df of all gene drug combos that user can select from'''
     q=G.query().V().hasLabel('Gene').as_('g').limit(1000).out('g2p_associations').as_('lit').out('compounds').as_('c')
@@ -86,7 +86,7 @@ def get_resultsDict(df,colname):
     res_dict = {}
     for i in range(0, len(df[colname])):
         info = df[colname][i]
-        doc_dict = json.loads(info) 
+        doc_dict = json.loads(info)
         if 'clinical' in doc_dict:
             data = doc_dict['clinical']
             for k,v in data.items():
@@ -101,7 +101,7 @@ def get_resultsDict(df,colname):
                     else:
                         res_dict[k].append(v)
     return res_dict
-    
+
 def build_publication_table(res_dict):
     '''Build publication table ['Cancer Studied', 'Evidence Level','Evidence Meaning','Study']'''
     if 'cancerType' in res_dict:
@@ -118,18 +118,18 @@ def pull_data(res_dict,variant_key1,variant_key2, level):
             return [res_dict['variant'][i][variant_key1] for i in range(0,len(res_dict['variant']))]
     else:
         return {}
-    
+
 def build_bio_table(res_dict):
     '''Build biological relevance table ['Curated Isoform','Gene Alias','Gene Info','Oncogene','TS Gene','Gene Alteration', 'Alteration Type','Alteration Description']'''
     if 'variant' in res_dict:
-        iso=pull_data(res_dict, 'gene','curatedIsoform',2)   
+        iso=pull_data(res_dict, 'gene','curatedIsoform',2)
         alia=[str(a).replace("\'",'').strip('[').strip(']')  for a in pull_data(res_dict, 'gene','geneAliases',2) ]
-        nm = [a.capitalize() for a in pull_data(res_dict, 'gene','name',2)]  
+        nm = [a.capitalize() for a in pull_data(res_dict, 'gene','name',2)]
         og=pull_data(res_dict, 'gene','oncogene',2)
-        tsupg=pull_data(res_dict, 'gene','tsg',2)  
-        alter=pull_data(res_dict, 'alteration','',1) 
+        tsupg=pull_data(res_dict, 'gene','tsg',2)
+        alter=pull_data(res_dict, 'alteration','',1)
         alter_term=pull_data(res_dict, 'consequence','term',2)
-        desp=pull_data(res_dict, 'consequence','description',2)  
+        desp=pull_data(res_dict, 'consequence','description',2)
         return pd.DataFrame(list(zip(iso,alia,nm,og,tsupg,alter,alter_term,desp)),columns=['Curated Isoform','Gene Alias','Gene Info','Oncogene','TS Gene','Gene Alteration', 'Alteration Type','Alteration Description'])
     else:
         return pd.DataFrame((['-','-','-','-','-','-','-','-'],['-','-','-','-','-','-','-','-'],['-','-','-','-','-','-','-','-']),columns=['Curated Isoform','Gene Alias','Gene Info','Oncogene','Tumor Suppressor Gene','Gene Alteration', 'Alteration Type','Alteration Description'])
@@ -160,10 +160,9 @@ def count_taxonomy(df):
     for c in df['drugID']:
         tax_list.append(comp2sclass.get(c))
     return Counter(tax_list)
-    
+
 def pie_from_dict(dictionary,legend):
     '''Dictionary k,v are label and total counts. Legend True or False to show'''
-    import plotly.graph_objects as go
     l=[]
     ct=[]
     for k,v in dictionary.items():
@@ -174,21 +173,23 @@ def pie_from_dict(dictionary,legend):
     fig = go.Figure(data=fig_data,layout=fig_layout)
     return fig
 
-def get_histogram_side(data,box_color):
+def get_histogram_side(data,box_color,title, x_title,y_title):
     '''
     input values to plot. can be pandas df['col']
      returns go figure
     '''
-    import pandas as pd
-    import plotly.graph_objects as go
     fig = go.Figure(data=[go.Histogram(y=data,marker=dict(color=box_color))]).update_yaxes(categoryorder="total ascending")
-    fig.update_layout(margin={'t':0, 'b':0},
+    fig.update_layout(
         yaxis=dict(tickmode='linear'),
         plot_bgcolor='white',
-        paper_bgcolor='white')
+        paper_bgcolor='white',
+        title_text=title,
+        xaxis_title_text=x_title,
+        yaxis_title_text=y_title
+    )
     fig.update_xaxes(showline=True,linewidth=1,ticks='outside',linecolor='black')
     fig.update_yaxes(showline=True,linewidth=1,ticks='outside',linecolor='black')
-    return fig    
+    return fig
 
 def parse_src_doc(df,colname,keys_to_extract):
     '''Parse source document to record selected info and drug/response
@@ -198,7 +199,7 @@ def parse_src_doc(df,colname,keys_to_extract):
     output={}
     for i in range(0, len(df[colname])):
         info = df[colname][i]
-        doc_dict = json.loads(info) 
+        doc_dict = json.loads(info)
 
         if info.startswith('{"clinical"'):
             # Add all non src_doc to output
@@ -214,7 +215,7 @@ def parse_src_doc(df,colname,keys_to_extract):
                         output[i][k]=url
                     else:
                         output[i][k]=v
-    
+
         elif info.startswith('{"allele_registry_id"'):
             # Add all non src_doc to output
             output[i]={'gene':df['gene'][i],'drug':df['drug'][i],'response':df['response'][i],'level':df['evidence label'][i]}
@@ -228,7 +229,7 @@ def parse_src_doc(df,colname,keys_to_extract):
             # Add src_doc to output
             output[i]['sample']=doc_dict['Primary Tumor type']
             output[i]['drugAbstracts']='N/A'
-            
+
         elif info.startswith('{"_score":'):
             continue
     return output
