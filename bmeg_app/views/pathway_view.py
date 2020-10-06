@@ -1,6 +1,6 @@
-from .. import appLayout as ly
 from ..app import app
 from ..db import G, gene_search
+from ..style import format_style
 import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -22,11 +22,6 @@ i18n.load_path.append('bmeg_app/locales/')
 #######
 # Prep
 #######
-
-main_colors= ly.main_colors
-styles=ly.styles
-
-
 pathwayList = []
 for row in G.query().V().hasLabel("Pathway").render([ "$._gid", "$.name"]):
     pathwayList.append( [row[0], row[1].lower()] )
@@ -59,7 +54,7 @@ NAME=i18n.t('app.config.tabname_pathway')
 LAYOUT = html.Div(children=[
     html.Label(i18n.t('app.widget_pathway.menu1')), dcc.Dropdown(id='pathway-dropdown'),
     element
-], style={'font-size' : styles['t']['size_font'],'fontFamily': styles['t']['type_font']})
+], style={'font-size' : format_style('font_size'),'fontFamily':format_style('font')})
 
 
 @app.callback(
