@@ -8,8 +8,8 @@ en:
 
     widget_home:
         cluster:
-            header: Tumor vs. Normal
-            body: Some descriptive text here on the purpose and use of this widget. Info on the type of data used in this widget
+            header: Explore TCGA cohort characteristics underlying the gene expression profiles
+            body: Uniform manifold approximation and projection (UMAP) of cancer cohort sample expression profiles.
             button: TCGA Clustering
             href: /tumors
         dresp:
@@ -33,6 +33,11 @@ en:
             body: Explore biological pathways.
             button: Pathway View
             href: /pathway
+
+    widget_cluster:
+        menu1: TCGA Cancer Cohort
+        menu2: Sample Characteristics
+        button_body: Uniform manifold approximation and projection (UMAP) is a popular technique that is a similar visualization to t-SNE, but can be used for general non-linear dimension reduction.
 
     widget_dresp:
         menu1: Dataset

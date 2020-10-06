@@ -1,5 +1,5 @@
 from ..app import app
-from ..components import tumor_match_normal_component as tmn
+from ..components import tumor_match_normal_component as tmn, info_button
 from ..db import G
 from ..style import format_style
 import dash
@@ -10,6 +10,8 @@ import dash_html_components as html
 import gripql
 import json
 import pandas as pd
+import i18n
+i18n.load_path.append('bmeg_app/locales/')
 
 #######
 # Page
@@ -21,51 +23,26 @@ LAYOUT = html.Div(children=[
         [
             dbc.Col(
                 [
-                    html.Label('Cancer cohort'),
+                    html.Label(i18n.t('app.widget_cluster.menu1')),
                     dcc.Dropdown(id='project_dd_tmn',
-                        options=[{'label': l, 'value': gid} for gid,l in tmn.options_project().items()],value='Project:TCGA-CHOL',
+                        options=[{'label': l.split('-')[1], 'value': gid} for gid,l in tmn.options_project().items()],value='Project:TCGA-CHOL',
                     )
                 ],
                 style={'font-size' : format_style('font_size')}
             ),
             dbc.Col(
                 [
-                    html.Label('Property'),
+                    html.Label(i18n.t('app.widget_cluster.menu2')),
                     dcc.Dropdown(id='property_dd_tmn')
                 ],
                 style={'font-size' : format_style('font_size')}
             ),
     ]),
     html.Hr(),
-    dbc.Button('?', id='info_open_tmn'),
-    dbc.Modal(
-        [
-            dbc.ModalHeader('TCGA Gene Expression Clustering'),
-            dbc.ModalBody('Explore property trends underlying the gene expression profiles. \
-                Shown here are sample expression profiles from the selected TCGA cancer cohort (ex. cholangiocarcinoma). \
-                Uniform manifold approximation and projection (UMAP) is a popular technique that is a similar visualization to t-SNE, \
-                but can be used for general non-linear dimension reduction.'),
-            dbc.ModalFooter(
-                dbc.Button('Close',id='info_close_tmn',className='ml-auto')
-            ),
-        ],
-        id='info_modal',
-        size='sm',
-        centered=True,
-    ),
+    html.Div(info_button('help_umap',i18n.t('app.widget_cluster.button_body')),style={'textAlign':'right'}),
     html.Div(id='hidden_base_df_tmn', style={'display': 'none'}),
     dcc.Loading(type="default",children=html.Div(id="umap_fig")),
-],style={'fontFamily': format_style('font_size')})
-
-@app.callback(
-    Output("info_modal", "is_open"),
-    [Input("info_open_tmn", "n_clicks"), Input("info_close_tmn", "n_clicks")],
-    [State("info_modal", "is_open")],
-)
-def toggle_modal(n1, n2, is_open):
-    if n1 or n2:
-        return not is_open
-    return is_open
+],style={'fontFamily': format_style('font'), })
 
 @app.callback(
     Output('hidden_base_df_tmn', 'children'),
@@ -96,7 +73,7 @@ def render_callback(jsonstring,selected_property):
     [Input('project_dd_tmn', 'value')]
 )
 def render_callback(selected_project):
-    return [{'label': l, 'value': query_string} for l,query_string in tmn.options_property(selected_project).items()]
+    return [{'label': l.capitalize(), 'value': query_string} for l,query_string in tmn.options_property(selected_project).items()]
 
 @app.callback(
     Output('property_dd_tmn', 'value'),
