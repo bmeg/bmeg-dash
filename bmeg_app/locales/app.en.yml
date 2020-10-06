@@ -20,7 +20,7 @@ en:
             href: /drug_response
         gmut:
             header: Explore Mutations
-            body: Description here.
+            body: Visualize all variant alleles associated with a specific gene.
             button: Gene-level Mutation View
             href: /oncoprint
         lit:
@@ -30,7 +30,7 @@ en:
             href: /g2p
         pathway:
             header: Pathways
-            body: Description here.
+            body: Explore biological pathways.
             button: Pathway View
             href: /pathway
 
@@ -48,6 +48,7 @@ en:
 
     widget_lit:
         menu1: Gene
+        button_body: Select a gene to view compound associations from published studies and/or clinical trials results.
 
     widget_pathway:
         menu1: Pathway

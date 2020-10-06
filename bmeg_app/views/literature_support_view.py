@@ -1,4 +1,5 @@
 from ..app import app
+from ..components import info_button
 from ..db import G, gene_search
 from ..style import format_style
 import dash
@@ -33,6 +34,10 @@ LAYOUT = html.Div(children=[
                         ),
                     ],style={'width': '100%','display': 'inline-block','font-size' : format_style('font_size')}
                 ),
+            ),
+            dbc.Col(
+                html.Div(info_button('help_indicator',i18n.t('app.widget_lit.button_body'))),
+                width='1'
             ),
         ]
     ),
