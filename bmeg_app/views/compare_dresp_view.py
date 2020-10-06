@@ -1,8 +1,8 @@
-from .. import appLayout as ly
 from ..app import app
 from ..components import compare_dresp_component as cdr
 from ..db import G
 from ..components import info_button
+from ..style import format_style
 import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -19,9 +19,6 @@ i18n.load_path.append('bmeg_app/locales/')
 #######
 # Prep
 #######
-main_colors= ly.main_colors
-styles=ly.styles
-
 with open('bmeg_app/locales/data.json', 'r') as fh:
     menu_options = json.load(fh)
 projects_options= menu_options['cell_line_projects']
@@ -40,14 +37,14 @@ LAYOUT = html.Div(children=[
                     html.Label(i18n.t('app.widget_dresp.menu1')),
                     dcc.Dropdown(id='project_dd_cdr',options=[{'label': l, 'value': gid} for gid,l in projects_options.items()],value='Project:CCLE')
                 ],
-                style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']})
+                style={'width': '100%', 'display': 'inline-block','font-size':format_style('font_size')})
             ),
             dbc.Col(
                 html.Div([
                     html.Label(i18n.t('app.widget_dresp.menu2')),
-                    dcc.Dropdown(id='dresp_dd_cdr',style={'font-size' : styles['t']['size_font']})
+                    dcc.Dropdown(id='dresp_dd_cdr',style={'font-size':format_style('font_size')})
                 ],
-                style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']})
+                style={'width': '100%', 'display': 'inline-block','font-size':format_style('font_size')})
             ),
         ]
     ),
@@ -65,18 +62,18 @@ LAYOUT = html.Div(children=[
             html.Div(
                 [
                     html.Label(i18n.t('app.widget_dresp.menu3')),
-                    dcc.Dropdown(id='drug_dd_cdr', style={'font-size' : styles['t']['size_font']})
+                    dcc.Dropdown(id='drug_dd_cdr', style={'font-size':format_style('font_size')})
                 ],
-                style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']}
+                style={'width': '100%', 'display': 'inline-block','font-size':format_style('font_size')}
             )
         ],width=2),
         dbc.Col([
             html.Div(
                 [
                     html.Label(i18n.t('app.widget_dresp.menu4')),
-                    dcc.Dropdown(id='drug2_dd_cdr',style={'font-size' : styles['t']['size_font']})
+                    dcc.Dropdown(id='drug2_dd_cdr',style={'font-size':format_style('font_size')})
                 ],
-                style={'width': '100%', 'display': 'inline-block','font-size' : styles['t']['size_font']}
+                style={'width': '100%', 'display': 'inline-block','font-size':format_style('font_size')}
             ),
         ],width=2),
     ]),
@@ -87,7 +84,7 @@ LAYOUT = html.Div(children=[
         dbc.Col(dcc.Loading(id="drug1_box",type="default",children=html.Div())),
         dbc.Col(dcc.Loading(id="drug2_box",type="default",children=html.Div())),
     ])
-],style={'fontFamily': styles['t']['type_font']})
+],style={'fontFamily': format_style('font')})
 
 app.clientside_callback(
     """
@@ -138,10 +135,10 @@ def render_callback(selected_drug):
     fig = dbc.Card(
         dbc.CardBody(
             [
-            html.H4(header, className="card-title",style={'fontFamily':styles['t']['type_font'],'font-size' : styles['t']['size_font_card'], 'fontWeight':'bold'}),
-            html.P(descrip,style={'fontFamily':styles['t']['type_font'],'font-size' : '12px'})
+            html.H4(header, className="card-title",style={'fontFamily':format_style('font'),'font-size' :format_style('font_size_lg'), 'fontWeight':'bold'}),
+            html.P(descrip,style={'fontFamily':format_style('font'),'font-size' : '12px'})
             ]),
-        color="info", inverse=True,style={'Align': 'center', 'width':'98%','fontFamily':styles['t']['type_font']})
+        color="info", inverse=True,style={'Align': 'center', 'width':'98%','fontFamily':format_style('font')})
     return fig
 
 @app.callback(
@@ -157,10 +154,10 @@ def render_callback(selected_drug):
     fig = dbc.Card(
         dbc.CardBody(
             [
-            html.H4(header, className="card-title",style={'fontFamily':styles['t']['type_font'],'font-size' : styles['t']['size_font_card'], 'fontWeight':'bold'}),
-            html.P(descrip,style={'fontFamily':styles['t']['type_font'],'font-size' : '12px'})
+            html.H4(header, className="card-title",style={'fontFamily':format_style('font'),'font-size' : format_style('font_size_lg'), 'fontWeight':'bold'}),
+            html.P(descrip,style={'fontFamily':format_style('font'),'font-size' : '12px'})
             ]),
-        color="info", inverse=True,style={'Align': 'center', 'width':'98%','fontFamily':styles['t']['type_font']})
+        color="info", inverse=True,style={'Align': 'center', 'width':'98%','fontFamily':format_style('font')})
     return fig,
 
 @app.callback(
