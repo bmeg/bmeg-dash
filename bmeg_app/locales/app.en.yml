@@ -41,6 +41,7 @@ en:
         menu4: Compound 2
         display: Compare dose/response of two componds on same cell lines
         button_body: Select two drugs from the above table to explore drug response patterns.
+        button_body2: Drug responses (ex. AAC, IC50, EC50) for all cohort samples.
 
     widget_gmut:
         menu1: Gene
