@@ -1,4 +1,5 @@
 from ..app import app
+from ..components import info_button
 from ..db import G, gene_search
 from ..style import format_style
 import dash
@@ -53,6 +54,8 @@ element = cyto.Cytoscape(
 NAME=i18n.t('app.config.tabname_pathway')
 LAYOUT = html.Div(children=[
     html.Label(i18n.t('app.widget_pathway.menu1')), dcc.Dropdown(id='pathway-dropdown'),
+    html.Hr(),
+    html.Div(info_button('help_pathway',i18n.t('app.widget_pathway.button_body'))),
     element
 ], style={'font-size' : format_style('font_size'),'fontFamily':format_style('font')})
 

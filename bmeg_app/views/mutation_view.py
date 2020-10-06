@@ -1,4 +1,5 @@
 from ..app import app
+from ..components import info_button
 from ..db import G, gene_search
 from ..style import format_style
 import dash
@@ -63,6 +64,8 @@ component = dash_bio.NeedlePlot(
 NAME=i18n.t('app.config.tabname_gmut')
 LAYOUT = html.Div(children=[
     html.Label(i18n.t('app.widget_gmut.menu1')), dcc.Dropdown(id='single-dropdown', value="TP53/ENSG00000141510", search_value="TP53/ENSG00000141510" ),
+    html.Hr(),
+    html.Div(info_button('help_genemutation',i18n.t('app.widget_gmut.button_body'))),
     component,
     html.Div(id='needle-selection')
 ], style={'font-size' :format_style('font_size'),'fontFamily': format_style('font')})

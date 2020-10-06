@@ -50,6 +50,7 @@ en:
 
     widget_gmut:
         menu1: Gene
+        button_body: Widget work in progress
 
     widget_lit:
         menu1: Gene
@@ -57,3 +58,4 @@ en:
 
     widget_pathway:
         menu1: Pathway
+        button_body: Widget work in progress
