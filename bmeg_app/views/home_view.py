@@ -2,7 +2,6 @@ from ..app import app
 from ..components import home_component as dty
 from ..db import G, get_vertex_label_count
 from ..style import format_style, color_palette
-from bmeg_app.views import home_view, tumor_match_normal_view, literature_support_view, compare_dresp_view
 import dash
 from dash.dependencies import Input, Output
 import dash_table
@@ -39,18 +38,18 @@ dresp_card=dty.build_card(
     i18n.t('app.widget_home.dresp.button'),
     i18n.t('app.widget_home.dresp.href')
 )
-# gene_mut_card=dty.build_card(
-#     i18n.t('app.widget_home.gmut.header'),
-#     [i18n.t('app.widget_home.gmut.body')],
-#     i18n.t('app.widget_home.gmut.button'),
-#     i18n.t('app.widget_home.gmut.href')
-# )
-# pathway_card=dty.build_card(
-#     i18n.t('app.widget_home.pathway.header'),
-#     [i18n.t('app.widget_home.pathway.body')],
-#     i18n.t('app.widget_home.pathway.button'),
-#     i18n.t('app.widget_home.pathway.href')
-# )
+gene_mut_card=dty.build_card(
+    i18n.t('app.widget_home.gmut.header'),
+    [i18n.t('app.widget_home.gmut.body')],
+    i18n.t('app.widget_home.gmut.button'),
+    i18n.t('app.widget_home.gmut.href')
+)
+pathway_card=dty.build_card(
+    i18n.t('app.widget_home.pathway.header'),
+    [i18n.t('app.widget_home.pathway.body')],
+    i18n.t('app.widget_home.pathway.button'),
+    i18n.t('app.widget_home.pathway.href')
+)
 
 LAYOUT = html.Div(children=[
     html.H1('Bio Medical Evidence Graph (BMEG)',style=format_style('banner')),
@@ -66,13 +65,13 @@ LAYOUT = html.Div(children=[
             dbc.Col(dresp_card),
         ]
     ),
-    # html.Br(),
-    # dbc.Row(
-    #     [
-    #         dbc.Col(gene_mut_card),
-    #         dbc.Col(pathway_card),
-    #     ]
-    # ),
+    html.Br(),
+    dbc.Row(
+        [
+            dbc.Col(gene_mut_card),
+            dbc.Col(pathway_card),
+        ]
+    ),
     html.Br(),
     dbc.Row(
         [

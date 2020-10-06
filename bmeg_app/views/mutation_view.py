@@ -1,4 +1,4 @@
-from .. import appLayout as ly
+# from .. import appLayout as ly
 from ..app import app
 from ..db import G, gene_search
 import dash
@@ -21,9 +21,10 @@ i18n.load_path.append('bmeg_app/locales/')
 #######
 # Prep
 #######
+from ..style import format_style
 
-main_colors= ly.main_colors
-styles=ly.styles
+# main_colors= ly.main_colors
+# styles=ly.styles
 
 def getGeneMutations(gene):
     app.logger.info("Updating mutation Track")
@@ -69,7 +70,7 @@ LAYOUT = html.Div(children=[
     html.Label(i18n.t('app.widget_gmut.menu1')), dcc.Dropdown(id='single-dropdown', value="TP53/ENSG00000141510", search_value="TP53/ENSG00000141510" ),
     component,
     html.Div(id='needle-selection')
-], style={'font-size' : styles['t']['size_font'],'fontFamily': styles['t']['type_font']})
+], style={'font-size' : format_style('font_size'),'fontFamily': format_style('font')})
 
 @app.callback(
     dash.dependencies.Output('single-dropdown', 'options'),
