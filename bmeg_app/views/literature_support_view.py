@@ -1,6 +1,6 @@
-from .. import appLayout as ly
 from ..app import app
 from ..db import G, gene_search
+from ..style import format_style
 import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -17,12 +17,6 @@ import i18n
 i18n.load_path.append('bmeg_app/locales/')
 
 #######
-# Prep
-#######
-main_colors= ly.main_colors
-styles=ly.styles
-
-#######
 # Page
 #######
 print('loading app layout')
@@ -37,7 +31,7 @@ LAYOUT = html.Div(children=[
                         dcc.Dropdown(id='gene_dd',
                             value="MTOR/ENSG00000198793", search_value="MTOR/ENSG00000198793"
                         ),
-                    ],style={'width': '100%','display': 'inline-block','font-size' : styles['t']['size_font']}
+                    ],style={'width': '100%','display': 'inline-block','font-size' : format_style('font_size')}
                 ),
             ),
         ]
@@ -53,7 +47,7 @@ LAYOUT = html.Div(children=[
     ),
     html.Hr(),
     dcc.Loading(id='evd', children=html.Div()),
-],style={'fontFamily': styles['t']['type_font']})
+],style={'fontFamily': format_style('font')})
 
 
 @app.callback(
@@ -128,9 +122,9 @@ def build_evidence_table(search_value):
         id='export_g2p_table',
         data = rows,
         columns=table_columns,
-        style_header={'text-align':'center','backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['t']['size_font'],'fontWeight': 'bold','fontFamily':styles['t']['type_font']},
+        style_header={'text-align':'center','backgroundColor': 'rgb(230, 230, 230)','fontSize':format_style('font_size'),'fontWeight': 'bold','fontFamily':format_style('font')},
         style_cell={'maxWidth':'100px','padding-left': '20px','padding-right': '20px'},
-        style_data={'whiteSpace':'normal','height':'auto','text-align':'center','fontFamily':styles['t']['type_font'],'fontSize':styles['t']['size_font']},
+        style_data={'whiteSpace':'normal','height':'auto','text-align':'center','fontFamily':format_style('font'),'fontSize':format_style('font_size')},
         style_data_conditional=[{'if': {'row_index': 'odd'},'backgroundColor': 'rgb(248, 248, 248)'}],
         style_table={'overflow':'hidden'},
         style_as_list_view=True,
@@ -148,9 +142,9 @@ def build_evidence_table(search_value):
         id='export_pub_table',
         data = citation_counts[:10],
         columns=[{"name": "Top 10 Compounds", "id": "compound"}, {"name" : "Citations", "id" : "citations"}],
-        style_header={'text-align':'center','backgroundColor': 'rgb(230, 230, 230)','fontSize':styles['t']['size_font'],'fontWeight': 'bold','fontFamily':styles['t']['type_font']},
+        style_header={'text-align':'center','backgroundColor': 'rgb(230, 230, 230)','fontSize':format_style('font_size'),'fontWeight': 'bold','fontFamily':format_style('font')},
         style_cell={'maxWidth':'100px','padding-left': '20px','padding-right': '20px'},
-        style_data={'whiteSpace':'normal','height':'auto','text-align':'center','fontFamily':styles['t']['type_font'],'fontSize':styles['t']['size_font']-2},
+        style_data={'whiteSpace':'normal','height':'auto','text-align':'center','fontFamily':format_style('font'),'fontSize':format_style('font_size_sm')},
         style_data_conditional=[{'if': {'row_index': 'odd'},'backgroundColor': 'rgb(248, 248, 248)'}],
         style_table={'overflow':'hidden'},
         style_as_list_view=True,        #tooltip_data=[{column: {'value': str(value), 'type': 'markdown'} for column, value in row.items()} for row in df.to_dict('records')],
