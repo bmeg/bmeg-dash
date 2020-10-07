@@ -21,7 +21,8 @@
          }
     },
     "response_bins": {
-        "sensitivity":"Sensitivity/Sensitive",
-        "sensitive":"Sensitivity/Sensitive"
+        "Sensitivity":"Sensitivity/Sensitive",
+        "sensitive":"Sensitivity/Sensitive",
+        "":"Not Reported"
     }
 }
