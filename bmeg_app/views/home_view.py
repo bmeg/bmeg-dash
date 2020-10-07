@@ -1,8 +1,7 @@
-from .. import appLayout as ly
 from ..app import app
 from ..components import home_component as dty
 from ..db import G, get_vertex_label_count
-from bmeg_app.views import home_view, tumor_match_normal_view, literature_support_view, compare_dresp_view
+from ..style import format_style, color_palette
 import dash
 from dash.dependencies import Input, Output
 import dash_table
@@ -14,12 +13,6 @@ import pandas as pd
 import plotly.express as px
 import i18n
 i18n.load_path.append('bmeg_app/locales/')
-
-#######
-# Prep
-#######
-main_colors= ly.main_colors
-styles=ly.styles
 
 #######
 # Page
@@ -59,13 +52,13 @@ pathway_card=dty.build_card(
 )
 
 LAYOUT = html.Div(children=[
-    html.H1('Bio Medical Evidence Graph (BMEG)',style=styles['banner']),
+    html.H1('Bio Medical Evidence Graph (BMEG)',style=format_style('banner')),
     dcc.Loading(id="cards",
             type="default",children=html.Div(id="cards_output")),
     html.Br(),
     dcc.Loading(id="node_cts_bar",
             type="default",children=html.Div(id="node_cts_bar_output")),
-    html.H3('Analysis Widgets',style=styles['subbanner']),
+    html.H3('Analysis Widgets',style=format_style('subbanner')),
     dbc.Row(
         [
             dbc.Col(lit_card),
@@ -85,7 +78,7 @@ LAYOUT = html.Div(children=[
             dbc.Col(cluster_card),
         ]
     ),
-],style={'fontFamily': styles['t']['type_font'],})
+],style={'fontFamily':format_style('font')})
 
 
 @app.callback(
@@ -100,7 +93,7 @@ def render_callback(href):
     res = {}
     for l in nodes_interest:
         res[l] = get_vertex_label_count(l)
-    fig= dty.counts(100, res,main_colors['lightgrey'],styles['t']['type_font'])
+    fig= dty.counts(100, res, color_palette('lightgrey'),format_style('font'))
     return dcc.Graph(id='cards_output', figure=fig),
 
 @app.callback(
@@ -122,5 +115,5 @@ def render_callback(href):
     for k,v in res.items():
         keys.append(k)
         values.append(v)
-    fig = dty.bar('','Node', keys, values, main_colors['lightgreen_borderfill'], 250, '', '')
+    fig = dty.bar('','Node', keys, values, color_palette('lightgreen_borderfill'), 250, '', '')
     return dcc.Graph(id='node_cts_bar_output', figure=fig),

@@ -1,7 +1,7 @@
-from .. import appLayout as ly
 from ..app import app
 from ..components import tumor_match_normal_component as tmn
 from ..db import G
+from ..style import format_style
 import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -10,12 +10,6 @@ import dash_html_components as html
 import gripql
 import json
 import pandas as pd
-
-#######
-# Prep
-#######
-main_colors= ly.main_colors
-styles=ly.styles
 
 #######
 # Page
@@ -32,14 +26,14 @@ LAYOUT = html.Div(children=[
                         options=[{'label': l, 'value': gid} for gid,l in tmn.options_project().items()],value='Project:TCGA-CHOL',
                     )
                 ],
-                style={'font-size' : styles['t']['size_font']}
+                style={'font-size' : format_style('font_size')}
             ),
             dbc.Col(
                 [
                     html.Label('Property'),
                     dcc.Dropdown(id='property_dd_tmn')
                 ],
-                style={'font-size' : styles['t']['size_font']}
+                style={'font-size' : format_style('font_size')}
             ),
     ]),
     html.Hr(),
@@ -61,7 +55,7 @@ LAYOUT = html.Div(children=[
     ),
     html.Div(id='hidden_base_df_tmn', style={'display': 'none'}),
     dcc.Loading(type="default",children=html.Div(id="umap_fig")),
-],style={'fontFamily': styles['t']['type_font']})
+],style={'fontFamily': format_style('font_size')})
 
 @app.callback(
     Output("info_modal", "is_open"),
