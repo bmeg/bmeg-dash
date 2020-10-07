@@ -59,7 +59,6 @@ LAYOUT = html.Div(children=[
     element
 ], style={'font-size' : format_style('font_size'),'fontFamily':format_style('font')})
 
-
 @app.callback(
     dash.dependencies.Output('pathway-dropdown', 'options'),
     [dash.dependencies.Input('pathway-dropdown', 'search_value')]
