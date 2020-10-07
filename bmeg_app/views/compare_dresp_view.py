@@ -77,6 +77,7 @@ LAYOUT = html.Div(children=[
             ),
         ],width=2),
     ]),
+    html.Div(info_button('help_plot',i18n.t('app.widget_dresp.button_body2')),style={'textAlign':'right'}),
     dbc.Row([
         dbc.Col(dcc.Loading(id="pairwise",type="default",children=html.Div())),
     ]),
