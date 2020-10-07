@@ -1,4 +1,5 @@
 from ..app import app
+from ..components import info_button
 from ..db import G, gene_search
 from ..style import format_style
 import dash
@@ -36,6 +37,10 @@ LAYOUT = html.Div(children=[
                         ),
                     ],style={'width': '100%','display': 'inline-block','font-size' : format_style('font_size')}
                 ),
+            ),
+            dbc.Col(
+                html.Div(info_button('help_indicator',i18n.t('app.widget_lit.button_body'))),
+                width='1'
             ),
         ]
     ),
@@ -141,7 +146,7 @@ def build_evidence_table(search_value):
         tooltip_duration=None,
         page_size=10,
     )
-
+    
     citations = G.query().V(gene).out("g2p_associations").as_("a").out("publications").as_("p").select("a").out("compounds").as_("c").aggregate(gripql.term("chem_citation", "$c.synonym")).execute()
     citation_counts = []
     for i in citations[0]["chem_citation"]["buckets"]:

@@ -10,8 +10,8 @@ en:
 
     widget_home:
         cluster:
-            header: Tumor vs. Normal
-            body: Some descriptive text here on the purpose and use of this widget. Info on the type of data used in this widget
+            header: Explore TCGA cohort characteristics underlying the gene expression profiles
+            body: Uniform manifold approximation and projection (UMAP) of cancer cohort sample expression profiles.
             button: TCGA Clustering
             href: /tumors
         dresp:
@@ -22,7 +22,7 @@ en:
             href: /drug_response
         gmut:
             header: Explore Mutations
-            body: Description here.
+            body: Visualize all variant alleles associated with a specific gene.
             button: Gene-level Mutation View
             href: /oncoprint
         lit:
@@ -32,9 +32,14 @@ en:
             href: /g2p
         pathway:
             header: Pathways
-            body: Description here.
+            body: Explore biological pathways.
             button: Pathway View
             href: /pathway
+
+    widget_cluster:
+        menu1: TCGA Cancer Cohort
+        menu2: Sample Characteristics
+        button_body: Uniform manifold approximation and projection (UMAP) is a popular technique that is a similar visualization to t-SNE, but can be used for general non-linear dimension reduction.
 
     widget_dresp:
         menu1: Dataset
@@ -43,12 +48,16 @@ en:
         menu4: Compound 2
         display: Compare dose/response of two componds on same cell lines
         button_body: Select two drugs from the above table to explore drug response patterns.
+        button_body2: Drug responses (ex. AAC, IC50, EC50) for all cohort samples.
 
     widget_gmut:
         menu1: Gene
+        button_body: Widget work in progress
 
     widget_lit:
         menu1: Gene
+        button_body: Select a gene to view compound associations from published studies and/or clinical trials results.
 
     widget_pathway:
         menu1: Pathway
+        button_body: Widget work in progress

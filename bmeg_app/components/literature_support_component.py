@@ -177,7 +177,6 @@ def count_taxonomy(df):
 
 def pie_from_dict(dictionary,legend):
     '''Dictionary k,v are label and total counts. Legend True or False to show'''
-    import plotly.graph_objects as go
     l=[]
     ct=[]
     for k,v in dictionary.items():
@@ -188,18 +187,20 @@ def pie_from_dict(dictionary,legend):
     fig = go.Figure(data=fig_data,layout=fig_layout)
     return fig
 
-def get_histogram_side(data,box_color):
+def get_histogram_side(data,box_color,title, x_title,y_title):
     '''
     input values to plot. can be pandas df['col']
      returns go figure
     '''
-    import pandas as pd
-    import plotly.graph_objects as go
     fig = go.Figure(data=[go.Histogram(y=data,marker=dict(color=box_color))]).update_yaxes(categoryorder="total ascending")
-    fig.update_layout(margin={'t':0, 'b':0},
+    fig.update_layout(
         yaxis=dict(tickmode='linear'),
         plot_bgcolor='white',
-        paper_bgcolor='white')
+        paper_bgcolor='white',
+        title_text=title,
+        xaxis_title_text=x_title,
+        yaxis_title_text=y_title
+    )
     fig.update_xaxes(showline=True,linewidth=1,ticks='outside',linecolor='black')
     fig.update_yaxes(showline=True,linewidth=1,ticks='outside',linecolor='black')
     return fig

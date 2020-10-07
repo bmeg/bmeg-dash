@@ -1,6 +1,7 @@
 from bmeg_app.app import app
 from bmeg_app.style import format_style
 from bmeg_app.views import view_map
+from bmeg_app.style import format_style
 import base64
 import dash
 import dash_bootstrap_components as dbc
@@ -15,6 +16,10 @@ import yaml
 #######
 image_filename = 'bmeg_app/images/bmeg_logo.png'
 encoded_image3 = base64.b64encode(open(image_filename, 'rb').read())
+
+#######
+# Page
+#######
 
 sidebar_header = dbc.Row(
     [
@@ -141,16 +146,6 @@ def toggle_collapse(n, is_open):
     if n:
         return not is_open
     return is_open
-
-# @app.callback(
-#     Output("main_help1", "is_open"),
-#     [Input("open1", "n_clicks"), Input("close1", "n_clicks")],
-#     [State("main_help1", "is_open")],
-# )
-# def toggle_modal(n1, n2, is_open):
-#     if n1 or n2:
-#         return not is_open
-#     return is_open
 
 with open('bmeg_app/config.yaml') as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
