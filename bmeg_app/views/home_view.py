@@ -52,13 +52,13 @@ pathway_card=dty.build_card(
 )
 
 LAYOUT = html.Div(children=[
-    html.H1('Bio Medical Evidence Graph (BMEG)',style=format_style('banner')),
+    html.H1(i18n.t('app.config.banner'),style=format_style('banner')),
     dcc.Loading(id="cards",
             type="default",children=html.Div(id="cards_output")),
     html.Br(),
     dcc.Loading(id="node_cts_bar",
             type="default",children=html.Div(id="node_cts_bar_output")),
-    html.H3('Analysis Widgets',style=format_style('subbanner')),
+    html.H3(i18n.t('app.config.banner_widgets'),style=format_style('subbanner')),
     dbc.Row(
         [
             dbc.Col(lit_card),

@@ -6,6 +6,20 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+def bin_df(df, col_to_bin, bins_dict):
+    '''
+    Bin similar column values. Ex combine response type "Sensitivity" and "sensitive" into one "Sensitivity/Sensitive"
+    bins_dict keys must be all lowercase
+    '''
+    new_col=[]
+    for r in df[col_to_bin]:
+        if r.lower() in bins_dict:
+            new_col.append(bins_dict[r.lower()])
+        else:
+            new_col.append(r.capitalize())
+    df[col_to_bin]=new_col
+    return df
+
 def gene_dd_selections(df, val_col, key_col):
     '''Gene dropdown menu options. Input gene symbol or ensembl id'''
     options = dict(zip(df[key_col],df[val_col]))

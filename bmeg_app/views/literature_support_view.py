@@ -17,6 +17,9 @@ import plotly.express as px
 import i18n
 i18n.load_path.append('bmeg_app/locales/')
 
+with open('bmeg_app/locales/data.json', 'r') as fh:
+     bins_dict = json.load(fh)["response_bins"]
+
 #######
 # Page
 #######
@@ -44,8 +47,8 @@ LAYOUT = html.Div(children=[
     html.Hr(),
     dbc.Row(
         [
-            dbc.Col(dcc.Loading(id='occr', children=html.Div()),width=3,style={"height":"100%"}),
-            dbc.Col(dcc.Loading(id='resp_histo', children=html.Div()),width=3,style={"height":"100%"}),
+            dbc.Col(dcc.Loading(id='occr', children=html.Div()),width=2,style={"height":"100%"}),
+            dbc.Col(dcc.Loading(id='resp_histo', children=html.Div()),width=4,style={"height":"100%"}),
             dbc.Col(dcc.Loading(id='pie_taxon', children=html.Div()),width=6,style={"height":"100%"}),
 
         ],
@@ -85,7 +88,13 @@ def build_evidence_table(search_value):
     response = []
     for row in G.query().V(gene).out("g2p_associations").render(mapping):
         g2p.append(row.to_dict())
-        response.append(row['response_type'])
+        if row['response_type'] in bins_dict:
+            response.append(bins_dict.get(row['response_type']))
+        else:
+            try:
+                response.append(row['response_type'].capitalize())
+            except:
+                response.append(row['response_type'])
     # If no responses found exit
     if len(response)==0:
         return html.Label('No Responses Found'),html.Label('No Responses Found'),html.Label('No Responses Found'),html.Label('No Responses Found')
@@ -137,16 +146,16 @@ def build_evidence_table(search_value):
         tooltip_duration=None,
         page_size=10,
     )
-
+    
     citations = G.query().V(gene).out("g2p_associations").as_("a").out("publications").as_("p").select("a").out("compounds").as_("c").aggregate(gripql.term("chem_citation", "$c.synonym")).execute()
     citation_counts = []
     for i in citations[0]["chem_citation"]["buckets"]:
-        citation_counts.append( { "compound" : i['key'], "citations" : i['value'] } )
+        citation_counts.append( { "compound" : i['key'].capitalize(), "citations" : i['value'] } )
 
     pub_table = dash_table.DataTable(
         id='export_pub_table',
         data = citation_counts[:10],
-        columns=[{"name": "Top 10 Compounds", "id": "compound"}, {"name" : "Citations", "id" : "citations"}],
+        columns=[{"name": "Top 10", "id": "compound"}, {"name" : "Citations", "id" : "citations"}],
         style_header={'text-align':'center','backgroundColor': 'rgb(230, 230, 230)','fontSize':format_style('font_size'),'fontWeight': 'bold','fontFamily':format_style('font')},
         style_cell={'maxWidth':'100px','padding-left': '20px','padding-right': '20px'},
         style_data={'whiteSpace':'normal','height':'auto','text-align':'center','fontFamily':format_style('font'),'fontSize':format_style('font_size_sm')},

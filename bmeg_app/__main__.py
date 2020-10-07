@@ -1,4 +1,5 @@
 from bmeg_app.app import app
+from bmeg_app.style import format_style
 from bmeg_app.views import view_map
 from bmeg_app.style import format_style
 import base64
@@ -19,6 +20,7 @@ encoded_image3 = base64.b64encode(open(image_filename, 'rb').read())
 #######
 # Page
 #######
+
 sidebar_header = dbc.Row(
     [
         dbc.Col(

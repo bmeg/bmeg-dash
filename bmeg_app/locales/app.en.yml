@@ -1,5 +1,7 @@
 en:
     config:
+        banner: Bio Medical Evidence Graph (BMEG)
+        banner_widgets: Analysis Widgets
         tabname_widget_home: Home
         tabname_widget_dresp: Cancer Compound Screening
         tabname_gmut: Gene-level Mutation View

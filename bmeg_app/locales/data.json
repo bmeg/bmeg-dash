@@ -19,5 +19,10 @@
             "AAC":"aac",
             "EC50": "ec50"
          }
+    },
+    "response_bins": {
+        "Sensitivity":"Sensitivity/Sensitive",
+        "sensitive":"Sensitivity/Sensitive",
+        "":"Not Reported"
     }
 }
