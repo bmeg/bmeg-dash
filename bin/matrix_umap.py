@@ -6,6 +6,8 @@ import umap
 
 def umap_tsv(path):
     df = pd.read_csv(path, sep="\t", index_col=0)
+    if df.shape[0] == 0 or df.shape[1] == 0:
+        return pd.DataFrame()
     locs = umap.UMAP().fit_transform(df)
     return pd.DataFrame(locs, index=df.index)
 
