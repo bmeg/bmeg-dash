@@ -26,3 +26,10 @@ On the [BMEG Website](https://bmegio.ohsu.edu) there are several relevant links:
 + [Graph Database Schema](https://bmegio.ohsu.edu/explore/schema)
 
 + [Contact BMEG](https://gitter.im/bmeg/)
+
+
+## git hooks
+
+* installation: see git-hooks/README.md
+* pre-commit: runs flake8 on bmeg_app/ dir.  skip via `git commit --no-verify ...`
+* pre-push: runs cypress/ tests.  skip via `git push --no-verify ...`
