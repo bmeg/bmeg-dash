@@ -5,19 +5,34 @@ from ..style import format_style
 import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
+from dash.exceptions import PreventUpdate
 from dash.dependencies import Input, Output, State
 import dash_html_components as html
 import gripql
+import os
 import json
+from glob import glob
 import pandas as pd
+import plotly.express as px
 import i18n
 i18n.load_path.append('bmeg_app/locales/')
 
 #######
 # Page
 #######
-print('loading app layout')
-NAME="TCGA Clustering"
+
+
+PROJECT_LOCS = {}
+PROJECT_NAME = {}
+for path in glob("bmeg_app/data/*.id"):
+    base = path.split(".id")[0]
+    if os.path.exists(base + ".locs"):
+        with open(path) as handle:
+            project_id = handle.read().rstrip()
+        PROJECT_LOCS[project_id] = base + ".locs"
+        PROJECT_NAME[project_id] = os.path.basename(base)
+
+NAME="RNA expression projection"
 LAYOUT = html.Div(children=[
     dbc.Row(
         [
@@ -25,7 +40,7 @@ LAYOUT = html.Div(children=[
                 [
                     html.Label(i18n.t('app.widget_cluster.menu1')),
                     dcc.Dropdown(id='project_dd_tmn',
-                        options=[{'label': l.split('-')[1], 'value': gid} for gid,l in tmn.options_project().items()],value='Project:TCGA-CHOL',
+                        options=[{'label': l, 'value': gid} for gid,l in PROJECT_NAME.items()],value='Project:TCGA-CHOL',
                     )
                 ],
                 style={'font-size' : format_style('font_size')}
@@ -45,39 +60,15 @@ LAYOUT = html.Div(children=[
 ],style={'fontFamily': format_style('font'), })
 
 @app.callback(
-    Output('hidden_base_df_tmn', 'children'),
-    [Input('project_dd_tmn', 'value')]
-)
-def createDF(selected_project):
-    df = tmn.get_df(selected_project,'$c._data.gdc_attributes.diagnoses.tumor_stage')
-    return df.to_json(orient="index")
-
-@app.callback(
     Output("umap_fig", "children"),
-    [Input('hidden_base_df_tmn', 'children'),
+    [Input('project_dd_tmn', 'value'),
     Input('property_dd_tmn', 'value')]
 )
-def render_callback(jsonstring,selected_property):
-    temp=json.loads(jsonstring)
-    df = pd.DataFrame.from_dict(temp, orient='index')
-    if selected_property=='$c._data.gdc_attributes.diagnoses.tumor_stage':
-        fig=tmn.get_umap(df, 'UMAP', selected_property.split('.')[-1])
-        return dcc.Graph(figure=fig),
-    else:
-        df2= tmn.update_umap(selected_property, df)
-        fig=tmn.get_umap(df2, 'UMAP', selected_property.split('.')[-1])
-        return dcc.Graph(figure=fig),
-
-@app.callback(
-    Output('property_dd_tmn', 'options'),
-    [Input('project_dd_tmn', 'value')]
-)
-def render_callback(selected_project):
-    return [{'label': l.capitalize(), 'value': query_string} for l,query_string in tmn.options_property(selected_project).items()]
-
-@app.callback(
-    Output('property_dd_tmn', 'value'),
-    [Input('property_dd_tmn', 'options')]
-)
-def render_callback(available_options):
-    return available_options[14]['value']
+def render_callback(project, property):
+    if not project:
+        raise PreventUpdate
+    app.logger.info("loading: %s" % (PROJECT_LOCS[project]))
+    df = pd.read_csv(PROJECT_LOCS[project], sep="\t", index_col=0, names=["sample", "x", "y"], skiprows=1)
+    fig = px.scatter(df, x='x', y='y')
+    fig.update_layout(title=PROJECT_NAME[project],height=400)
+    return dcc.Graph(figure=fig)
