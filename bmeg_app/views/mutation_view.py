@@ -3,28 +3,28 @@ from ..components import info_button
 from ..db import G, gene_search
 from ..style import format_style
 import dash
-import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 from dash.exceptions import PreventUpdate
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
 import dash_html_components as html
-import dash_table
 import dash_bio
-import gripql
 import json
 import pandas as pd
-from plotly.subplots import make_subplots
 import logging
-logger = logging.getLogger(__name__)
 import i18n
+logger = logging.getLogger(__name__)
 i18n.load_path.append('bmeg_app/locales/')
 
 #######
 # Prep
 #######
+
+
 def getGeneMutations(gene):
     app.logger.info("Updating mutation Track")
-    res = G.query().V(gene).out("alleles").as_("a").outE("somatic_callsets").as_("c").render(["$a.ensembl_transcript", "$a.cds_position", "$c._to"])
+    res = G.query().V(gene).out("alleles").as_("a") \
+        .outE("somatic_callsets").as_("c") \
+        .render(["$a.ensembl_transcript", "$a.cds_position", "$c._to"])
     o = []
     t = []
     for transcript, cds, dst in res:
@@ -39,11 +39,11 @@ def getGeneMutations(gene):
     df = pd.Series(o)
     counts = df.value_counts()
     mData = {
-        "x" : list("%d.0" % (i) for i in counts.index),
-        "y" : list("%d" % (i) for i in counts.values)
+        "x": list("%d.0" % (i) for i in counts.index),
+        "y": list("%d" % (i) for i in counts.values)
     }
     return mData
-#print(json.dumps(mData))
+
 
 component = dash_bio.NeedlePlot(
   id='my-dashbio-needleplot',
@@ -51,7 +51,7 @@ component = dash_bio.NeedlePlot(
   needleStyle={
         'stemColor': '#FF8888',
         'stemThickness': 2,
-        #'stemConstHeight': True,
+        # 'stemConstHeight': True,
         'headSize': 10,
         'headColor': ['#FFDD00', '#000000']
   }
@@ -61,14 +61,33 @@ component = dash_bio.NeedlePlot(
 #######
 # Page
 #######
-NAME=i18n.t('app.config.tabname_gmut')
-LAYOUT = html.Div(children=[
-    html.Label(i18n.t('app.widget_gmut.menu1')), dcc.Dropdown(id='single-dropdown', value="TP53/ENSG00000141510", search_value="TP53/ENSG00000141510" ),
-    html.Hr(),
-    html.Div(info_button('help_genemutation',i18n.t('app.widget_gmut.button_body'))),
-    component,
-    html.Div(id='needle-selection')
-], style={'font-size' :format_style('font_size'),'fontFamily': format_style('font')})
+NAME = i18n.t('app.config.tabname_gmut')
+LAYOUT = html.Div(
+    children=[
+        html.Label(
+            i18n.t('app.widget_gmut.menu1')
+        ),
+        dcc.Dropdown(
+            id='single-dropdown',
+            value="TP53/ENSG00000141510",
+            search_value="TP53/ENSG00000141510"
+        ),
+        html.Hr(),
+        html.Div(
+            info_button(
+                'help_genemutation',
+                i18n.t('app.widget_gmut.button_body')
+            )
+        ),
+        component,
+        html.Div(id='needle-selection')
+    ],
+    style={
+        'font-size': format_style('font_size'),
+        'fontFamily': format_style('font')
+    }
+)
+
 
 @app.callback(
     dash.dependencies.Output('single-dropdown', 'options'),
@@ -97,6 +116,6 @@ def process_single(value):
     Output('needle-selection', 'children'),
     [Input('my-dashbio-needleplot', 'selectedData')])
 def display_selected_data(selectedData):
-    #This doesn't seem to respond so will probably delete
+    # This doesn't seem to respond so will probably delete
     app.logger.info("Got selectedData")
     return json.dumps(selectedData, indent=2)

@@ -4,10 +4,15 @@ import dash_bootstrap_components as dbc
 
 server = flask.Flask(__name__)
 app = dash.Dash(
-    __name__, 
-    server=server, 
-    url_base_pathname = '/',
+    __name__,
+    server=server,
+    url_base_pathname='/',
     external_stylesheets=[dbc.themes.BOOTSTRAP],
-    meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}], #mobile and computer views
+    meta_tags=[
+        {
+            "name": "viewport",
+            "content": "width=device-width, initial-scale=1"
+        }
+    ],
 )
-app.config.suppress_callback_exceptions=True
+app.config.suppress_callback_exceptions = True
