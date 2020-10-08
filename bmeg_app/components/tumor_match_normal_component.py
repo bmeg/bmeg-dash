@@ -1,6 +1,5 @@
 from ..db import G
 import pandas as pd
-import plotly.express as px
 import umap.umap_ as umap
 
 
@@ -32,32 +31,6 @@ def get_df(selected_project, property):
     )
     df2[property_name] = [a.split('__')[0] for a in df2.index]
     return df2
-
-
-def update_umap(p, cached_df):
-    '''Update UMAP'''
-    ordered_samp = [a.split('__')[1] for a in cached_df.index]
-    new_colname = p.split('.')[-1]
-    new_col = []
-    q = G.query().V(ordered_samp).as_('s') \
-        .out("case").as_('c').render([p])
-    for a in q:
-        new_col.append(a[0][0])
-    cached_df[new_colname] = new_col
-    return cached_df
-
-
-def get_umap(df, input_title, cached_df_column):
-    '''UMAP'''
-    fig = px.scatter(
-        df,
-        x='0',
-        y='1',
-        hover_name='2',
-        color=cached_df_column
-    )
-    fig.update_layout(title=input_title, height=400)
-    return fig
 
 
 def options_project():
@@ -112,13 +85,13 @@ def options_property(selected_project):
             .out("samples").as_('s') \
             .out("aliquots") \
             .out("gene_expressions").as_('gexp')
-        q = q.render(['$c._data.gtex_attributes']).limit(1) #
+        q = q.render(['$c._data.gtex_attributes']).limit(1)
         options = {}
         for row in q:
-            prop_list = list(row[0].keys()) #
+            prop_list = list(row[0].keys())
             for a in prop_list:
                 if a not in exclude:
-                    q = '$c._data.gtex_attributes.' + a #
+                    q = '$c._data.gtex_attributes.' + a
                     string = a.replace('_', ' ').upper()
                     options[string] = q
         return options
@@ -128,13 +101,13 @@ def options_property(selected_project):
             .out("samples").as_('s') \
             .out("aliquots") \
             .out("gene_expressions").as_('gexp')
-        q = q.render(['$c._data.cellline_attributes']).limit(1) #
+        q = q.render(['$c._data.cellline_attributes']).limit(1)
         options = {}
         for row in q:
-            prop_list = list(row[0].keys()) #
+            prop_list = list(row[0].keys())
             for a in prop_list:
                 if a not in exclude:
-                    q = '$c._data.cellline_attributes.' + a #
+                    q = '$c._data.cellline_attributes.' + a
                     string = a.replace('_', ' ').upper()
                     options[string] = q
         return options

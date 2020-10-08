@@ -2,15 +2,12 @@ from ..app import app
 from ..components import tumor_match_normal_component as tmn, info_button
 from ..db import G
 from ..style import format_style
-import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 from dash.exceptions import PreventUpdate
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
 import dash_html_components as html
-import gripql
 import os
-import json
 from glob import glob
 import pandas as pd
 import plotly.express as px
@@ -34,7 +31,7 @@ del PROJECT_NAME['Project:GDSC']
 del PROJECT_LOCS['Project:CTRP']
 del PROJECT_LOCS['Project:GDSC']
 
-NAME="RNA expression projection"
+NAME = "RNA expression projection"
 LAYOUT = html.Div(
     children=[
         dbc.Row(
@@ -77,18 +74,6 @@ LAYOUT = html.Div(
 )
 
 
-# @app.callback(
-#     Output('hidden_base_df_tmn', 'children'),
-#     [Input('project_dd_tmn', 'value')]
-# )
-# def createDF(selected_project):
-#     df = tmn.get_df(
-#         selected_project,
-#         '$c._data.gdc_attributes.diagnoses.tumor_stage'
-#     )
-#     return df.to_json(orient="index")
-
-
 @app.callback(
     Output("umap_fig", "children"),
     [
@@ -100,8 +85,14 @@ def render_callback(project, prop):
     if not project:
         raise PreventUpdate
     app.logger.info("loading: %s" % (PROJECT_LOCS[project]))
-    df = pd.read_csv(PROJECT_LOCS[project], sep="\t", index_col=0, names=["sample", "x", "y"], skiprows=1)
-    new_col=[]
+    df = pd.read_csv(
+        PROJECT_LOCS[project],
+        sep="\t",
+        index_col=0,
+        names=["sample", "x", "y"],
+        skiprows=1
+    )
+    new_col = []
     q = G.query().V(list(df.index)).out("case").as_('c').render([prop])
     for row in q:
         info = row[0]
@@ -111,30 +102,16 @@ def render_callback(project, prop):
             new_col.append(info[0])
         else:
             new_col.append(info)
-    df['Characteristic']=new_col
+    df['Characteristic'] = new_col
     fig = px.scatter(
         df,
         x='x',
         y='y',
         color='Characteristic')
-    fig.update_layout(title=PROJECT_NAME[project],height=400)
+    fig.update_layout(title=PROJECT_NAME[project], height=400)
     return dcc.Graph(figure=fig)
-# def render_umap(jsonstring, selected_property):
-#     temp = json.loads(jsonstring)
-#     df = pd.DataFrame.from_dict(temp, orient='index')
-#     if selected_property == '$c._data.gdc_attributes.diagnoses.tumor_stage':
-#         fig = tmn.get_umap(
-#             df,
-#             'UMAP',
-#             selected_property.split('.')[-1]
-#         )
-#         return dcc.Graph(figure=fig),
-#     else:
-#         df2 = tmn.update_umap(selected_property, df)
-#         fig = tmn.get_umap(df2, 'UMAP', selected_property.split('.')[-1])
-#         return dcc.Graph(figure=fig),
-#
-#
+
+
 @app.callback(
     Output('property_dd_tmn', 'options'),
     [Input('project_dd_tmn', 'value')]
@@ -146,8 +123,8 @@ def render_options(selected_project):
         tmn.options_property(selected_project).items()
     ]
     return out
-#
-#
+
+
 @app.callback(
     Output('property_dd_tmn', 'value'),
     [Input('property_dd_tmn', 'options')]
