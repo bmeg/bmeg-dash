@@ -102,12 +102,13 @@ def render_callback(project, prop):
             new_col.append(info[0])
         else:
             new_col.append(info)
-    df['Characteristic'] = new_col
+    display_prop = prop.split('.')[-1].replace('_', ' ').capitalize()
+    df[display_prop] = new_col
     fig = px.scatter(
         df,
         x='x',
         y='y',
-        color='Characteristic')
+        color=display_prop)
     fig.update_layout(title=PROJECT_NAME[project], height=400)
     return dcc.Graph(figure=fig)
 
