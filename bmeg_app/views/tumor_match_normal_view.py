@@ -1,5 +1,6 @@
 from ..app import app
 from ..components import tumor_match_normal_component as tmn, info_button
+from ..db import G
 from ..style import format_style
 import dash
 import dash_bootstrap_components as dbc
@@ -95,12 +96,27 @@ LAYOUT = html.Div(
         Input('property_dd_tmn', 'value')
     ]
 )
-def render_callback(project, property):
+def render_callback(project, prop):
     if not project:
         raise PreventUpdate
     app.logger.info("loading: %s" % (PROJECT_LOCS[project]))
     df = pd.read_csv(PROJECT_LOCS[project], sep="\t", index_col=0, names=["sample", "x", "y"], skiprows=1)
-    fig = px.scatter(df, x='x', y='y')
+    new_col=[]
+    q = G.query().V(list(df.index)).out("case").as_('c').render([prop])
+    for row in q:
+        info = row[0]
+        if info is None:
+            info = 'Not Reported'
+        if 'TCGA' in project:
+            new_col.append(info[0])
+        else:
+            new_col.append(info)
+    df['Characteristic']=new_col
+    fig = px.scatter(
+        df,
+        x='x',
+        y='y',
+        color='Characteristic')
     fig.update_layout(title=PROJECT_NAME[project],height=400)
     return dcc.Graph(figure=fig)
 # def render_umap(jsonstring, selected_property):
