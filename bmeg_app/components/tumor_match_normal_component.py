@@ -74,6 +74,9 @@ def options_project():
 def options_property(selected_project):
     '''Property dropdown menu options'''
     exclude = [
+        'CCLE_Name',
+        'COSMIC_ID',
+        'DepMap_ID',
         'created_datetime',
         'state',
         'submitter_id',
@@ -83,19 +86,55 @@ def options_property(selected_project):
         'age_at_diagnosis',
         'classification_of_tumor',
         'days_to_recurrence',
-        'diagnosis_id'
+        'diagnosis_id',
     ]
-    q = G.query().V(selected_project).out("cases").as_('c') \
-        .out("samples").as_('s') \
-        .out("aliquots") \
-        .out("gene_expressions").as_('gexp')
-    q = q.render(['$c._data.gdc_attributes.diagnoses']).limit(1)
-    options = {}
-    for row in q:
-        prop_list = list(row[0][0].keys())
-        for a in prop_list:
-            if a not in exclude:
-                q = '$c._data.gdc_attributes.diagnoses.' + a
-                string = a.replace('_', ' ').upper()
-                options[string] = q
-    return options
+
+    # If TCGA data...
+    if "TCGA" in selected_project:
+        print('selected ', selected_project)
+        q = G.query().V(selected_project).out("cases").as_('c') \
+            .out("samples").as_('s') \
+            .out("aliquots") \
+            .out("gene_expressions").as_('gexp')
+        q = q.render(['$c._data.gdc_attributes.diagnoses']).limit(1)
+        options = {}
+        for row in q:
+            prop_list = list(row[0][0].keys())
+            for a in prop_list:
+                if a not in exclude:
+                    q = '$c._data.gdc_attributes.diagnoses.' + a
+                    string = a.replace('_', ' ').upper()
+                    options[string] = q
+        return options
+    if 'GTEx' in selected_project:
+        print('selected ', selected_project)
+        q = G.query().V(selected_project).out("cases").as_('c') \
+            .out("samples").as_('s') \
+            .out("aliquots") \
+            .out("gene_expressions").as_('gexp')
+        q = q.render(['$c._data.gtex_attributes']).limit(1) #
+        options = {}
+        for row in q:
+            prop_list = list(row[0].keys()) #
+            for a in prop_list:
+                if a not in exclude:
+                    q = '$c._data.gtex_attributes.' + a #
+                    string = a.replace('_', ' ').upper()
+                    options[string] = q
+        return options
+    else:
+        print('selected ', selected_project)
+        q = G.query().V(selected_project).out("cases").as_('c') \
+            .out("samples").as_('s') \
+            .out("aliquots") \
+            .out("gene_expressions").as_('gexp')
+        q = q.render(['$c._data.cellline_attributes']).limit(1) #
+        options = {}
+        for row in q:
+            prop_list = list(row[0].keys()) #
+            for a in prop_list:
+                if a not in exclude:
+                    q = '$c._data.cellline_attributes.' + a #
+                    string = a.replace('_', ' ').upper()
+                    options[string] = q
+        return options

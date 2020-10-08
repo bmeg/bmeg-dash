@@ -37,7 +37,7 @@ en:
             href: /pathway
 
     widget_cluster:
-        menu1: TCGA Cancer Cohort
+        menu1: Sample Cohort
         menu2: Sample Characteristics
         button_body: Uniform manifold approximation and projection (UMAP) is a popular technique that is a similar visualization to t-SNE, but can be used for general non-linear dimension reduction.
 
