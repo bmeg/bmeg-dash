@@ -112,8 +112,11 @@ def render_callback(project, prop):
             info = row[0]
             if info is None:
                 info = 'Not Reported'
-            if 'TCGA' in project:
-                new_col.append(info[0])
+            if isinstance(info, list):
+                if len(info) == 0:
+                    new_col.append('Not Reported')
+                else:
+                    new_col.append(info[0])
             else:
                 new_col.append(info)
 
