@@ -1,4 +1,3 @@
-
 rule all:
     input: dynamic("data/{project}.locs")
 

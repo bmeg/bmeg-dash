@@ -5,9 +5,11 @@ from ..style import format_style
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 from dash.exceptions import PreventUpdate
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import dash_html_components as html
+import gripql
 import os
+import json
 from glob import glob
 import pandas as pd
 import plotly.express as px
@@ -17,6 +19,8 @@ i18n.load_path.append('bmeg_app/locales/')
 #######
 # Page
 #######
+
+
 PROJECT_LOCS = {}
 PROJECT_NAME = {}
 for path in glob("bmeg_app/data/*.id"):
