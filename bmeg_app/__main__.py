@@ -1,14 +1,11 @@
 from bmeg_app.app import app
 from bmeg_app.style import format_style
 from bmeg_app.views import view_map
-from bmeg_app.style import format_style
 import base64
-import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
 import dash_html_components as html
-import gripql
 import yaml
 
 #######
@@ -24,8 +21,17 @@ encoded_image3 = base64.b64encode(open(image_filename, 'rb').read())
 sidebar_header = dbc.Row(
     [
         dbc.Col(
-            html.Div(html.Img(src='data:image/png;base64,{}'.format(encoded_image3.decode()),
-                style={'height':'85%','width':'85%', 'marginTop': 0, 'marginBottom':0}),
+            html.Div(
+                html.Img(
+                    src='data:image/png;base64,{}'.format(
+                        encoded_image3.decode()
+                        ), style={
+                        'height': '85%',
+                        'width': '85%',
+                        'marginTop': 0,
+                        'marginBottom': 0
+                        }
+                )
             ),
             className="display-4"),
         dbc.Col(
@@ -55,17 +61,24 @@ sidebar_header = dbc.Row(
     ]
 )
 
+
 def genNavBarList():
     i = 0
     out = []
     for k, v in view_map.items():
-        e = dbc.NavLink(v.NAME, href="/%s" % (k), id="page-%d-link" % (i),
-            style={'font-size':format_style('font_size_lg'),
-            'fontFamily':format_style('font')
-            },)
+        e = dbc.NavLink(
+            v.NAME,
+            href="/%s" % (k),
+            id="page-%d-link" % (i),
+            style={
+                'font-size': format_style('font_size_lg'),
+                'fontFamily': format_style('font')
+            }
+        )
         out.append(e)
         i += 1
     return out
+
 
 sidebar = html.Div(
     [
@@ -77,7 +90,10 @@ sidebar = html.Div(
                     "A graph database for "
                     "merging and analyzing connected data",
                     className="lead",
-                    style={'font-size':format_style('font_size_lg'),'fontFamily':format_style('font')},
+                    style={
+                        'font-size': format_style('font_size_lg'),
+                        'fontFamily': format_style('font')
+                    },
                 ),
             ],
             id="blurb",
@@ -107,6 +123,7 @@ def toggle_active_links(pathname):
         return [True] + [False] * (len(view_map)-1)
     return [pathname == f"/{i}" for i in view_map.keys()]
 
+
 @app.callback(
     Output("page-content", "children"),
     [Input("url", "pathname")]
@@ -125,6 +142,7 @@ def render_page_content(pathname):
         ]
     )
 
+
 @app.callback(
     Output("sidebar", "className"),
     [Input("sidebar-toggle", "n_clicks")],
@@ -135,6 +153,7 @@ def toggle_classname(n, classname):
     if n and classname == "":
         return "collapsed"
     return ""
+
 
 @app.callback(
     Output("collapse", "is_open"),
@@ -147,7 +166,12 @@ def toggle_collapse(n, is_open):
         return not is_open
     return is_open
 
+
 with open('bmeg_app/config.yaml') as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 if __name__ == '__main__':
-    app.run_server(host=config['app']['host'], debug=config['app']['dev'], port=config['app']['port'])
+    app.run_server(
+        host=config['app']['host'],
+        debug=config['app']['dev'],
+        port=config['app']['port']
+    )
