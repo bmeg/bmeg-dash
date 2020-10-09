@@ -31,6 +31,7 @@ del PROJECT_NAME['Project:GDSC']
 del PROJECT_LOCS['Project:CTRP']
 del PROJECT_LOCS['Project:GDSC']
 
+
 NAME = "RNA expression projection"
 LAYOUT = html.Div(
     children=[
@@ -45,7 +46,7 @@ LAYOUT = html.Div(
                                 {'label': l, 'value': gid}
                                 for gid, l in PROJECT_NAME.items()
                             ],
-                            value='Project:TCGA-CHOL',
+                            value='Project:CCLE',
                         )
                     ],
                     style={'font-size': format_style('font_size')}
@@ -92,16 +93,28 @@ def render_callback(project, prop):
         names=["sample", "x", "y"],
         skiprows=1
     )
+    print('selected: ', project, prop)
     new_col = []
-    q = G.query().V(list(df.index)).out("case").as_('c').render([prop])
-    for row in q:
-        info = row[0]
-        if info is None:
-            info = 'Not Reported'
-        if 'TCGA' in project:
-            new_col.append(info[0])
-        else:
+    if prop == '$c._data.gdc_attributes.sample_type':
+        print('reached this if statement')
+        q = G.query().V(list(df.index)).as_('c').render([prop])
+        for row in q:
+            info = row[0]
+            if info is None:
+                info = 'Not Reported'
             new_col.append(info)
+
+    else:
+        q = G.query().V(list(df.index)).out("case").as_('c').render([prop])
+        for row in q:
+            info = row[0]
+            if info is None:
+                info = 'Not Reported'
+            if 'TCGA' in project:
+                new_col.append(info[0])
+            else:
+                new_col.append(info)
+
     display_prop = prop.split('.')[-1].replace('_', ' ').capitalize()
     df[display_prop] = new_col
     fig = px.scatter(
@@ -123,6 +136,8 @@ def render_options(selected_project):
         for label, query_string in
         tmn.options_property(selected_project).items()
     ]
+    if 'TCGA' in selected_project:
+        out.append({'label': 'Sample Type', 'value': '$c._data.gdc_attributes.sample_type'})
     return out
 
 
