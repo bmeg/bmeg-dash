@@ -1,31 +1,23 @@
 from ..app import app
 from ..components import info_button
-from ..db import G, gene_search
+from ..db import G
 from ..style import format_style
 import dash
-import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 from dash.exceptions import PreventUpdate
-from dash.dependencies import Input, Output, State
 import dash_html_components as html
-import dash_table
-import dash_bio
 import dash_cytoscape as cyto
-import gripql
-import json
-import pandas as pd
-from plotly.subplots import make_subplots
 import logging
-logger = logging.getLogger(__name__)
 import i18n
+logger = logging.getLogger(__name__)
 i18n.load_path.append('bmeg_app/locales/')
 
 #######
 # Prep
 #######
 pathwayList = []
-for row in G.query().V().hasLabel("Pathway").render([ "$._gid", "$.name"]):
-    pathwayList.append( [row[0], row[1].lower()] )
+for row in G.query().V().hasLabel("Pathway").render(["$._gid", "$.name"]):
+    pathwayList.append([row[0], row[1].lower()])
 
 
 def getPathwayGraph(pathway):
@@ -38,26 +30,46 @@ def getPathwayGraph(pathway):
     data = []
     for src, inter, dst in q:
         if src not in nodes:
-            data.append( { "data" : {"id" : src, "label" : src} } )
+            data.append({"data": {"id": src, "label": src}})
         if dst not in nodes:
-            data.append( { "data" : {"id" : dst, "label" : dst} } )
-        data.append( { "data" : { "source" : src, "target" : dst} } )
+            data.append({"data": {"id": dst, "label": dst}})
+        data.append({"data": {"source": src, "target": dst}})
     return data
+
 
 element = cyto.Cytoscape(
     id='bmeg-cytoscape',
     layout={'name': 'cose'},
-    style={'width': '100%', 'height': '400px', 'arrow-scale': 2, 'target-arrow-shape': 'vee'},
+    style={
+        'width': '100%',
+        'height': '400px',
+        'arrow-scale': 2,
+        'target-arrow-shape': 'vee'
+    },
     elements=[]
 )
 
-NAME=i18n.t('app.config.tabname_pathway')
-LAYOUT = html.Div(children=[
-    html.Label(i18n.t('app.widget_pathway.menu1')), dcc.Dropdown(id='pathway-dropdown'),
-    html.Hr(),
-    html.Div(info_button('help_pathway',i18n.t('app.widget_pathway.button_body'))),
-    element
-], style={'font-size' : format_style('font_size'),'fontFamily':format_style('font')})
+
+NAME = i18n.t('app.config.tabname_pathway')
+LAYOUT = html.Div(
+    children=[
+        html.Label(i18n.t('app.widget_pathway.menu1')),
+        dcc.Dropdown(id='pathway-dropdown'),
+        html.Hr(),
+        html.Div(
+            info_button(
+                'help_pathway',
+                i18n.t('app.widget_pathway.button_body')
+            )
+        ),
+        element
+    ],
+    style={
+        'font-size': format_style('font_size'),
+        'fontFamily': format_style('font')
+    }
+)
+
 
 @app.callback(
     dash.dependencies.Output('pathway-dropdown', 'options'),
@@ -70,8 +82,9 @@ def update_options(search_value):
     hits = []
     for g, n in pathwayList:
         if search_value in n:
-            hits.append( {"label" : n, "value" : g} )
+            hits.append({"label": n, "value": g})
     return hits
+
 
 @app.callback(
     dash.dependencies.Output('bmeg-cytoscape', 'elements'),
