@@ -18,7 +18,7 @@ describe("Home Page Tests", () => {
   });
 
   it("Has expected home page content", () => {
-    cy.contains("Tumor vs. Normal");
+    cy.contains("RNA expression projection");
     cy.contains("Curated Literature Evidence");
     cy.contains("Identify Compound Candidates from Cancer Cell Line Screens");
     cy.contains("Explore Mutations");
