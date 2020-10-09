@@ -92,17 +92,22 @@ describe("RNA Expression API Tests", () => {
     })
   });
 
-  const testProject = (project) => {
+  const testProject = (project, property) => {
     // test umap call back for a project
     // throws exception if problem
+
     const payload = {
       output: "umap_fig.children",
       outputs: { id: "umap_fig", property: "children" },
       inputs: [
         { id: "project_dd_tmn", property: "value", value: project },
-        { id: "property_dd_tmn", property: "value" },
+        {
+          id: "property_dd_tmn",
+          property: "value",
+          value: property,
+        },
       ],
-      changedPropIds: ["project_dd_tmn.value"],
+      changedPropIds: ["property_dd_tmn.value"],
     };
 
     cy.request(
@@ -132,9 +137,9 @@ describe("RNA Expression API Tests", () => {
       });
   };
 
-  expected_projects.forEach((project) =>
-    it(`${project} should return a series.`, () => testProject(project))
-  ) ;
-  
+  expected_projects.forEach((project) => {
+    const property = "$c._data.cellline_attributes.Primary Disease";
+    it(`${project} should return a series.`, () => testProject(project, property));
+  } ) ;
   
 });
