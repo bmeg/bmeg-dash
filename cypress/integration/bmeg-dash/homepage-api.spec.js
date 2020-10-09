@@ -1,5 +1,4 @@
-const { assert } = require("console");
-const { resolve } = require("path");
+// test the homepage callback
 
 describe("Home Page API Tests", () => {
 
@@ -33,10 +32,10 @@ describe("Home Page API Tests", () => {
         expect(Object.keys(expected_results).length, "Should return data for expected results").to.eq(data.length)
         data.forEach((d) => {
             const expected_result = expected_results[d.number.suffix]
-            expect(expected_result, `${d.number.suffix}`).to.eq(d.value);
+            expect(expected_result, `${d.number.suffix}`).to.be.at.least(d.value);
         });
+    })
 
-    })    
   });
 
 });
