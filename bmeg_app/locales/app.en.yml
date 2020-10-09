@@ -9,11 +9,11 @@ en:
         tabname_pathway: Pathway View
 
     widget_home:
-        cluster:
-            header: Explore TCGA cohort characteristics underlying the gene expression profiles
-            body: Uniform manifold approximation and projection (UMAP) of cancer cohort sample expression profiles.
-            button: TCGA Clustering
-            href: /tumors
+        rna_umap:
+            header: Explore cohort feautres mapped on the gene expression landscape
+            body: Uniform manifold approximation and projection (UMAP) of cohort sample expression profiles.
+            button: RNA UMAP
+            href: /rna_umap
         dresp:
             header: Identify Compound Candidates from Cancer Cell Line Screens
             body: Interrogate cell line compound screening trials from large established sources (CCLE, CTRP, GDSC). Dig into compound sensitivity trends within a particular disease and explore associated metadata.

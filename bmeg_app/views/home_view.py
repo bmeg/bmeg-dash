@@ -14,11 +14,11 @@ i18n.load_path.append('bmeg_app/locales/')
 #######
 NAME = i18n.t('app.config.tabname_widget_home')
 
-cluster_card = dty.build_card(
-    i18n.t('app.widget_home.cluster.header'),
-    [i18n.t('app.widget_home.cluster.body')],
-    i18n.t('app.widget_home.cluster.button'),
-    i18n.t('app.widget_home.cluster.href')
+rna_umap_card = dty.build_card(
+    i18n.t('app.widget_home.rna_umap.header'),
+    [i18n.t('app.widget_home.rna_umap.body')],
+    i18n.t('app.widget_home.rna_umap.button'),
+    i18n.t('app.widget_home.rna_umap.href')
 )
 lit_card = dty.build_card(
     i18n.t('app.widget_home.lit.header'),
@@ -82,7 +82,7 @@ LAYOUT = html.Div(
         html.Br(),
         dbc.Row(
             [
-                dbc.Col(cluster_card),
+                dbc.Col(rna_umap_card),
             ]
         ),
     ],
