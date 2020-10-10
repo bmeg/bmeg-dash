@@ -10,7 +10,7 @@ en:
 
     widget_home:
         rna_umap:
-            header: Explore cohort feautres mapped on the gene expression landscape
+            header: RNA expression projection
             body: Uniform manifold approximation and projection (UMAP) of cohort sample expression profiles.
             button: RNA UMAP
             href: /rna_umap

@@ -28,11 +28,11 @@ for path in glob("bmeg_app/data/*.id"):
             project_id = handle.read().rstrip()
         PROJECT_LOCS[project_id] = base + ".locs"
         PROJECT_NAME[project_id] = os.path.basename(base)
-del PROJECT_NAME['Project:CTRP']
-del PROJECT_NAME['Project:GDSC']
-del PROJECT_LOCS['Project:CTRP']
-del PROJECT_LOCS['Project:GDSC']
-
+for p in ['Project:CTRP', 'Project:GDSC']:
+    if p in PROJECT_NAME:
+        del PROJECT_NAME[p]
+    if p in PROJECT_LOCS:
+        del PROJECT_LOCS[p]
 
 NAME = "RNA expression projection"
 LAYOUT = html.Div(

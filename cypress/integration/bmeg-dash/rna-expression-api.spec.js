@@ -4,14 +4,11 @@ describe("RNA Expression API Tests", () => {
 
   const expected_projects = [
     "Project:CCLE",
-    "Project:CTRP",
-    "Project:GDSC",
     "Project:GTEx_Adipose Tissue",
     "Project:GTEx_Adrenal Gland",
     "Project:GTEx_Bladder",
     "Project:GTEx_Blood",
     "Project:GTEx_Blood Vessel",
-    "Project:GTEx_Bone Marrow",
     "Project:GTEx_Brain",
     "Project:GTEx_Breast",
     "Project:GTEx_Cervix Uteri",
@@ -73,7 +70,7 @@ describe("RNA Expression API Tests", () => {
   ].sort();
 
   it("Has expected drop down values", () => {
-    const payload = {"output":"page-content.children","outputs":{"id":"page-content","property":"children"},"inputs":[{"id":"url","property":"pathname","value":"/tumors"}],"changedPropIds":["url.pathname"]};
+    const payload = {"output":"page-content.children","outputs":{"id":"page-content","property":"children"},"inputs":[{"id":"url","property":"pathname","value":"/rna_umap"}],"changedPropIds":["url.pathname"]};
     cy.request('POST', "http://localhost:8050/_dash-update-component", payload).then((response) => {
       // cy.log(JSON.stringify(response.body)) ;
       expect(response.status, "Should return a 200").to.eq(200);
@@ -122,7 +119,7 @@ describe("RNA Expression API Tests", () => {
         expect(data, `${project} - should return data`).to.not.be.undefined;
         const series = data[0];
         expect(series, `${project} - should return series`).to.not.be.undefined;
- 
+
         const x = series.x;
         const y = series.y;
         expect(
@@ -133,7 +130,7 @@ describe("RNA Expression API Tests", () => {
           x.length,
           `${project} - to have at least one data point`
         ).to.be.gt(0);
-      
+
       });
   };
 
@@ -141,5 +138,5 @@ describe("RNA Expression API Tests", () => {
     const property = "$c._data.cellline_attributes.Primary Disease";
     it(`${project} should return a series.`, () => testProject(project, property));
   } ) ;
-  
+
 });
