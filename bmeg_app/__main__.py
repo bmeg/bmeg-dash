@@ -171,7 +171,7 @@ with open('bmeg_app/config.yaml') as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 if __name__ == '__main__':
     app.run_server(
-        host=config['app']['host'],
-        debug=config['app']['dev'],
-        port=config['app']['port']
+        host=config['app_staging']['host'],
+        debug=config['app_staging']['dev'],
+        port=config['app_staging']['port']
     )

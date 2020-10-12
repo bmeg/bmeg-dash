@@ -2,7 +2,12 @@ bmeg:
     credentials: bmeg_app/secrets/bmeg_credentials.json
     graph: rc5
 
-app:
+app_staging:
     host: 0.0.0.0
     port: 8050
     dev: True
+
+app_prod:
+    host: 0.0.0.0
+    port: 8050
+    dev: False
