@@ -9,7 +9,7 @@ describe("Home Page Tests", () => {
   it("Has expected sidebar static content", () => {
     cy.contains("A graph database");
     cy.contains("Home");
-    cy.contains("TCGA Clustering");
+    cy.contains("RNA expression projection");
     cy.contains("Literature Gene-Compound Associations");
     cy.contains("Cancer Compound Screening");
     cy.contains("Gene-level Mutation View");
@@ -22,7 +22,7 @@ describe("Home Page Tests", () => {
     cy.contains("Curated Literature Evidence");
     cy.contains("Identify Compound Candidates from Cancer Cell Line Screens");
     cy.contains("Explore Mutations");
-    cy.contains("Pathways");  
+    cy.contains("Pathways");
   });
 
   it("Has expected home page plot", () => {
