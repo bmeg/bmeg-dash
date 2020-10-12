@@ -54,7 +54,10 @@ NAME = i18n.t('app.config.tabname_pathway')
 LAYOUT = html.Div(
     children=[
         html.Label(i18n.t('app.widget_pathway.menu1')),
-        dcc.Dropdown(id='pathway-dropdown'),
+        dcc.Dropdown(id='pathway-dropdown',
+                        value="pathwaycommons.org/pc11/" +
+                        "Pathway_2d307e80e3a7b4ae590fcd73c4d058cf",
+                        search_value="mtor signaling pathway"),
         html.Hr(),
         html.Div(
             info_button(

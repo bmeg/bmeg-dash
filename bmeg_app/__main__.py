@@ -7,6 +7,8 @@ import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
 import dash_html_components as html
 import yaml
+import i18n
+i18n.load_path.append('bmeg_app/locales/')
 
 #######
 # Prep
@@ -87,8 +89,7 @@ sidebar = html.Div(
             [
                 html.Hr(),
                 html.P(
-                    "A graph database for "
-                    "merging and analyzing connected data",
+                    i18n.t('app.config.tab_title'),
                     className="lead",
                     style={
                         'font-size': format_style('font_size_lg'),
