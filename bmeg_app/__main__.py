@@ -7,6 +7,7 @@ import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
 import dash_html_components as html
 import yaml
+import os
 
 #######
 # Prep
@@ -169,9 +170,11 @@ def toggle_collapse(n, is_open):
 
 with open('bmeg_app/config.yaml') as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
+STAGE = os.environ.get("BMEG_STAGE", "DEV")
+print('BMEG stage: ', STAGE)
 if __name__ == '__main__':
     app.run_server(
-        host=config['app']['host'],
-        debug=config['app']['dev'],
-        port=config['app']['port']
+        host=config[STAGE]['host'],
+        debug=config[STAGE]['dev'],
+        port=config[STAGE]['port']
     )
