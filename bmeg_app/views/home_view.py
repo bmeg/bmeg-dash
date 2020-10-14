@@ -47,10 +47,10 @@ pathway_card = dty.build_card(
 
 LAYOUT = html.Div(
     children=[
-        #html.H1(
+        # html.H1(
         #    i18n.t('app.config.banner'),
         #    style=format_style('banner')
-        #),
+        # ),
         dcc.Loading(
             id="cards",
             type="default",
