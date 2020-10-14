@@ -7,7 +7,7 @@ describe("Home Page Tests", () => {
   });
 
   it("Has expected sidebar static content", () => {
-    cy.contains("BMEG Analaysis");
+    cy.contains("BMEG Analysis");
     cy.contains("Home");
     cy.contains("RNA expression projection");
     cy.contains("Literature Gene-Compound Associations");
