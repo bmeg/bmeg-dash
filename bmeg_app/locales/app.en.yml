@@ -2,7 +2,7 @@ en:
     config:
         banner: Bio Medical Evidence Graph
         banner_widgets: Analysis
-        tab_title: BMEG Analaysis
+        tab_title: BMEG Analysis
         tabname_widget_home: Home
         tabname_widget_dresp: Dose Response Comparisons
         tabname_gmut: Gene-level Mutation View
