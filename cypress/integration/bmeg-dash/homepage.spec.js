@@ -7,11 +7,11 @@ describe("Home Page Tests", () => {
   });
 
   it("Has expected sidebar static content", () => {
-    cy.contains("A graph database");
+    cy.contains("BMEG Analysis");
     cy.contains("Home");
     cy.contains("RNA expression projection");
     cy.contains("Literature Gene-Compound Associations");
-    cy.contains("Cancer Compound Screening");
+    cy.contains("Dose Response Comparisons");
     cy.contains("Gene-level Mutation View");
     cy.contains("Pathway View");
     cy.get("#sidebar-toggle")
@@ -20,8 +20,8 @@ describe("Home Page Tests", () => {
   it("Has expected home page content", () => {
     cy.contains("RNA expression projection");
     cy.contains("Curated Literature Evidence");
-    cy.contains("Identify Compound Candidates from Cancer Cell Line Screens");
-    cy.contains("Explore Mutations");
+    cy.contains("Compare Dose Response of Compounds from Cancer Cell Line Screens");
+    cy.contains("Gene-level Mutation View");
     cy.contains("Pathways");
   });
 

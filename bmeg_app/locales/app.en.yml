@@ -1,9 +1,10 @@
 en:
     config:
-        banner: Bio Medical Evidence Graph (BMEG)
-        banner_widgets: Analysis Widgets
+        banner: Bio Medical Evidence Graph
+        banner_widgets: Analysis
+        tab_title: BMEG Analysis
         tabname_widget_home: Home
-        tabname_widget_dresp: Cancer Compound Screening
+        tabname_widget_dresp: Dose Response Comparisons
         tabname_gmut: Gene-level Mutation View
         tabname_lit: Literature Gene-Compound Associations
         tabname_pathway: Pathway View
@@ -15,13 +16,13 @@ en:
             button: RNA UMAP
             href: /rna_umap
         dresp:
-            header: Identify Compound Candidates from Cancer Cell Line Screens
-            body: Interrogate cell line compound screening trials from large established sources (CCLE, CTRP, GDSC). Dig into compound sensitivity trends within a particular disease and explore associated metadata.
+            header: Compare Dose Response of Compounds from Cancer Cell Line Screens
+            body: Interrogate cell line compound screening trials from large established sources (CCLE, CTRP, GDSC).
             body2: For example, select a FDA compound that is widely known to prevent/treat a particular disease phenotype (ex. Paclitaxel, breast cancer treatment) and identify other compounds that show a similar impact on cell lines.
-            button: Cancer Compound Screening
+            button: Dose Response Comparison
             href: /drug_response
         gmut:
-            header: Explore Mutations
+            header: View all Catalogued Mutations for a gene
             body: Visualize all variant alleles associated with a specific gene.
             button: Gene-level Mutation View
             href: /oncoprint
