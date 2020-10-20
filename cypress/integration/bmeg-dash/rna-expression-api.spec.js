@@ -70,7 +70,7 @@ describe("RNA Expression API Tests", () => {
   ].sort();
 
   it("Has expected drop down values", () => {
-    const payload = {"output":"page-content.children","outputs":{"id":"page-content","property":"children"},"inputs":[{"id":"url","property":"pathname","value":"/rna_umap"}],"changedPropIds":["url.pathname"]};
+    const payload = {"output":"page-content.children","outputs":{"id":"page-content","property":"children"},"inputs":[{"id":"url","property":"pathname","value":"/app/rna_umap"}],"changedPropIds":["url.pathname"]};
     cy.request('POST', "http://localhost:8050/app/_dash-update-component", payload).then((response) => {
       // cy.log(JSON.stringify(response.body)) ;
       expect(response.status, "Should return a 200").to.eq(200);
