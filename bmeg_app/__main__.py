@@ -137,7 +137,7 @@ def toggle_active_links(pathname):
 )
 def render_page_content(pathname):
     '''render selected widget view'''
-    if pathname == "/" + path_name + "/" :
+    if pathname == "/" + path_name + "/":
         pathname = "/" + list(view_map.keys())[0]
     if pathname[1:] in view_map:
         return html.Div(view_map[pathname[1:]].LAYOUT)
