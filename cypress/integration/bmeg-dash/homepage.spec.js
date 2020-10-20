@@ -2,7 +2,7 @@ describe("Home Page Tests", () => {
 
   before(() => {
     // runs once before all tests in the block
-    cy.visit("http://localhost:8050");
+    cy.visit("http://localhost:8050/app");
 
   });
 

@@ -24,7 +24,7 @@ describe("Home Page API Tests", () => {
         " PubLit Articles": 29162966
     }
 
-    cy.request('POST', "http://localhost:8050/_dash-update-component", payload).then((response) => {
+    cy.request('POST', "http://localhost:8050/app/_dash-update-component", payload).then((response) => {
         // cy.log(JSON.stringify(response.body))
         cy.log(JSON.stringify(expected_results));
         expect(response.status, "Should return a 200").to.eq(200)
