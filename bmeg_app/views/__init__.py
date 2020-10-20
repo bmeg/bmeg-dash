@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import yaml
 from . import home_view, \
     rna_umap_view, \
     literature_support_view, \
@@ -12,11 +13,15 @@ from . import home_view, \
 # # - NAME : string name that is displayed in the menu
 # # - LAYOUT : a Dash component for the view
 
+with open('bmeg_app/config.yaml') as f:
+    config = yaml.load(f, Loader=yaml.FullLoader)
+path_name = config['DEV']['basepath']
+
 view_map = OrderedDict([
-    ("home", home_view),
-    ("rna_umap", rna_umap_view),
-    ("g2p", literature_support_view),
-    ("drug_response", compare_dresp_view),
-    ("oncoprint", mutation_view),
-    ("pathway", pathway_view)
+    (path_name, home_view),
+    (path_name + "/rna_umap", rna_umap_view),
+    (path_name + "/g2p", literature_support_view),
+    (path_name + "/drug_response", compare_dresp_view),
+    (path_name + "/oncoprint", mutation_view),
+    (path_name + "/pathway", pathway_view)
 ])

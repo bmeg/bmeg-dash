@@ -7,6 +7,12 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 import i18n
+import yaml
+
+with open('bmeg_app/config.yaml') as f:
+    config = yaml.load(f, Loader=yaml.FullLoader)
+path_name = config['DEV']['basepath']
+
 i18n.load_path.append('bmeg_app/locales/')
 
 #######
@@ -18,31 +24,31 @@ rna_umap_card = dty.build_card(
     i18n.t('app.widget_home.rna_umap.header'),
     [i18n.t('app.widget_home.rna_umap.body')],
     i18n.t('app.widget_home.rna_umap.button'),
-    i18n.t('app.widget_home.rna_umap.href')
+    '/' + path_name + i18n.t('app.widget_home.rna_umap.href')
 )
 lit_card = dty.build_card(
     i18n.t('app.widget_home.lit.header'),
     [i18n.t('app.widget_home.lit.body')],
     i18n.t('app.widget_home.lit.button'),
-    i18n.t('app.widget_home.lit.href')
+    '/' + path_name + i18n.t('app.widget_home.lit.href')
 )
 dresp_card = dty.build_card(
     i18n.t('app.widget_home.dresp.header'),
     [i18n.t('app.widget_home.dresp.body')],
     i18n.t('app.widget_home.dresp.button'),
-    i18n.t('app.widget_home.dresp.href')
+    '/' + path_name + i18n.t('app.widget_home.dresp.href')
 )
 gene_mut_card = dty.build_card(
     i18n.t('app.widget_home.gmut.header'),
     [i18n.t('app.widget_home.gmut.body')],
     i18n.t('app.widget_home.gmut.button'),
-    i18n.t('app.widget_home.gmut.href')
+    '/' + path_name + i18n.t('app.widget_home.gmut.href')
 )
 pathway_card = dty.build_card(
     i18n.t('app.widget_home.pathway.header'),
     [i18n.t('app.widget_home.pathway.body')],
     i18n.t('app.widget_home.pathway.button'),
-    i18n.t('app.widget_home.pathway.href')
+    '/' + path_name + i18n.t('app.widget_home.pathway.href')
 )
 
 LAYOUT = html.Div(

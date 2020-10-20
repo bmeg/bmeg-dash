@@ -9,6 +9,12 @@ import dash_html_components as html
 import yaml
 import os
 
+with open('bmeg_app/config.yaml') as f:
+    config = yaml.load(f, Loader=yaml.FullLoader)
+STAGE = os.environ.get("BMEG_STAGE", "DEV")
+print('BMEG stage: ', STAGE)
+path_name = config['DEV']['basepath']
+
 #######
 # Prep
 #######
@@ -131,7 +137,7 @@ def toggle_active_links(pathname):
 )
 def render_page_content(pathname):
     '''render selected widget view'''
-    if pathname == "/":
+    if pathname == "/" + path_name + "/" :
         pathname = "/" + list(view_map.keys())[0]
     if pathname[1:] in view_map:
         return html.Div(view_map[pathname[1:]].LAYOUT)
@@ -168,10 +174,6 @@ def toggle_collapse(n, is_open):
     return is_open
 
 
-with open('bmeg_app/config.yaml') as f:
-    config = yaml.load(f, Loader=yaml.FullLoader)
-STAGE = os.environ.get("BMEG_STAGE", "DEV")
-print('BMEG stage: ', STAGE)
 if __name__ == '__main__':
     app.run_server(
         host=config[STAGE]['host'],
