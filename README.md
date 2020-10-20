@@ -28,8 +28,8 @@ On the [BMEG Website](https://bmegio.ohsu.edu) there are several relevant links:
 + [Contact BMEG](https://gitter.im/bmeg/)
 
 
-## git hooks
+## Git Hooks
 
-* installation: see git-hooks/README.md
-* pre-commit: runs flake8 on bmeg_app/ dir.  skip via `git commit --no-verify ...`
-* pre-push: runs cypress/ tests.  skip via `git push --no-verify ...`
+* Installation: see `git-hooks/README.md`
+* Pre-commit: runs flake8 on `bmeg_app/` dir.  Skip via `git commit --no-verify ...`
+* Pre-push: runs `cypress/` tests.  Skip via `git push --no-verify ...`
