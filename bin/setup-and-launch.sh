@@ -5,7 +5,12 @@
 curl -s -f $ELASTICSEARCH_URL/genes
 if [ $? -eq 0 ]
 then
+  echo
   echo "/genes index exists"
+  echo
+  ls -l bmeg_app/secrets/bmeg_credentials.json
+  echo
+  echo
 else
   echo "/genes index does not exist"
   echo "/genes setup"
