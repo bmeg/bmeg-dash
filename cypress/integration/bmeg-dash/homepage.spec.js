@@ -1,8 +1,9 @@
 describe("Home Page Tests", () => {
 
   before(() => {
+    const baseURL = Cypress.config("baseURL"); 
     // runs once before all tests in the block
-    cy.visit("http://localhost:8050");
+    cy.visit(baseURL);
 
   });
 

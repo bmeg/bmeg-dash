@@ -9,10 +9,17 @@ from flask_caching import Cache
 
 with open('bmeg_app/config.yaml') as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
-conn = gripql.Connection(
-    "https://bmeg.io/api",
-    credential_file=config['bmeg']['credentials']
-)
+
+if 'credentials' in config['bmeg']:
+    conn = gripql.Connection(
+        config['bmeg']['url'],
+        credential_file=config['bmeg']['credentials']
+    )
+else:
+    conn = gripql.Connection(
+        config['bmeg']['url']
+    )
+
 G = conn.graph(config['bmeg']['graph'])
 
 # configure dash app

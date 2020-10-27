@@ -1,5 +1,7 @@
 // test the RNA expression callback
 
+const baseURL = Cypress.config("baseURL"); 
+
 describe("RNA Expression API Tests", () => {
 
   const expected_projects = [
@@ -70,23 +72,28 @@ describe("RNA Expression API Tests", () => {
   ].sort();
 
   it("Has expected drop down values", () => {
-    const payload = {"output":"page-content.children","outputs":{"id":"page-content","property":"children"},"inputs":[{"id":"url","property":"pathname","value":"/rna_umap"}],"changedPropIds":["url.pathname"]};
-    cy.request('POST', "http://localhost:8050/_dash-update-component", payload).then((response) => {
-      // cy.log(JSON.stringify(response.body)) ;
-      expect(response.status, "Should return a 200").to.eq(200);
+    const payload = {"output":"page-content.children","outputs":{"id":"page-content","property":"children"},"inputs":[{"id":"url","property":"pathname","value":"/app/rna_umap"}],"changedPropIds":["url.pathname"]};
+    cy.request("POST", `${baseURL}/_dash-update-component`, payload).then(
+      (response) => {
+        // cy.log(JSON.stringify(response.body)) ;
+        expect(response.status, "Should return a 200").to.eq(200);
 
-      // discover this response structure by using browser's devtools
-      const data =
-        response.body
-        .response["page-content"]
-        .children.props.children.props.children[0]
-        .props.children[0].props.children[1].props.options;
-      // cy.log(JSON.stringify(data));
-      const actual_values = data.map((d) => d.value).sort();
-      // cy.log(JSON.stringify(actual_values));
-      const diff_values = actual_values.filter((x) => !expected_projects.includes(x));
-      expect(diff_values.length, `Should have all expected values ${diff_values}`).to.eq(0);
-    })
+        // discover this response structure by using browser's devtools
+        const data =
+          response.body.response["page-content"].children.props.children.props
+            .children[0].props.children[0].props.children[1].props.options;
+        // cy.log(JSON.stringify(data));
+        const actual_values = data.map((d) => d.value).sort();
+        // cy.log(JSON.stringify(actual_values));
+        const diff_values = actual_values.filter(
+          (x) => !expected_projects.includes(x)
+        );
+        expect(
+          diff_values.length,
+          `Should have all expected values ${diff_values}`
+        ).to.eq(0);
+      }
+    );
   });
 
   const testProject = (project, property) => {
@@ -107,31 +114,25 @@ describe("RNA Expression API Tests", () => {
       changedPropIds: ["property_dd_tmn.value"],
     };
 
-    cy.request(
-        "POST",
-        "http://localhost:8050/_dash-update-component",
-        payload
-      )
-      .then((response) => {
+    cy.request("POST", `${baseURL}/_dash-update-component`, payload).then(
+      (response) => {
         expect(response.status, "Should return a 200").to.eq(200);
-        const data =
-          response.body.response.umap_fig.children.props.figure.data;
+        const data = response.body.response.umap_fig.children.props.figure.data;
         expect(data, `${project} - should return data`).to.not.be.undefined;
         const series = data[0];
         expect(series, `${project} - should return series`).to.not.be.undefined;
 
         const x = series.x;
         const y = series.y;
-        expect(
-          x.length,
-          `${project} - X & Y should be same length`
-        ).to.be.eq(y.length);
+        expect(x.length, `${project} - X & Y should be same length`).to.be.eq(
+          y.length
+        );
         expect(
           x.length,
           `${project} - to have at least one data point`
         ).to.be.gt(0);
-
-      });
+      }
+    );
   };
 
   expected_projects.forEach((project) => {

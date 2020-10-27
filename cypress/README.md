@@ -16,6 +16,16 @@ npm install cypress --save-dev
 ls -lR cypress/integration
 ```
 
+* set test host
+
+```
+# see ./cypress.json
+{
+    "baseURL": "https://bmeg.io/app"
+}
+```
+
+
 * interactively running tests
 
 ```
