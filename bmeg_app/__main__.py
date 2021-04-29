@@ -2,9 +2,11 @@ from bmeg_app.app import app
 from bmeg_app.style import format_style
 from bmeg_app.views import view_map
 import base64
+import json
+import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output, State, ALL
 import dash_html_components as html
 import yaml
 import os
@@ -75,14 +77,9 @@ def genNavBarList():
     i = 0
     out = []
     for k, v in view_map.items():
-        e = dbc.NavLink(
+        e = dbc.Button(
             v.NAME,
-            href="/%s" % (k),
-            id="page-%d-link" % (i),
-            style={
-                'font-size': format_style('font_size_lg'),
-                'fontFamily': format_style('font')
-            }
+            id={"type" : "new-button", "index":k}
         )
         out.append(e)
         i += 1
@@ -117,38 +114,28 @@ sidebar = html.Div(
     ],
     id="sidebar",
 )
+
 content = html.Div(id="page-content")
 app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
 
 
 @app.callback(
-    [Output(f"page-{i[0]}-link", "active") for i in enumerate(view_map)],
-    [Input("url", "pathname")],
-)
-def toggle_active_links(pathname):
-    '''active link for widget view'''
-    if pathname is None:
-        return [True] + [False] * (len(view_map)-1)
-    return [pathname == f"/{i}" for i in view_map.keys()]
+    Output('page-content', 'children'),
+    [Input({'type': 'new-button', 'index': ALL}, 'n_clicks')],
+    [State('page-content', 'children')])
+def update_output(n_clicks, content):
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        button_id = 'No clicks yet'
+        return [ view_map["app"].LAYOUT ]
+    else:
+        button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+        d = json.loads(button_id)
+        n = d['index']
+        if n in view_map:
+            content = [ view_map[n].LAYOUT ] + content
 
-
-@app.callback(
-    Output("page-content", "children"),
-    [Input("url", "pathname")]
-)
-def render_page_content(pathname):
-    '''render selected widget view'''
-    if pathname == "/" + path_name + "/":
-        pathname = "/" + list(view_map.keys())[0]
-    if pathname[1:] in view_map:
-        return html.Div(view_map[pathname[1:]].LAYOUT)
-    return dbc.Jumbotron(
-        [
-            html.H1("404: Not found", className="text-danger"),
-            html.Hr(),
-            html.P(f"The pathname {pathname} was not recognised..."),
-        ]
-    )
+    return content
 
 
 @app.callback(

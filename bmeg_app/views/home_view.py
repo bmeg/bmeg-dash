@@ -68,29 +68,6 @@ LAYOUT = html.Div(
             type="default",
             children=html.Div(id="node_cts_bar_output")
         ),
-        html.H3(
-            i18n.t('app.config.banner_widgets'),
-            style=format_style('subbanner')
-        ),
-        dbc.Row(
-            [
-                dbc.Col(lit_card),
-                dbc.Col(dresp_card),
-            ]
-        ),
-        html.Br(),
-        dbc.Row(
-            [
-                dbc.Col(gene_mut_card),
-                dbc.Col(pathway_card),
-            ]
-        ),
-        html.Br(),
-        dbc.Row(
-            [
-                dbc.Col(rna_umap_card),
-            ]
-        ),
     ],
     style={'fontFamily': format_style('font')}
 )

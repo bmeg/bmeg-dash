@@ -1,7 +1,6 @@
 from ..db import G
 import pandas as pd
-import umap.umap_ as umap
-
+import umap
 
 def get_df(selected_project, property):
     '''Create df for selected property'''
