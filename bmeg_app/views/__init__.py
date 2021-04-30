@@ -1,3 +1,8 @@
+
+import dash_core_components as dcc
+import dash_html_components as html
+import dash_bootstrap_components as dbc
+
 from collections import OrderedDict
 import yaml
 from . import home_view, \
@@ -25,3 +30,19 @@ view_map = OrderedDict([
     (path_name + "/oncoprint", mutation_view),
     (path_name + "/pathway", pathway_view)
 ])
+
+
+def create_window(name, index):
+    print("Creating Window", name, index)
+    return dbc.Card([
+        dbc.CardHeader(html.Div([dbc.Button("X", id={"type":"close-button", "index":index}), html.Span(view_map[name].NAME, style={"text-align":"center"})])),
+        dbc.CardBody([
+            html.Div(
+                children=[view_map[name].CREATE(index)],
+                #style={'border': '1px solid'}
+            )
+        ],
+        )
+    ],
+    id={"type":"view_window", "index": index},
+    )

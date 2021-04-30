@@ -6,6 +6,7 @@ from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
+from dash.dependencies import Input, Output, State, ALL, MATCH
 import i18n
 import yaml
 
@@ -20,61 +21,32 @@ i18n.load_path.append('bmeg_app/locales/')
 #######
 NAME = i18n.t('app.config.tabname_widget_home')
 
-rna_umap_card = dty.build_card(
-    i18n.t('app.widget_home.rna_umap.header'),
-    [i18n.t('app.widget_home.rna_umap.body')],
-    i18n.t('app.widget_home.rna_umap.button'),
-    '/' + path_name + i18n.t('app.widget_home.rna_umap.href')
-)
-lit_card = dty.build_card(
-    i18n.t('app.widget_home.lit.header'),
-    [i18n.t('app.widget_home.lit.body')],
-    i18n.t('app.widget_home.lit.button'),
-    '/' + path_name + i18n.t('app.widget_home.lit.href')
-)
-dresp_card = dty.build_card(
-    i18n.t('app.widget_home.dresp.header'),
-    [i18n.t('app.widget_home.dresp.body')],
-    i18n.t('app.widget_home.dresp.button'),
-    '/' + path_name + i18n.t('app.widget_home.dresp.href')
-)
-gene_mut_card = dty.build_card(
-    i18n.t('app.widget_home.gmut.header'),
-    [i18n.t('app.widget_home.gmut.body')],
-    i18n.t('app.widget_home.gmut.button'),
-    '/' + path_name + i18n.t('app.widget_home.gmut.href')
-)
-pathway_card = dty.build_card(
-    i18n.t('app.widget_home.pathway.header'),
-    [i18n.t('app.widget_home.pathway.body')],
-    i18n.t('app.widget_home.pathway.button'),
-    '/' + path_name + i18n.t('app.widget_home.pathway.href')
-)
 
-LAYOUT = html.Div(
-    children=[
-        # html.H1(
-        #    i18n.t('app.config.banner'),
-        #    style=format_style('banner')
-        # ),
-        dcc.Loading(
-            id="cards",
-            type="default",
-            children=html.Div(id="cards_output")
-        ),
-        html.Br(),
-        dcc.Loading(
-            id="node_cts_bar",
-            type="default",
-            children=html.Div(id="node_cts_bar_output")
-        ),
-    ],
-    style={'fontFamily': format_style('font')}
-)
+def CREATE(index):
+    return html.Div(
+        children=[
+            # html.H1(
+            #    i18n.t('app.config.banner'),
+            #    style=format_style('banner')
+            # ),
+            dcc.Loading(
+                id={"type":"summary-counts", "index":index},
+                type="default",
+                children=html.Div(id="cards_output")
+            ),
+            html.Br(),
+            dcc.Loading(
+                id={"type":"summary-counts-barchart", "index":index},
+                type="default",
+                children=html.Div(id="node_cts_bar_output")
+            ),
+        ],
+        style={'fontFamily': format_style('font'), 'border': '2px solid'}
+    )
 
 
 @app.callback(
-    Output("cards", "children"),
+    Output({"type":"summary-counts", "index":MATCH}, "children"),
     [Input('url', 'pathname')]
 )
 def render_callback(href):
@@ -98,7 +70,7 @@ def render_callback(href):
 
 
 @app.callback(
-    Output("node_cts_bar", "children"),
+    Output({"type":"summary-counts-barchart", "index":MATCH}, "children"),
     [Input('url', 'pathname')]
 )
 def render_node_cts_bar(href):

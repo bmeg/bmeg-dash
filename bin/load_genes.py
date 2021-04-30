@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3
+#!/usr/bin/env python3
 """Load gene symbol, ensembl_id into elastic."""
 
 import os
@@ -13,7 +13,7 @@ import click
 def read_genes(path, index, skip_first=True):
     """Yield an elastic dictionary {symbol, ensembl_id} for each line in file.
 
-    The _id is set to ensembl_id - except if it's missing! Then we use the symbol.    
+    The _id is set to ensembl_id - except if it's missing! Then we use the symbol.
     See https://elasticsearch-py.readthedocs.io/en/master/helpers.html?highlight=parallel_bulk#bulk-helpers"""
 
     with open(path, "r") as inputs:

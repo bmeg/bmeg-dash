@@ -5,7 +5,7 @@ from ..style import format_style
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 from dash.exceptions import PreventUpdate
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, MATCH
 import dash_html_components as html
 import os
 from glob import glob
@@ -35,57 +35,61 @@ for p in ['Project:CTRP', 'Project:GDSC']:
         del PROJECT_LOCS[p]
 
 NAME = "RNA expression projection"
-LAYOUT = html.Div(
-    children=[
-        dbc.Row(
-            [
-                dbc.Col(
-                    [
-                        html.Label(i18n.t('app.widget_cluster.menu1')),
-                        dcc.Dropdown(
-                            id='project_dd_tmn',
-                            options=[
-                                {'label': l, 'value': gid}
-                                for gid, l in PROJECT_NAME.items()
-                            ],
-                            value='Project:CCLE',
-                        )
-                    ],
-                    style={'font-size': format_style('font_size')}
-                ),
-                dbc.Col(
-                    [
-                        html.Label(i18n.t('app.widget_cluster.menu2')),
-                        dcc.Dropdown(id='property_dd_tmn')
-                    ],
-                    style={'font-size': format_style('font_size')}
-                ),
-            ]
-        ),
-        html.Hr(),
-        html.Div(
-            info_button(
-                'help_umap',
-                i18n.t('app.widget_cluster.button_body')
+
+
+def CREATE(index):
+    return html.Div(
+        children=[
+            dbc.Row(
+                [
+                    dbc.Col(
+                        [
+                            html.Label(i18n.t('app.widget_cluster.menu1')),
+                            dcc.Dropdown(
+                                id={"type": 'project_dd_tmn', "index" : index},
+                                options=[
+                                    {'label': l, 'value': gid}
+                                    for gid, l in PROJECT_NAME.items()
+                                ],
+                                value='Project:CCLE',
+                            )
+                        ],
+                        style={'font-size': format_style('font_size')}
+                    ),
+                    dbc.Col(
+                        [
+                            html.Label(i18n.t('app.widget_cluster.menu2')),
+                            dcc.Dropdown(id={"type": 'property_dd_tmn', "index" : index})
+                        ],
+                        style={'font-size': format_style('font_size')}
+                    ),
+                ]
             ),
-            style={'textAlign': 'right'}
-        ),
-        html.Div(id='hidden_base_df_tmn', style={'display': 'none'}),
-        dcc.Loading(type="default", children=html.Div(id="umap_fig")),
-    ],
-    style={'fontFamily': format_style('font')}
-)
+            html.Hr(),
+            html.Div(
+                info_button(
+                    'help_umap',
+                    i18n.t('app.widget_cluster.button_body')
+                ),
+                style={'textAlign': 'right'}
+            ),
+            html.Div(id={"type": 'hidden_base_df_tmn', "index" : index}, style={'display': 'none'}),
+            dcc.Loading(type="default", children=html.Div(id={"type":"umap_fig", "index":index})),
+        ],
+        style={'fontFamily': format_style('font')}
+    )
 
 
 @app.callback(
-    Output("umap_fig", "children"),
+    Output({"type":"umap_fig", "index":MATCH}, "children"),
     [
-        Input('project_dd_tmn', 'value'),
-        Input('property_dd_tmn', 'value')
+        Input({"type":'project_dd_tmn', "index":MATCH}, 'value'),
+        Input({"type":'property_dd_tmn', "index":MATCH}, 'value')
     ]
 )
 def render_callback(project, prop):
-    if not project:
+    print("render: %s" % (project))
+    if not project or not prop:
         raise PreventUpdate
     app.logger.info("loading: %s" % (PROJECT_LOCS[project]))
     df = pd.read_csv(
@@ -132,10 +136,11 @@ def render_callback(project, prop):
 
 
 @app.callback(
-    Output('property_dd_tmn', 'options'),
-    [Input('project_dd_tmn', 'value')]
+    Output({"type":'property_dd_tmn', "index":MATCH}, 'options'),
+    [Input({"type":'project_dd_tmn', "index":MATCH}, 'value')]
 )
 def render_options(selected_project):
+    print("Getting property for %s" % (selected_project))
     out = [
         {'label': label.capitalize(), 'value': query_string}
         for label, query_string in
@@ -150,8 +155,9 @@ def render_options(selected_project):
 
 
 @app.callback(
-    Output('property_dd_tmn', 'value'),
-    [Input('property_dd_tmn', 'options')]
+    Output({"type":'property_dd_tmn', "index":MATCH}, 'value'),
+    [Input({"type":'property_dd_tmn', "index":MATCH}, 'options')]
 )
 def render_value(available_options):
-    return available_options[0]['value']
+    if available_options is not None:
+        return available_options[0]['value']

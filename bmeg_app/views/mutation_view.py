@@ -5,7 +5,7 @@ from ..style import format_style
 import dash
 import dash_core_components as dcc
 from dash.exceptions import PreventUpdate
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, MATCH
 import dash_html_components as html
 import dash_bio
 import json
@@ -45,53 +45,56 @@ def getGeneMutations(gene):
     return mData
 
 
-component = dash_bio.NeedlePlot(
-  id='my-dashbio-needleplot',
-  mutationData={},
-  needleStyle={
-        'stemColor': '#FF8888',
-        'stemThickness': 2,
-        # 'stemConstHeight': True,
-        'headSize': 10,
-        'headColor': ['#FFDD00', '#000000']
-  }
-)
-
 
 #######
 # Page
 #######
 NAME = i18n.t('app.config.tabname_gmut')
-LAYOUT = html.Div(
-    children=[
-        html.Label(
-            i18n.t('app.widget_gmut.menu1')
-        ),
-        dcc.Dropdown(
-            id='single-dropdown',
-            value="TP53/ENSG00000141510",
-            search_value="TP53/ENSG00000141510"
-        ),
-        html.Hr(),
-        html.Div(
-            info_button(
-                'help_genemutation',
-                i18n.t('app.widget_gmut.button_body')
-            )
-        ),
-        component,
-        html.Div(id='needle-selection')
-    ],
-    style={
-        'font-size': format_style('font_size'),
-        'fontFamily': format_style('font')
-    }
-)
+
+
+def CREATE(index):
+
+    component = dash_bio.NeedlePlot(
+      id={"type": 'mutation-dashbio-needleplot', "index":index},
+      mutationData={},
+      needleStyle={
+            'stemColor': '#FF8888',
+            'stemThickness': 2,
+            # 'stemConstHeight': True,
+            'headSize': 10,
+            'headColor': ['#FFDD00', '#000000']
+      }
+    )
+    return html.Div(
+        children=[
+            html.Label(
+                i18n.t('app.widget_gmut.menu1')
+            ),
+            dcc.Dropdown(
+                id={"type" : "mutation-single-dropdown", "index":index},
+                value="TP53/ENSG00000141510",
+                search_value="TP53/ENSG00000141510"
+            ),
+            html.Hr(),
+            html.Div(
+                info_button(
+                    'help_genemutation',
+                    i18n.t('app.widget_gmut.button_body')
+                )
+            ),
+            component,
+            html.Div(id={"type": 'mutation-needle-selection', "index":index})
+        ],
+        style={
+            'font-size': format_style('font_size'),
+            'fontFamily': format_style('font')
+        }
+    )
 
 
 @app.callback(
-    dash.dependencies.Output('single-dropdown', 'options'),
-    [dash.dependencies.Input('single-dropdown', 'search_value')]
+    dash.dependencies.Output({"type" : "mutation-single-dropdown", "index":MATCH}, 'options'),
+    [dash.dependencies.Input({"type" : "mutation-single-dropdown", "index":MATCH}, 'search_value')]
 )
 def update_options(search_value):
     """Lookup the search value in elastic."""
@@ -102,8 +105,8 @@ def update_options(search_value):
 
 
 @app.callback(
-    dash.dependencies.Output('my-dashbio-needleplot', 'mutationData'),
-    [dash.dependencies.Input('single-dropdown', 'value')])
+    dash.dependencies.Output({"type": 'mutation-dashbio-needleplot', "index":MATCH}, 'mutationData'),
+    [dash.dependencies.Input({"type" : "mutation-single-dropdown", "index":MATCH}, 'value')])
 def process_single(value):
     if not value:
         raise PreventUpdate
@@ -112,10 +115,10 @@ def process_single(value):
     return getGeneMutations(gene)
 
 
-@app.callback(
-    Output('needle-selection', 'children'),
-    [Input('my-dashbio-needleplot', 'selectedData')])
-def display_selected_data(selectedData):
-    # This doesn't seem to respond so will probably delete
-    app.logger.info("Got selectedData")
-    return json.dumps(selectedData, indent=2)
+#@app.callback(
+#    Output('needle-selection', 'children'),
+#    [Input('my-dashbio-needleplot', 'selectedData')])
+#def display_selected_data(selectedData):
+#    # This doesn't seem to respond so will probably delete
+#    app.logger.info("Got selectedData")
+#    return json.dumps(selectedData, indent=2)

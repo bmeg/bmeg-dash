@@ -9,6 +9,7 @@ import dash_html_components as html
 import dash_cytoscape as cyto
 import logging
 import i18n
+from dash.dependencies import Input, Output, MATCH
 logger = logging.getLogger(__name__)
 i18n.load_path.append('bmeg_app/locales/')
 
@@ -37,46 +38,47 @@ def getPathwayGraph(pathway):
     return data
 
 
-element = cyto.Cytoscape(
-    id='bmeg-cytoscape',
-    layout={'name': 'cose'},
-    style={
-        'width': '100%',
-        'height': '400px',
-        'arrow-scale': 2,
-        'target-arrow-shape': 'vee'
-    },
-    elements=[]
-)
-
-
 NAME = i18n.t('app.config.tabname_pathway')
-LAYOUT = html.Div(
-    children=[
-        html.Label(i18n.t('app.widget_pathway.menu1')),
-        dcc.Dropdown(id='pathway-dropdown',
-                        value="pathwaycommons.org/pc11/" +
-                        "Pathway_2d307e80e3a7b4ae590fcd73c4d058cf",
-                        search_value="mtor signaling pathway"),
-        html.Hr(),
-        html.Div(
-            info_button(
-                'help_pathway',
-                i18n.t('app.widget_pathway.button_body')
-            )
-        ),
-        element
-    ],
-    style={
-        'font-size': format_style('font_size'),
-        'fontFamily': format_style('font')
-    }
-)
+
+def CREATE(index):
+
+    element = cyto.Cytoscape(
+        id={"type":'bmeg-cytoscape', "index":index},
+        layout={'name': 'cose'},
+        style={
+            'width': '100%',
+            'height': '400px',
+            'arrow-scale': 2,
+            'target-arrow-shape': 'vee'
+        },
+        elements=[]
+    )
+    return html.Div(
+        children=[
+            html.Label(i18n.t('app.widget_pathway.menu1')),
+            dcc.Dropdown(id={"type":'pathway-dropdown', "index":index},
+                            value="pathwaycommons.org/pc11/" +
+                            "Pathway_2d307e80e3a7b4ae590fcd73c4d058cf",
+                            search_value="mtor signaling pathway"),
+            html.Hr(),
+            html.Div(
+                info_button(
+                    'help_pathway',
+                    i18n.t('app.widget_pathway.button_body')
+                )
+            ),
+            element
+        ],
+        style={
+            'font-size': format_style('font_size'),
+            'fontFamily': format_style('font')
+        }
+    )
 
 
 @app.callback(
-    dash.dependencies.Output('pathway-dropdown', 'options'),
-    [dash.dependencies.Input('pathway-dropdown', 'search_value')]
+    Output({"type":'pathway-dropdown', "index":MATCH}, 'options'),
+    [Input({"type":'pathway-dropdown', "index":MATCH}, 'search_value')]
 )
 def update_options(search_value):
     """Lookup the search value in elastic."""
@@ -90,8 +92,8 @@ def update_options(search_value):
 
 
 @app.callback(
-    dash.dependencies.Output('bmeg-cytoscape', 'elements'),
-    [dash.dependencies.Input('pathway-dropdown', 'value')]
+    Output({"type":'bmeg-cytoscape', "index":MATCH}, 'elements'),
+    [Input({"type":'pathway-dropdown', "index":MATCH}, 'value')]
 )
 def update_pathway(value):
     app.logger.info("Getting pathway: %s" % (value))

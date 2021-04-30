@@ -6,7 +6,7 @@ import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 from dash.exceptions import PreventUpdate
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, MATCH
 import dash_html_components as html
 import dash_table
 import gripql
@@ -24,78 +24,81 @@ with open('bmeg_app/locales/data.json', 'r') as fh:
 #######
 print('loading app layout')
 NAME = i18n.t('app.config.tabname_lit')
-LAYOUT = html.Div(
-    children=[
-        dbc.Row(
-            [
-                dbc.Col(
-                    html.Div(
-                        [
-                            html.Label(i18n.t('app.widget_lit.menu1')),
-                            dcc.Dropdown(
-                                id='gene_dd',
-                                value="MTOR/ENSG00000198793",
-                                search_value="MTOR/ENSG00000198793"
-                            ),
-                        ],
-                        style={
-                            'width': '100%',
-                            'display': 'inline-block',
-                            'font-size': format_style('font_size')
-                        }
-                    ),
-                ),
-                dbc.Col(
-                    html.Div(
-                        info_button(
-                            'help_indicator',
-                            i18n.t('app.widget_lit.button_body')
-                        )
-                    ),
-                    width='1'
-                ),
-            ]
-        ),
-        html.Hr(),
-        dbc.Row(
-            [
-                dbc.Col(
-                    dcc.Loading(
-                        id='occr',
-                        children=html.Div()
-                    ),
-                    width=2,
-                    style={"height": "100%"}
-                ),
-                dbc.Col(
-                    dcc.Loading(
-                        id='resp_histo',
-                        children=html.Div()
-                    ),
-                    width=4,
-                    style={"height": "100%"}
-                ),
-                dbc.Col(
-                    dcc.Loading(
-                        id='pie_taxon',
-                        children=html.Div()
-                    ),
-                    width=6,
-                    style={"height": "100%"}
-                ),
 
-            ],
-        ),
-        html.Hr(),
-        dcc.Loading(id='evd', children=html.Div()),
-    ],
-    style={'fontFamily': format_style('font')}
-)
+
+def CREATE(index):
+    return html.Div(
+        children=[
+            dbc.Row(
+                [
+                    dbc.Col(
+                        html.Div(
+                            [
+                                html.Label(i18n.t('app.widget_lit.menu1')),
+                                dcc.Dropdown(
+                                    id={"type": 'lit-gene-dd', "index":index},
+                                    value="MTOR/ENSG00000198793",
+                                    search_value="MTOR/ENSG00000198793"
+                                ),
+                            ],
+                            style={
+                                'width': '100%',
+                                'display': 'inline-block',
+                                'font-size': format_style('font_size')
+                            }
+                        ),
+                    ),
+                    dbc.Col(
+                        html.Div(
+                            info_button(
+                                'help_indicator',
+                                i18n.t('app.widget_lit.button_body')
+                            )
+                        ),
+                        width='1'
+                    ),
+                ]
+            ),
+            html.Hr(),
+            dbc.Row(
+                [
+                    dbc.Col(
+                        dcc.Loading(
+                            id={"type": 'lit-gene-occr', "index":index},
+                            children=html.Div()
+                        ),
+                        width=2,
+                        style={"height": "100%"}
+                    ),
+                    dbc.Col(
+                        dcc.Loading(
+                            id={"type": 'lit-gene-resp-histo', "index":index},
+                            children=html.Div()
+                        ),
+                        width=4,
+                        style={"height": "100%"}
+                    ),
+                    dbc.Col(
+                        dcc.Loading(
+                            id={"type": 'lit-gene-pie-taxon', "index":index},
+                            children=html.Div()
+                        ),
+                        width=6,
+                        style={"height": "100%"}
+                    ),
+
+                ],
+            ),
+            html.Hr(),
+            dcc.Loading(id={"type":'lit-gene-evd', "index":index}, children=html.Div()),
+        ],
+        style={'fontFamily': format_style('font')}
+    )
 
 
 @app.callback(
-    dash.dependencies.Output('gene_dd', 'options'),
-    [dash.dependencies.Input('gene_dd', 'search_value')]
+    Output({"type":"lit-gene-dd", "index":MATCH}, 'options'),
+    [Input({"type":"lit-gene-dd", "index":MATCH}, 'search_value')]
 )
 def update_options(search_value):
     """Lookup the search value in elastic."""
@@ -107,12 +110,12 @@ def update_options(search_value):
 
 @app.callback(
     [
-        Output("evd", "children"),
-        Output("resp_histo", "children"),
-        Output("pie_taxon", "children"),
-        Output("occr", "children")
+        Output({"type":"lit-gene-evd", "index":MATCH}, "children"),
+        Output({"type":"lit-gene-resp-histo", "index":MATCH}, "children"),
+        Output({"type":"lit-gene-pie-taxon", "index":MATCH}, "children"),
+        Output({"type":"lit-gene-occr", "index":MATCH}, "children")
     ],
-    [Input('gene_dd', 'value')]
+    [Input({"type":"lit-gene-dd", "index":MATCH}, 'value')]
 )
 def build_evidence_table(search_value):
     gene = search_value.split("/")[1]
@@ -128,7 +131,7 @@ def build_evidence_table(search_value):
     g2p = []
     response = []
     for row in G.query().V(gene).out("g2p_associations").render(mapping):
-        g2p.append(row.to_dict())
+        g2p.append(row)
         if row['response_type'] in bins_dict:
             response.append(bins_dict.get(row['response_type']))
         else:
@@ -230,6 +233,7 @@ def build_evidence_table(search_value):
         .out("compounds").as_("c") \
         .aggregate(gripql.term("chem_citation", "$c.synonym")).execute()
     citation_counts = []
+    print("Agg results: %s" % (citations))
     for i in citations[0]["chem_citation"]["buckets"]:
         citation_counts.append(
             {"compound": i['key'].capitalize(), "citations": i['value']}
