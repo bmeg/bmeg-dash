@@ -1,7 +1,8 @@
 bmeg:
-    credentials: bmeg_app/secrets/bmeg_credentials.json
+    credentials: ./bmeg_credentials.json
     graph: rc5
     url: https://bmeg.io/grip
+
 DEV:
     host: 0.0.0.0
     port: 8050

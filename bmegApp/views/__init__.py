@@ -1,4 +1,6 @@
 
+from ..app import app
+from .. import config
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
@@ -18,9 +20,7 @@ from . import home_view, \
 # # - NAME : string name that is displayed in the menu
 # # - LAYOUT : a Dash component for the view
 
-with open('bmeg_app/config.yaml') as f:
-    config = yaml.load(f, Loader=yaml.FullLoader)
-path_name = config['DEV']['basepath']
+path_name = config.CONFIG[config.STAGE]['basepath']
 
 view_map = OrderedDict([
     (path_name, home_view),

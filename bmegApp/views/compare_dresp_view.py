@@ -11,12 +11,15 @@ import json
 import pandas as pd
 import plotly.express as px
 import i18n
-i18n.load_path.append('bmeg_app/locales/')
+import os
 
 #######
 # Prep
 #######
-with open('bmeg_app/locales/data.json', 'r') as fh:
+
+BASEDIR = os.path.dirname(os.path.abspath(__file__))
+
+with open(os.path.join(BASEDIR, '../locales/data.json'), 'r') as fh:
     menu_options = json.load(fh)
 projects_options = menu_options['cell_line_projects']
 dresp_options = menu_options['drug_responses']

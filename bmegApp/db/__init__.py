@@ -1,26 +1,25 @@
 import os
 import yaml
 import gripql
+from .. import config
 from ..app import app
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
 from elasticsearch_dsl.query import MultiMatch
 from flask_caching import Cache
 
-with open('bmeg_app/config.yaml') as f:
-    config = yaml.load(f, Loader=yaml.FullLoader)
-
-if 'credentials' in config['bmeg']:
+if 'credentials' in config.CONFIG['bmeg']:
+    credFile = os.path.join( config.CONFIG_PATH, config.CONFIG['bmeg']['credentials'] )
     conn = gripql.Connection(
-        config['bmeg']['url'],
-        credential_file=config['bmeg']['credentials']
+        config.CONFIG['bmeg']['url'],
+        credential_file=credFile
     )
 else:
     conn = gripql.Connection(
-        config['bmeg']['url']
+        config.CONFIG['bmeg']['url']
     )
 
-G = conn.graph(config['bmeg']['graph'])
+G = conn.graph(config.CONFIG['bmeg']['graph'])
 
 # configure dash app
 # Setup cache, just use local file system for now.
@@ -32,7 +31,6 @@ cache = Cache(app.server, config={
 CHECK_ELASTIC_LOAD_TIMEOUT = 60*60
 # otherwise, infinite - use creation_date to invalidate cache
 TIMEOUT = 0
-
 
 def gene_search(query):
     """Query gene index, map to {label, value}.

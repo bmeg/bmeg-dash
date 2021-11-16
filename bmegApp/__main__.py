@@ -1,6 +1,7 @@
-from bmeg_app.app import app
-from bmeg_app.style import format_style
-from bmeg_app.views import view_map, create_window
+from .app import app
+from . import config
+from .style import format_style
+from .views import view_map, create_window
 import base64
 import json
 import dash
@@ -11,19 +12,7 @@ import dash_html_components as html
 import yaml
 import os
 import i18n
-i18n.load_path.append('bmeg_app/locales/')
 
-with open('bmeg_app/config.yaml') as f:
-    config = yaml.load(f, Loader=yaml.FullLoader)
-STAGE = os.environ.get("BMEG_STAGE", "DEV")
-print('BMEG stage: ', STAGE)
-path_name = config['DEV']['basepath']
-
-#######
-# Prep
-#######
-image_filename = 'bmeg_app/images/bmeg_logo.png'
-encoded_image3 = base64.b64encode(open(image_filename, 'rb').read())
 
 #######
 # Page
@@ -35,7 +24,7 @@ sidebar_header = dbc.Row(
             html.Div(
                 html.Img(
                     src='data:image/png;base64,{}'.format(
-                        encoded_image3.decode()
+                        config.LOGO_IMAGE.decode()
                         ), style={
                         'height': '85%',
                         'width': '85%',
@@ -115,10 +104,6 @@ sidebar = html.Div(
     id="sidebar",
 )
 
-content = html.Div(id="page-content")
-app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
-
-
 @app.callback(
     Output('page-content', 'children'),
     [Input({'type': 'new-button', 'index': ALL}, 'n_clicks'), Input({'type':'close-button', 'index':ALL}, 'n_clicks')],
@@ -173,8 +158,10 @@ def toggle_collapse(n, is_open):
 
 
 if __name__ == '__main__':
+    content = html.Div(id="page-content")
+    app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
     app.run_server(
-        host=config[STAGE]['host'],
-        debug=config[STAGE]['dev'],
-        port=config[STAGE]['port']
+        host=config.CONFIG[config.STAGE]['host'],
+        debug=config.CONFIG[config.STAGE]['dev'],
+        port=config.CONFIG[config.STAGE]['port']
     )

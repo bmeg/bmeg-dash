@@ -1,3 +1,4 @@
+import os
 from ..app import app
 from ..components import home_component as dty
 from ..db import G, get_vertex_label_count
@@ -10,17 +11,11 @@ from dash.dependencies import Input, Output, State, ALL, MATCH
 import i18n
 import yaml
 
-with open('bmeg_app/config.yaml') as f:
-    config = yaml.load(f, Loader=yaml.FullLoader)
-path_name = config['DEV']['basepath']
-
-i18n.load_path.append('bmeg_app/locales/')
 
 #######
 # Page
 #######
 NAME = i18n.t('app.config.tabname_widget_home')
-
 
 def CREATE(index):
     return html.Div(

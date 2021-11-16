@@ -1,11 +1,19 @@
+
+from . import config
+import os
+import sys
 import flask
 import dash
 import yaml
+import i18n
+import base64
+
 import dash_bootstrap_components as dbc
 
-with open('bmeg_app/config.yaml') as f:
-    config = yaml.load(f, Loader=yaml.FullLoader)
-path_name = config['DEV']['basepath']
+BASEDIR = os.path.dirname( os.path.abspath(__file__) )
+
+path_name = config.CONFIG[config.STAGE]['basepath']
+
 
 server = flask.Flask(__name__)
 app = dash.Dash(

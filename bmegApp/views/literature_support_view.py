@@ -14,9 +14,11 @@ import json
 import pandas as pd
 import plotly.express as px
 import i18n
-i18n.load_path.append('bmeg_app/locales/')
+import os
 
-with open('bmeg_app/locales/data.json', 'r') as fh:
+BASEDIR = os.path.dirname(os.path.abspath(__file__))
+
+with open(os.path.join(BASEDIR, '../locales/data.json'), 'r') as fh:
     bins_dict = json.load(fh)["response_bins"]
 
 #######
@@ -24,7 +26,6 @@ with open('bmeg_app/locales/data.json', 'r') as fh:
 #######
 print('loading app layout')
 NAME = i18n.t('app.config.tabname_lit')
-
 
 def CREATE(index):
     return html.Div(
