@@ -75,7 +75,7 @@ def render_callback(href):
 )
 def render_node_cts_bar(href):
     '''Bar chart counts'''
-    all_v = G.listLabels()['vertex_labels']
+    all_v = G.listLabels()['vertexLabels']
     to_rm = [
         'Aliquot', 'Allele',
         'Gene', 'Protein',
