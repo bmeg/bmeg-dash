@@ -235,7 +235,7 @@ def build_evidence_table(search_value):
         .aggregate(gripql.term("chem_citation", "$c.synonym")).execute()
     citation_counts = []
     print("Agg results: %s" % (citations))
-    for i in citations[0]["chem_citation"]["buckets"]:
+    for i in citations:
         citation_counts.append(
             {"compound": i['key'].capitalize(), "citations": i['value']}
         )

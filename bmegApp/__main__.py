@@ -112,7 +112,7 @@ def update_output(n_clicks, close_clicks, content):
     ctx = dash.callback_context
     if not ctx.triggered:
         button_id = 'No clicks yet'
-        return [ create_window("app", 0) ]
+        return [ ]
     else:
         button_id = ctx.triggered[0]['prop_id'].split('.')[0]
         d = json.loads(button_id)

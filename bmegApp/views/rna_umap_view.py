@@ -91,6 +91,8 @@ def render_callback(project, prop):
     print("render: %s" % (project))
     if not project or not prop:
         raise PreventUpdate
+    if project not in PROJECT_LOCS:
+        return dcc.Graph()
     app.logger.info("loading: %s" % (PROJECT_LOCS[project]))
     df = pd.read_csv(
         PROJECT_LOCS[project],
