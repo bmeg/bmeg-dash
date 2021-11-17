@@ -117,10 +117,20 @@ sidebar = html.Div(
 def render_page_content(pathname):
     '''render selected widget view'''
     if pathname == "/" + config.CONFIG[config.STAGE]['basepath'] + "/":
-        pathname = "/" + list(view_map.keys())[0]
-    print(pathname[1:], view_map)
-    if pathname[1:] in view_map:
-        return html.Div(view_map[pathname[1:]].CREATE(0))
+        pathname = "/" + config.CONFIG[config.STAGE]['basepath'] + list(view_map.keys())[0]
+    if pathname.startswith("/"):
+        pathname = pathname[1:]
+    if pathname.startswith(config.CONFIG[config.STAGE]['basepath']):
+        pathname = pathname[len(config.CONFIG[config.STAGE]['basepath']):]
+    if pathname.startswith("/"):
+        pathname = pathname[1:]
+    pathSlice = pathname.split("/")
+    print("path", pathname, pathSlice)
+    if pathSlice[0] in view_map:
+        args = None
+        if len(pathSlice) > 1:
+            args = pathSlice[1]
+        return html.Div(view_map[pathSlice[0]].CREATE(args))
     return dbc.Jumbotron(
         [
             html.H1("404: Not found", className="text-danger"),

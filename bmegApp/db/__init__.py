@@ -63,17 +63,28 @@ def gene_search(query):
 
     global GENE_MAP
     if GENE_MAP is None:
-        GENE_MAP = G.query().V().hasLabel("Gene").render(["$.symbol", "$._gid"]).execute()
+        GENE_MAP = sorted(G.query().V().hasLabel("Gene").render(["$.symbol", "$._gid"]).execute(), key=lambda x:x[0])
 
     query = query.upper()
+    t = query.split("/") #check if in the GENE/ENSEMBL format
+    if len(t) > 1 and t[1].startswith("ENSG"):
+        query = t[1]
 
     out = []
-    for symbol, ensemble_id in GENE_MAP:
-        if symbol.startswith(query):
-            out.append({
-                'label' : "%s/%s" % (symbol, ensemble_id),
-                'value' : "%s/%s" % (symbol, ensemble_id)
-            })
+    if query.startswith("ENSG"):
+        for symbol, ensemble_id in GENE_MAP:
+            if ensemble_id.startswith(query):
+                out.append({
+                    'label' : "%s/%s" % (symbol, ensemble_id),
+                    'value' : "%s/%s" % (symbol, ensemble_id)
+                })
+    else:
+        for symbol, ensemble_id in GENE_MAP:
+            if symbol.startswith(query):
+                out.append({
+                    'label' : "%s/%s" % (symbol, ensemble_id),
+                    'value' : "%s/%s" % (symbol, ensemble_id)
+                })
     return out
 
 

@@ -51,8 +51,14 @@ def getGeneMutations(gene):
 #######
 
 
-def CREATE(index):
-
+def CREATE(gene, index):
+    geneSelect = None
+    if gene is None:
+        gene = "TP53"
+    t = gene_search(gene)
+    if len(t):
+        geneSelect = t[0]['value']
+    print("Select", geneSelect)
     component = dash_bio.NeedlePlot(
       id={"type": 'mutation-dashbio-needleplot', "index":index},
       mutationData={},
@@ -62,7 +68,8 @@ def CREATE(index):
             # 'stemConstHeight': True,
             'headSize': 10,
             'headColor': ['#FFDD00', '#000000']
-      }
+      },
+      rangeSlider=True
     )
     return html.Div(
         children=[
@@ -71,8 +78,8 @@ def CREATE(index):
             ),
             dcc.Dropdown(
                 id={"type" : "mutation-single-dropdown", "index":index},
-                value="TP53/ENSG00000141510",
-                search_value="TP53/ENSG00000141510"
+                value=geneSelect,
+                search_value=geneSelect,
             ),
             html.Hr(),
             html.Div(
@@ -114,10 +121,10 @@ def process_single(value):
     return getGeneMutations(gene)
 
 
-#@app.callback(
-#    Output('needle-selection', 'children'),
-#    [Input('my-dashbio-needleplot', 'selectedData')])
-#def display_selected_data(selectedData):
-#    # This doesn't seem to respond so will probably delete
-#    app.logger.info("Got selectedData")
-#    return json.dumps(selectedData, indent=2)
+@app.callback(
+    Output({"type":'mutation-needle-selection', "index":MATCH}, 'children'),
+    [Input({"type": 'mutation-dashbio-needleplot', "index":MATCH}, 'clickData')])
+def display_selected_data(selectData):
+    # This doesn't seem to respond so will probably delete
+    app.logger.info("Got selectedData %s" % (selectData) )
+    return json.dumps(selectData, indent=2)

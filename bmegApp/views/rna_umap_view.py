@@ -37,7 +37,10 @@ for p in ['Project:CTRP', 'Project:GDSC']:
 NAME = "RNA expression projection"
 
 
-def CREATE(index):
+def CREATE(path):
+    return build(0)
+
+def build(index):
     return html.Div(
         children=[
             dbc.Row(

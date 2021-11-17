@@ -18,5 +18,5 @@ import yaml
 #######
 NAME = i18n.t('app.config.tabname_widget_home')
 
-def CREATE(index):
-    return summary.CREATE(index)
+def CREATE(path):
+    return summary.CREATE(0)

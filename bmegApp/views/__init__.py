@@ -1,6 +1,5 @@
 
 from ..app import app
-from .. import config
 from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
@@ -20,15 +19,13 @@ from . import home_view, \
 # # - NAME : string name that is displayed in the menu
 # # - LAYOUT : a Dash component for the view
 
-path_name = config.CONFIG[config.STAGE]['basepath']
-
 view_map = OrderedDict([
-    (path_name, home_view),
-    (path_name + "/rna_umap", rna_umap_view),
-    (path_name + "/g2p", literature_support_view),
-    (path_name + "/drug_response", compare_dresp_view),
-    (path_name + "/oncoprint", mutation_view),
-    (path_name + "/pathway", pathway_view)
+    ("", home_view),
+    ("rna_umap", rna_umap_view),
+    ("g2p", literature_support_view),
+    ("drug_response", compare_dresp_view),
+    ("mutations", mutation_view),
+    ("pathway", pathway_view)
 ])
 
 

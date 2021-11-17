@@ -27,7 +27,17 @@ with open(os.path.join(BASEDIR, '../locales/data.json'), 'r') as fh:
 print('loading app layout')
 NAME = i18n.t('app.config.tabname_lit')
 
-def CREATE(index):
+def CREATE(path):
+    return build(path, 0)
+
+def build(gene, index):
+    geneSelect = None
+    if gene is None:
+        gene = "MTOR"
+    t = gene_search(gene)
+    if len(t):
+        geneSelect = t[0]['value']
+
     return html.Div(
         children=[
             dbc.Row(
@@ -38,8 +48,8 @@ def CREATE(index):
                                 html.Label(i18n.t('app.widget_lit.menu1')),
                                 dcc.Dropdown(
                                     id={"type": 'lit-gene-dd', "index":index},
-                                    value="MTOR/ENSG00000198793",
-                                    search_value="MTOR/ENSG00000198793"
+                                    value=geneSelect,
+                                    search_value=geneSelect,
                                 ),
                             ],
                             style={

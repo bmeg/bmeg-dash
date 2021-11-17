@@ -31,7 +31,10 @@ print('loading app layout')
 NAME = i18n.t('app.config.tabname_widget_dresp')
 
 
-def CREATE(index):
+def CREATE(path):
+    return build(0)
+
+def build(index):
     return html.Div(
         children=[
             dbc.Row(
@@ -194,7 +197,7 @@ def set_project_compound1_selector(selected_project):
             cdr.get_project_drugs(selected_project).items(), key=lambda a: a[1]
         )
     ]
-    return out, out[cdr.find_index(out)+1]['value']
+    return out, out[cdr.find_index(out)]['value']
 
 @app.callback(
     [Output({"type":'drug2_dd_cdr', "index":MATCH}, 'options'), Output({"type":'drug2_dd_cdr', "index":MATCH}, 'value')],
