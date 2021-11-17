@@ -3,10 +3,10 @@ from ..components import tumor_match_normal_component as tmn, info_button
 from ..db import G
 from ..style import format_style
 import dash_bootstrap_components as dbc
-import dash_core_components as dcc
+from dash import dcc
 from dash.exceptions import PreventUpdate
 from dash.dependencies import Input, Output, MATCH
-import dash_html_components as html
+from dash import html
 import os
 from glob import glob
 import pandas as pd

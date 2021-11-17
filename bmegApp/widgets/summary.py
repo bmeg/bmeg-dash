@@ -2,8 +2,8 @@
 from dash.dependencies import Input, Output, State, ALL, MATCH
 from ..app import app
 from dash.dependencies import Input, Output
-import dash_html_components as html
-import dash_core_components as dcc
+from dash import html
+from dash import dcc
 from ..style import format_style, color_palette
 from ..db import G, get_vertex_label_count
 from ..components import home_component as dty

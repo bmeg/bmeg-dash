@@ -3,10 +3,10 @@ from ..components import info_button
 from ..db import G, gene_search
 from ..style import format_style
 import dash
-import dash_core_components as dcc
+from dash import dcc
 from dash.exceptions import PreventUpdate
 from dash.dependencies import Input, Output, MATCH
-import dash_html_components as html
+from dash import html
 import dash_bio
 import json
 import pandas as pd

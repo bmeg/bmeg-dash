@@ -6,8 +6,8 @@ from ..db import G, get_vertex_label_count
 from ..style import format_style, color_palette
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc
+from dash import html
 from dash.dependencies import Input, Output, State, ALL, MATCH
 import i18n
 import yaml
